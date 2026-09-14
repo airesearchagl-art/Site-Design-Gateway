@@ -39,7 +39,7 @@ def require_unit(value: object) -> Unit:
     return value
 
 
-def normalized_polygon(coordinates: object, unit: Unit) -> Polygon:
+def normalized_polygon(coordinates: object, unit: Unit, *, canonical: bool = True) -> Polygon:
     """Accept closed rings of plain numbers; return a canonical valid m Polygon."""
     require_unit(unit)
     if type(coordinates) is not list or not coordinates:
@@ -94,6 +94,6 @@ def normalized_polygon(coordinates: object, unit: Unit) -> Polygon:
                 raise GeometryError(Code.ZERO_AREA)
             if not polygon.is_valid:
                 raise GeometryError(Code.INVALID_POLYGON)
-            return orient_polygons(normalize(polygon))
+            return orient_polygons(normalize(polygon)) if canonical else polygon
     except (GEOSException, RuntimeWarning, OverflowError):
         raise GeometryError(Code.NUMERIC_RANGE) from None

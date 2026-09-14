@@ -41,6 +41,13 @@ DXFはdrawing_derived、unit override使用時はuser_provided + UNIT_OVERRIDDEN
 
 ## CLI
 
+Phase 2の再利用API `load_normalized_geometry(bytes | str)` は本schemaをoffline検証し、
+既存のPolygon検証を使ってencoded ringの面積・boundsを再計算する。metadataのdecimal表現と
+完全一致しなければMETADATA_MISMATCH。shape-only GeoJSONをこのAPIへ渡すことはできない。
+返すSiteGeometryのsource_referenceは今回のnormalized入力bytesのSHA-256であり、metadataの
+旧sourceReferenceではない。sourceStatus/sourceFormat/sourceUnit/warningsの宣言は保持する。
+詳細は[Constraint契約](constraint-contract.md)を参照。
+
 仮想環境を有効にしたリポジトリルートで実行します。既存 `python -m bve FILE` は変更しません。
 
 ```sh

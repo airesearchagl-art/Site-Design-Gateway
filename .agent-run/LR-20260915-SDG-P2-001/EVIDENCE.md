@@ -21,3 +21,16 @@ Added output-only schema referencing Project condition/status definitions offlin
 Schema meta-validation PASS after correcting an empty prefixItems declaration.
 No changes to Project/Geometry schemas or dependencies. Source APIs and behavioral
 checks follow in later waves; schema meta-validation is not engine validation.
+
+## Wave 2
+
+Added a normalized Geometry consumer using the existing Polygon validation, exact
+metadata comparison and current-input SHA-256. Preserves encoded ring order so
+float metric roundtrips do not change through reorientation. Shared bounded decimal
+JSON/offline schema helpers avoid duplicating Polygon or Project schema rules.
+ValidatedProject retains immutable conditions/hash only; explicit area selection
+rejects absent/invalid basis and unavailable selected declared area.
+New boundary tests: 59 PASS. Full Python suite: 405 PASS (346 inherited + 59 new).
+Initial oversized parameter labels exceeded the Windows environment limit; fixed
+to short synthetic IDs before rerunning. No input values included in case names.
+Original schemas/dependencies/fixtures remain unchanged; packet digest MATCH.
