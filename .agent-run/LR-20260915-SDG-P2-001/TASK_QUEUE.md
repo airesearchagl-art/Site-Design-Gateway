@@ -1,0 +1,11 @@
+# Task queue
+
+- [x] Wave 0: Fresh gate, exact branch, original packet, run artifacts.
+- [ ] Wave 1: Constraint contract, output schema, ADR.
+- [ ] Wave 2: Normalized Geometry consumer and explicit area basis.
+- [ ] Wave 3: BCR/FAR/height calculations.
+- [ ] Wave 4: Provenance/review/export/independent CLI.
+- [ ] Wave 5: Adversarial tests, synthetic integration, CI, docs.
+- [ ] Wave 6: Independent verifier, convergence, exact-head CI, Draft PR then STOP.
+
+Future separate run: Vercel Preview Smoke — REQUIRED BEFORE PHASE 3.
