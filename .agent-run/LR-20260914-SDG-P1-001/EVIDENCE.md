@@ -20,3 +20,8 @@ Snapshot rehash MATCH; branch/base MATCH.
 
 Contract and current-phase docs updated. Shapely 2.1.2 / ezdxf 1.4.4 editable install and imports PASS. NumPy installed only transitively. Geometry tests/export schema follow in dependent waves.
 Snapshot rehash MATCH; branch/base MATCH.
+
+## Wave 2 checkpoint
+
+GeoJSON reader and shared ring normalization implemented; 70 geometry tests PASS. Common Shapely validity checks implemented early because safe readers depend on them. DXF import font-cache diagnostics observed during dependency smoke; eliminate disclosure in reader integration before delivery. No runtime input used.
+Snapshot rehash MATCH; branch/base MATCH.

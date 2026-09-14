@@ -21,3 +21,8 @@ Snapshot rehash MATCH; branch/base MATCH.
 
 No hard-gate issue deferred; see current entries above.
 Snapshot rehash MATCH; branch/base MATCH.
+
+## Wave 2 checkpoint
+
+No hard-gate issue deferred; see current entries above.
+Snapshot rehash MATCH; branch/base MATCH.
