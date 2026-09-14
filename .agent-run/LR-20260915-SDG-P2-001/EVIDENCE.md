@@ -46,3 +46,15 @@ COMPUTED. Long fractional expected value verified exactly, without float roundin
 Per-input provenance/state fields added with the engine; Wave 4 verifies all seven
 statuses and adds deterministic export/CLI. Schema validation of computed/null/absent
 results PASS. No legal rules or shape generation. Packet digest MATCH.
+
+## Wave 4
+
+65 focused tests PASS (core/provenance/export/CLI). All seven status values retained
+for each of five source fields; BCR/FAR trace area plus ratio, height traces only height.
+Overall review includes both compared areas; no llm_researched promotion.
+Decimal result numbers are serialized without conversion to float. Output schema
+validation, fixed ordering, exact input hashes and PYTHONHASHSEED 1/23 byte/summary
+equality PASS. CLI permits explicit output only, rejects overwrite/duplicate arguments,
+and emits counts or fixed codes with empty stderr on tested successes and failures.
+No-output mode creates no files. Missing/invalid input/path and tampered metadata
+fail without output artifacts. Packet digest MATCH.

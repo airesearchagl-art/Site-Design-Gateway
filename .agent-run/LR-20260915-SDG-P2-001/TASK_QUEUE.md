@@ -4,7 +4,7 @@
 - [x] Wave 1: Constraint contract, output schema, ADR.
 - [x] Wave 2: Normalized Geometry consumer and explicit area basis.
 - [x] Wave 3: BCR/FAR/height calculations.
-- [ ] Wave 4: Provenance/review/export/independent CLI.
+- [x] Wave 4: Provenance/review/export/independent CLI.
 - [ ] Wave 5: Adversarial tests, synthetic integration, CI, docs.
 - [ ] Wave 6: Independent verifier, convergence, exact-head CI, Draft PR then STOP.
 
