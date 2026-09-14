@@ -9,3 +9,8 @@
 
 Scope unchanged; next wave per queue.
 Snapshot rehash MATCH; branch/base MATCH.
+
+## Wave 1 checkpoint
+
+Scope unchanged; next wave per queue.
+Snapshot rehash MATCH; branch/base MATCH.

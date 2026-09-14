@@ -1,7 +1,7 @@
 # Task queue
 
 - [x] Wave 0: Fresh gate and run artifacts.
-- [ ] Wave 1: Contract, dependencies and architecture.
+- [x] Wave 1: Contract, dependencies and architecture.
 - [ ] Wave 2: GeoJSON reader and normalization.
 - [ ] Wave 3: DXF reader and explicit selection.
 - [ ] Wave 4: Validation, export and CLI.

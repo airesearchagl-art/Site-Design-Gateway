@@ -15,3 +15,8 @@
 
 Fresh gate complete. Implementation and required checks pending.
 Snapshot rehash MATCH; branch/base MATCH.
+
+## Wave 1 checkpoint
+
+Contract and current-phase docs updated. Shapely 2.1.2 / ezdxf 1.4.4 editable install and imports PASS. NumPy installed only transitively. Geometry tests/export schema follow in dependent waves.
+Snapshot rehash MATCH; branch/base MATCH.

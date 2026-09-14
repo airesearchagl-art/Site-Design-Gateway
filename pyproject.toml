@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "sdg-bve"
 version = "0.1.0"
-description = "Phase 0 shared-schema validation boundary for Site Design Gateway"
+description = "Shared-schema validation and local XY geometry foundation for Site Design Gateway"
 requires-python = ">=3.12"
-dependencies = ["jsonschema==4.26.0"]
+dependencies = ["jsonschema==4.26.0", "shapely==2.1.2", "ezdxf==1.4.4"]
 
 [project.optional-dependencies]
 dev = ["pytest==8.4.2"]

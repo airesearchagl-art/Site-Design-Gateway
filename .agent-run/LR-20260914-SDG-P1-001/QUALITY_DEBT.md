@@ -16,3 +16,8 @@ No unit, geometry integrity, privacy, credential or permission violation may bec
 
 No hard-gate issue deferred; see current entries above.
 Snapshot rehash MATCH; branch/base MATCH.
+
+## Wave 1 checkpoint
+
+No hard-gate issue deferred; see current entries above.
+Snapshot rehash MATCH; branch/base MATCH.
