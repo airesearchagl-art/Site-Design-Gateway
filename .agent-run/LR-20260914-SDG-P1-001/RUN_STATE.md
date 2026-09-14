@@ -2,19 +2,29 @@
 
 - Run ID: LR-20260914-SDG-P1-001
 - Mode: LONG_RUN_ENDURANCE / DAY
-- State: CONVERGED_AWAITING_DRAFT_PR
+- State: REPAIR_FINAL_CHECKPOINT (local verification complete; delivery receipt in PR #2)
 - Branch: feat/phase1-geometry-foundation
 - Exact base: 8b673999118d7109c6530399e324c8fa324f83e1
-- Current head: ffd34cf78f0a1141ddcdf58412244061038c20c0 (observed before checkpoint; carrying commit via git log)
-- Last successful checkpoint: Wave 6
+- Previous reviewed head: 03c9e775ee9828bddcb5d1daea630d153d32f55b
+- Repair head: containing checkpoint commit; exact pushed head/CI recorded in PR #2 and Completion Report
+- Last successful checkpoint: Repair Wave local convergence
 - Task Packet: LRP-20260914-SDG-P1-001 / revision 1
 - SHA-256: 93fee6c5f33b17c412a3b2141a9ada385eded1dde3185f51e51565e21291efee (MATCH)
 
-Independent Verifier PASS; 292 Python (113 existing + 179 geometry), 28 Web, lint/types/build, CLI nondisclosure, reproducible synthetic equivalence at 200 m2/difference 0, public scan and diff checks PASS. All independent findings fixed and 18 reviewed file digests MATCH. Exact packet digest/branch/base MATCH. Next: push final checkpoint, require exact-head CI PASS, create Draft PR and STOP immediately. No further implementation changes. CI result and final Draft metadata go in PR body/Completion Report; no post-creation file writes.
+Phase 1 Draft PR #2 was delivered at the reviewed head with exact-head CI PASS.
+Human resumed this same campaign for RF-01 through RF-04 from Independent FULL Review.
+Fresh gate and original packet digest MATCH. See REPAIR.md for per-finding status.
+Repair: RF-01 through RF-04 independently FIXED; 346 Python / 28 Web PASS.
+Lint/type/build, pip check and public boundary/diff checks PASS. Four isolated-copy
+mutations killed; original sources unchanged. Independent focused suite 202 PASS
+plus 44 additional synthetic checks PASS. See FOCUSED_REPAIR_VERIFICATION.md.
 
 See EVIDENCE.md, TASK_QUEUE.md and QUALITY_DEBT.md for completed checks, remaining
-work and explicit limitations. Unexecuted work is not PASS. Final PR-triggered checks
-are intentionally not observed after Draft creation; creation is the last action.
+work and explicit limitations. Unexecuted work is not PASS. The Repair instruction
+authorizes same-branch commit/push and exact-head CI/PR Draft-state verification.
+This record is the pre-push checkpoint. Delivery receipt belongs to PR #2 and the
+completion report: same-branch push, exact-head CI, OPEN/Draft verification.
+After delivery verification, STOP for Independent Re-Review; no further scope work.
 
 Resume: read manifest/state/queue/debt, verify exact local packet digest, branch,
 base and working tree before any write. Preserve checkpoints and Phase 0 history.

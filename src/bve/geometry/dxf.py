@@ -41,8 +41,22 @@ def _preflight(text: str) -> tuple[int, dict[str, int]]:
     sections = set()
     original_by_axis = {10: {}, 20: {}, 30: {}}
     counts_by_type = {"LWPOLYLINE": 0, "POLYLINE": 0, "VERTEX": 0}
+    sequence_child = None
     for group in group_tags(tags):
         kind = group[0].value
+        # Validate order before ezdxf can repair a missing terminator or relink
+        # vertices. INSERT attributes also legally use SEQEND.
+        if sequence_child is not None:
+            if kind == "SEQEND":
+                sequence_child = None
+            elif kind != sequence_child:
+                raise GeometryError(Code.INVALID_DXF)
+        elif kind == "POLYLINE":
+            sequence_child = "VERTEX"
+        elif kind == "INSERT" and any(tag.code == 66 and int(tag.value) != 0 for tag in group):
+            sequence_child = "ATTRIB"
+        elif kind in ("VERTEX", "SEQEND"):
+            raise GeometryError(Code.INVALID_DXF)
         if kind == "SECTION":
             if len(group) < 2 or group[1].code != 2 or group[1].value in sections:
                 raise GeometryError(Code.INVALID_DXF)
@@ -144,7 +158,7 @@ def _preflight(text: str) -> tuple[int, dict[str, int]]:
         elif kind == "VERTEX":
             if sum(tag.code == 10 for tag in group) != 1 or sum(tag.code == 20 for tag in group) != 1:
                 raise GeometryError(Code.INVALID_DXF)
-    if "ENTITIES" not in sections:
+    if sequence_child is not None or "ENTITIES" not in sections:
         raise GeometryError(Code.INVALID_DXF)
     return header_unit, counts_by_type
 
@@ -178,9 +192,12 @@ def read_dxf(payload: bytes | str, *, layer: str | None = None,
                 raise GeometryError(Code.INVALID_DXF)
             if any(entity.dxftype() == "GEODATA" for entity in doc.objects):
                 raise GeometryError(Code.UNSUPPORTED_CRS)
-            candidates = [entity for entity in doc.modelspace()
-                          if entity.dxftype() in ("LWPOLYLINE", "POLYLINE")
-                          and (layer is None or entity.dxf.layer.casefold() == layer.casefold())]
+            selected = [entity for entity in doc.modelspace()
+                        if layer is None or entity.dxf.layer.casefold() == layer.casefold()]
+            if any(entity.dxftype() in ("ARC", "CIRCLE", "SPLINE", "ELLIPSE") for entity in selected):
+                raise GeometryError(Code.UNSUPPORTED_CURVE)
+            candidates = [entity for entity in selected
+                          if entity.dxftype() in ("LWPOLYLINE", "POLYLINE")]
             if not candidates:
                 raise GeometryError(Code.NO_BOUNDARY)
             if len(candidates) != 1:

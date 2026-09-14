@@ -1,6 +1,7 @@
 """Only invented coordinates. Contract, numeric and non-disclosure boundaries."""
 from copy import deepcopy
 from dataclasses import FrozenInstanceError
+import hashlib
 import json
 from pathlib import Path
 from typing import get_args
@@ -199,3 +200,14 @@ def test_model_immutable_and_cannot_adopt_invalid_polygon():
 def test_python_normalizer_rejects_nonfinite(value):
     with pytest.raises(GeometryError, match="^NONFINITE_COORDINATES$"):
         normalized_polygon([[[0, 0], [value, 0], [1, 1], [0, 0]]], "m")
+
+
+@pytest.mark.parametrize("as_bytes", [False, True])
+@pytest.mark.parametrize("indent", [None, 2])
+def test_geojson_source_reference_matches_exact_input_bytes(as_bytes, indent):
+    value = feature()
+    value["properties"].update(name="合成入力", sourceReference="unused-synthetic-reference")
+    text = json.dumps(value, ensure_ascii=False, indent=indent) + "\r\n"
+    raw = text.encode("utf-8")
+    site = read_geojson(raw if as_bytes else text)
+    assert site.source_reference == "sha256:" + hashlib.sha256(raw).hexdigest()

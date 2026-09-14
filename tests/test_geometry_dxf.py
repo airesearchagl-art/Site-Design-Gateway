@@ -1,5 +1,6 @@
 """Synthetic ezdxf documents exercise selection and geometry-loss boundaries."""
 import io
+import hashlib
 import json
 import logging
 import os
@@ -265,8 +266,10 @@ def test_blocks_paperspace_and_other_entities_not_adopted():
     doc = ezdxf.new("R2010", units=6)
     doc.blocks.new("EXAMPLE").add_lwpolyline(RING, close=True)
     doc.modelspace().add_blockref("EXAMPLE", (0, 0))
-    doc.modelspace().add_circle((0, 0), 1)
+    circle = doc.modelspace().add_circle((0, 0), 1)
     doc.paperspace().add_lwpolyline(RING, close=True)
+    rejected(doc, Code.UNSUPPORTED_CURVE)
+    doc.modelspace().delete_entity(circle)
     rejected(doc, Code.NO_BOUNDARY)
 
 
@@ -372,3 +375,160 @@ def test_modern_missing_subclasses_rejected_but_r12_supported():
         old.modelspace().add_polyline2d(RING, close=True)
         text = payload(old)
     assert read_dxf(text, unit_override="m").area_m2 == 220
+
+
+def add_curve(layout, kind, layer="SITE"):
+    attributes = {"layer": layer}
+    if kind == "ARC":
+        layout.add_arc((0, 0), 2, 0, 90, dxfattribs=attributes)
+    elif kind == "CIRCLE":
+        layout.add_circle((0, 0), 2, dxfattribs=attributes)
+    elif kind == "SPLINE":
+        layout.add_spline([(0, 0), (1, 2), (3, 1), (4, 0)], dxfattribs=attributes)
+    elif kind == "ELLIPSE":
+        layout.add_ellipse((0, 0), (2, 0), ratio=0.5, dxfattribs=attributes)
+    else:
+        raise AssertionError("unsupported synthetic test kind")
+
+
+@pytest.mark.parametrize("kind", ["ARC", "CIRCLE", "SPLINE", "ELLIPSE"])
+@pytest.mark.parametrize("with_polyline", [False, True])
+@pytest.mark.parametrize("layer", [None, "SITE"])
+def test_unsupported_curve_in_selected_scope(kind, with_polyline, layer):
+    doc = ezdxf.new("R2010", units=6)
+    doc.layers.new("SITE")
+    if with_polyline:
+        doc.modelspace().add_lwpolyline(RING, close=True, dxfattribs={"layer": "SITE"})
+    add_curve(doc.modelspace(), kind)
+    rejected(doc, Code.UNSUPPORTED_CURVE, layer=layer)
+
+
+@pytest.mark.parametrize("kind", ["ARC", "CIRCLE", "SPLINE", "ELLIPSE"])
+def test_other_layer_curve_requires_explicit_site_selection(kind):
+    doc, boundary = document()
+    doc.layers.new("SITE")
+    doc.layers.new("OTHER")
+    boundary.dxf.layer = "SITE"
+    add_curve(doc.modelspace(), kind, layer="OTHER")
+    site = read_dxf(payload(doc), layer="site")
+    assert site.area_m2 == 220
+    rejected(doc, Code.UNSUPPORTED_CURVE)
+
+
+@pytest.mark.parametrize("kind", ["ARC", "CIRCLE", "SPLINE", "ELLIPSE"])
+def test_curve_outside_modelspace_is_not_in_boundary_scope(kind):
+    doc, boundary = document()
+    doc.layers.new("SITE")
+    boundary.dxf.layer = "SITE"
+    add_curve(doc.paperspace(), kind)
+    add_curve(doc.blocks.new("EXAMPLE_CURVE"), kind)
+    assert read_dxf(payload(doc), layer="SITE").area_m2 == 220
+    assert read_dxf(payload(doc)).area_m2 == 220
+
+
+@pytest.mark.parametrize("damage", ["missing_seqend", "orphan_vertex", "orphan_seqend",
+    "duplicate_seqend", "interrupted", "nested_polyline", "seqend_before_polyline", "vertex_after_seqend"])
+def test_raw_polyline_sequence_rejected_before_parser_repair(damage, monkeypatch):
+    doc, _ = document("POLYLINE")
+    groups = raw_groups(doc)
+    start = next(i for i, group in enumerate(groups) if group[0] == (0, "POLYLINE"))
+    end = next(i for i, group in enumerate(groups) if group[0] == (0, "SEQEND"))
+    if damage == "missing_seqend":
+        del groups[end]
+    elif damage == "orphan_vertex":
+        del groups[start]
+    elif damage == "orphan_seqend":
+        del groups[start:end]
+    elif damage == "duplicate_seqend":
+        groups.insert(end + 1, list(groups[end]))
+    elif damage == "interrupted":
+        groups.insert(end, [(0, "LINE"), (8, "0"), (10, "0"), (20, "0"), (11, "1"), (21, "1")])
+    elif damage == "nested_polyline":
+        groups.insert(start + 2, list(groups[start]))
+    elif damage == "seqend_before_polyline":
+        groups.insert(start, groups.pop(end))  # balanced counts, invalid order
+    elif damage == "vertex_after_seqend":
+        groups.insert(end - 1, groups.pop(end))  # closes before the final VERTEX
+    calls = []
+    original = ezdxf.read
+    def tracked_read(*args, **kwargs):
+        calls.append(True)
+        return original(*args, **kwargs)
+    monkeypatch.setattr(ezdxf, "read", tracked_read)
+    with pytest.raises(GeometryError, match="^INVALID_DXF$"):
+        read_dxf(render(groups))
+    assert calls == []
+
+
+@pytest.mark.parametrize("version", ["R12", "R2010"])
+@pytest.mark.parametrize("newline", ["\n", "\r\n", "\r"])
+def test_valid_polyline_sequence_versions_and_newlines(version, newline):
+    with quiet_dxf():
+        doc = ezdxf.new(version, units=6)
+        doc.modelspace().add_polyline2d(RING, close=True)
+        data = payload(doc).replace("\n", newline)
+    site = read_dxf(data, unit_override="m" if version == "R12" else None)
+    assert site.area_m2 == 220
+
+
+def test_empty_polyline_sequence_is_structural_but_not_valid_geometry():
+    from bve.geometry.dxf import _preflight
+    doc, _ = document("POLYLINE", points=[])
+    data = payload(doc)
+    with quiet_dxf():
+        unit, counts = _preflight(data)
+    assert unit == 6 and counts["POLYLINE"] == 1 and counts["VERTEX"] == 0
+    with pytest.raises(GeometryError):
+        read_dxf(data)
+
+
+def test_insert_attribute_seqend_is_not_an_orphan_polyline_terminator():
+    doc, _ = document()
+    doc.blocks.new("EXAMPLE_ATTRIBUTE").add_attdef("LABEL", (0, 0), text="synthetic")
+    reference = doc.modelspace().add_blockref("EXAMPLE_ATTRIBUTE", (0, 0))
+    reference.add_attrib("LABEL", "synthetic", (0, 0))
+    assert read_dxf(payload(doc)).area_m2 == 220
+
+
+@pytest.mark.parametrize("as_bytes", [False, True])
+@pytest.mark.parametrize("newline", ["\n", "\r\n", "\r"])
+def test_dxf_source_reference_matches_exact_input_bytes(as_bytes, newline):
+    doc, boundary = document()
+    doc.layers.new("合成境界")
+    boundary.dxf.layer = "合成境界"
+    text = payload(doc).replace("\n", newline)
+    raw = text.encode("utf-8")
+    site = read_dxf(raw if as_bytes else text)
+    assert site.source_reference == "sha256:" + hashlib.sha256(raw).hexdigest()
+
+
+@pytest.mark.parametrize("initial_disable", [0, logging.WARNING])
+@pytest.mark.parametrize("raise_inside", [False, True])
+def test_quiet_dxf_restores_fresh_process_state(initial_disable, raise_inside):
+    script = '''
+import logging
+import sys
+logging.disable(int(sys.argv[1]))
+before = (logging.root.manager.disable, sys.stdout, sys.stderr)
+assert "bve.geometry._dxf_runtime" not in sys.modules
+from bve.geometry._dxf_runtime import quiet_dxf
+assert logging.root.manager.disable == before[0]
+assert sys.stdout is before[1] and sys.stderr is before[2]
+try:
+    with quiet_dxf():
+        assert logging.root.manager.disable == logging.CRITICAL
+        assert sys.stdout is not before[1] and sys.stderr is not before[2]
+        print("synthetic-hidden-output")
+        print("synthetic-hidden-error", file=sys.stderr)
+        if sys.argv[2] == "True":
+            raise RuntimeError("synthetic-context-exception")
+except RuntimeError:
+    pass
+assert logging.root.manager.disable == before[0]
+assert sys.stdout is before[1] and sys.stderr is before[2]
+print("PASS")
+'''
+    result = subprocess.run([sys.executable, "-c", script, str(initial_disable), str(raise_inside)],
+                            capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0
+    assert result.stdout == "PASS\n" and result.stderr == ""
