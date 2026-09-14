@@ -7,9 +7,9 @@
 - Repository: airesearchagl-art/Site-Design-Gateway
 - Working branch: feat/phase0-bootstrap
 - Base SHA: 62f8925b804cb26bddf73d91096d8490f444817f
-- Current head: d1e9e339dd9eed8f8c8326bc0b54d4309f301ced (observed before checkpoint commit)
-- Current wave: 2
-- Last successful checkpoint: Wave 2; identify carrying commit with git log.
+- Current head: fa2d40788eaf7d5f053e2e7605556e588205fe50 (observed before checkpoint commit)
+- Current wave: 3
+- Last successful checkpoint: Wave 3; identify carrying commit with git log.
 - Task Packet ID: LRP-20260914-SDG-P0-001
 - Task Packet revision: 2
 - Task Packet snapshot: .agent-run/LR-20260914-SDG-P0-001/TASK_PACKET_SNAPSHOT.md (local only)
@@ -33,15 +33,15 @@ acceptance criteria are fixed by PUBLIC_CONTRACT.md and the exact local packet.
 
 ## Completed
 
-Waves 0–2: foundation, SDG Project Schema v0.1, synthetic example-urban-office, importable BVE Core validation/CLI, Python tests.
+Waves 0–3: foundation, shared schema, Python validation, Next.js Web shell, prompt copy, file/sample validation, source status table and disabled DXF/PDF placeholders.
 
 ## Current implementation state
 
-Python source/editable package ready. Shared schema is the sole contract. Web source is being prepared independently and is not part of this checkpoint commit.
+Phase 0 local product surface implemented. No geometry, compute integration, storage, authentication or production deployment. CI foundation still needs full validation jobs.
 
 ## Checks
 
-Python worker: 103 pytest tests PASS, package import PASS, sample CLI PASS errors=0, invalid schema-as-input CLI FAIL exit 1. Covers enum, malformed JSON, units, null provenance, size/depth, nonfinite numbers, no mutation and no CLI input logging. Snapshot digest MATCH.
+Python 103 PASS; Web 26 PASS; ESLint 9.39.5 and TypeScript PASS; Next.js 16.3.5 build PASS. Browser: page/content/no-overlay PASS; copy success; sample REVIEW_REQUIRED; all-user-provided file VALID; invalid enum and malformed JSON INVALID; disabled placeholders PASS. At 390px no page overflow; local/session storage empty; no requests captured during JSON operations; page errors absent. Snapshot digest MATCH.
 
 ## Quality Debt
 
@@ -49,11 +49,11 @@ See QUALITY_DEBT.md. Existing PR read, remote authentication and preview unverif
 
 ## Explicit unverified items
 
-Web build/lint/browser; full CI; existing PRs; remote authentication/push/Draft PR; Vercel Preview; final public scan; independent verification. Python wheel distribution is outside Phase 0 support.
+Final CI execution, existing PR state, remote authentication/push/Draft PR, Vercel Preview, independent review and final privacy scan. Final build after agentRules=false will be included in integration checks.
 
 ## Known failures
 
-Broken PATH Python shim and default npm cache permissions are resolved for this task via explicit existing Python and local caches. No global settings changed. Remote metadata/auth and Preview remain deferred.
+ESLint 10.10.0 failed in upstream eslint-plugin-react (getFilename removed); pinned compatible 9.39.5. Default pytest temp/cache failed under sandbox; workspace-local temp/cache passed 103 tests. Agent-browser sandbox auto-launch/CDP failed; approved isolated headless launch worked. Relative upload paths failed in the browser tool; absolute synthetic paths worked. No unresolved product failure observed.
 
 ## Decisions
 
@@ -61,11 +61,11 @@ See DECISIONS.md. The exact human packet is local-only to protect personal paths
 
 ## Files changed
 
-schemas/, cases/example-urban-office/, pyproject.toml, src/bve/, tests/test_validation.py, README support clarification and run checkpoints. Web files remain local work in progress until Wave 3.
+package.json/package-lock.json, apps/web package/config/source/tests, Next-generated rule files removed before tracking, and run checkpoint documents.
 
 ## Remaining tasks / Next action
 
-Finish Web checks and browser smoke verification, integrate CI, then review all changes and remote delivery.
+Add full synthetic-only CI and public boundary scan; run final integrated checks and independent verification; then check remote auth, push and Draft PR.
 
 ## Stop conditions status
 

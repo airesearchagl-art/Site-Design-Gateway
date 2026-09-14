@@ -41,3 +41,9 @@ Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad2
 Python worker reports 103 passed in 2.38s; sample CLI PASS errors=0; invalid input CLI FAIL errors=5 exit 1; import PASS. Lead reviewed package source, schema loading and safe CLI output. Installed jsonschema 4.26.0 / pytest 8.4.2 in local venv. Web unit tests already 26 PASS; complete Web checkpoint follows.
 
 Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).
+
+## Wave 3 checkpoint
+
+Lead reran Python with workspace-local temp/cache: 103 passed in 1.91s; sample PASS errors=0. Web node:test: 26 passed. npm audit after install: 0 vulnerabilities. Lint/TypeScript PASS. Turbopack build compiled/static prerender PASS. agent-browser desktop and 390px mobile smoke PASS with synthetic-only inputs. Clipboard button reports copied. VALID/INVALID/REVIEW_REQUIRED observed. Invalid enum path /site/area/status displayed. Malformed JSON error does not echo input. JSON operations: No requests captured, zero browser storage keys, no page exceptions/overlay. Local screenshots are excluded from public Git. React checklist: client events for browser APIs, stable keys, no effects/network, accessible labels/live results and native disabled controls.
+
+Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).

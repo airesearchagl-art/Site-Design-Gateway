@@ -1,0 +1,13 @@
+{
+  "name": "site-design-gateway",
+  "private": true,
+  "workspaces": ["apps/web"],
+  "engines": { "node": ">=22.18.0" },
+  "scripts": {
+    "dev": "npm run dev --workspace @sdg/web",
+    "lint": "npm run lint --workspace @sdg/web",
+    "test": "npm run test --workspace @sdg/web",
+    "build": "npm run build --workspace @sdg/web",
+    "start": "npm run start --workspace @sdg/web"
+  }
+}
