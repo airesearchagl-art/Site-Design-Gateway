@@ -33,6 +33,7 @@ class SiteGeometry:
                 or type(self.source_reference) is not str
                 or re.fullmatch(r"sha256:[0-9a-f]{64}", self.source_reference) is None
                 or type(self.warnings) is not tuple
+                or len(self.warnings) > 1
                 or any(w != "UNIT_OVERRIDDEN" for w in self.warnings)):
             raise GeometryError(Code.INVALID_METADATA)
         polygon = self.polygon

@@ -39,4 +39,45 @@ DXFはdrawing_derived、unit override使用時はuser_provided + UNIT_OVERRIDDEN
 その他の入力properties、ファイル名、layer名、診断文や元の座標列をログへコピーしません。
 正規化出力ファイルには座標が必要なため、明示指定したローカル出力先だけへ書きます。
 
-詳細CLI操作・エラーcode・制限は実装後に本書へ追記します。Project Schemaや既存CLIは変更しません。
+## CLI
+
+仮想環境を有効にしたリポジトリルートで実行します。既存 `python -m bve FILE` は変更しません。
+
+```sh
+python -m bve.geometry cases/example-urban-office/site.geojson --format geojson
+python -m bve.geometry cases/example-urban-office/site.dxf --format dxf --layer SITE
+```
+
+`--output runtime-data/site.geojson` と `--summary runtime-data/summary.json` は任意です。
+先に出力ディレクトリを作成してください。既存ファイル・入力ファイルは上書きしません。
+2ファイルは個別書込で、OS障害時は一部が残る可能性があります。その場合はIO_ERRORで終了し、
+PASSにはなりません。出力はGitへ自動追加しません。
+
+GeoJSONはinput内の単位・座標系が必須です。`--unit m|mm` はDXFの未知単位にだけ使用でき、
+既知単位に矛盾する指定はUNIT_CONFLICTになります。DXFのlayer名は大文字小文字を区別せず完全一致。
+選択layerに候補が複数残る場合はAMBIGUOUS_BOUNDARYです。
+
+stdoutは `PASS code=VALID warnings=N` または `FAIL code=固定コード` のみ。summary/座標は
+明示出力ファイルで確認します。終了codeは0=成功、1=入力reject、2=引数/I/O/既存出力エラーです。
+主なreject codeはUNIT_REQUIRED、UNSUPPORTED_UNIT、CRS_REQUIRED、UNSUPPORTED_CRS、
+OPEN_BOUNDARY、AMBIGUOUS_BOUNDARY、UNSUPPORTED_CURVE、INVALID_POLYGON、ZERO_AREA、
+NON_2D、NONFINITE_COORDINATES、NUMERIC_RANGEです。全codeは `geometry/errors.py` にあります。
+
+## 実行制限
+
+- 最大入力4 MiB、GeoJSON depth 32、全ring合計100,000 positions。倍精度範囲外はreject。
+- DXFはUTF-8 text（ASCII含む）。binary、旧codepage、recover/auditによる修復は非対応。
+- ezdxfが省略単位を既定値で補う前に原文headerを検査します。LWPOLYLINEのZ、非有限値、
+  頂点数不整合・重複scalar・不正extrusionも、parserが捨てる前に検査します。
+- ezdxf初回importは一時ディレクトリの空font cacheを使い、既存home cacheを作成・更新しません。
+  設定はスコープ終了時に復元します。reader中の診断は保存せず捨て、固定codeで失敗を返します。
+  この診断抑制はプロセス全体の標準stream/logに一時作用するため、Phase 1は同期CLIで使用します。
+  同一プロセスで別threadのログ処理と並行運用するサービス接続は未対応です。
+- JSON Schemaは出力構造の契約です。ring closure、finite、面積/bounds整合、幾何validityは
+  Shapely Coreで検証します。sourceStatusは正本Project Schemaをoffline参照します。
+
+参照: [Shapely normalize](https://shapely.readthedocs.io/en/stable/reference/shapely.normalize.html)、
+[ring orientation](https://shapely.readthedocs.io/en/stable/reference/shapely.orient_polygons.html)、
+[ezdxf units](https://ezdxf.readthedocs.io/en/stable/concepts/units.html)、
+[LWPOLYLINE](https://ezdxf.readthedocs.io/en/stable/dxfentities/lwpolyline.html)、
+[POLYLINE](https://ezdxf.readthedocs.io/en/stable/dxfentities/polyline.html)。

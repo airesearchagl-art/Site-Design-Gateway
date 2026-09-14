@@ -30,3 +30,8 @@ Snapshot rehash MATCH; branch/base MATCH.
 
 122 geometry tests PASS (70 GeoJSON, 52 DXF). DXF m/mm and both polyline types equivalent at 220 m2. Unknown raw header units cannot inherit parser defaults; raw Z/nonfinite/zero-extrusion loss guarded. Diagnostic streams discarded and import font cache isolated to empty disposable cache; no input data or paths emitted.
 Snapshot rehash MATCH; branch/base MATCH.
+
+## Wave 4 checkpoint
+
+256 Python tests PASS: existing 113 unchanged + geometry 143 (including 21 export/CLI tests). Independent CLI, deterministic schema-conformant export and summary, no overwrite, no argument/native diagnostic disclosure. Initial mapping import corrected to shapely.geometry before passing suite.
+Snapshot rehash MATCH; branch/base MATCH.
