@@ -16,3 +16,7 @@
 ## Wave 1 checkpoint
 
 Use standard npm workspaces; Next.js app root apps/web, root schemas/cases imported by the app. Document Vercel Root Directory apps/web and inclusion of sources outside that root; no deployment or project setting change. Documentation was delegated with disjoint file ownership.
+
+## Wave 2 checkpoint
+
+Draft 2020-12 schema is shared verbatim by Ajv and Python jsonschema. Explicit units m2/m/percent, fixed seven provenance statuses, null allowed only with unknown/review_required. No regulatory limit or geometry computation. Python source/editable only; wheel delivery is not required. Input boundary limits are 256 KiB and depth 32; no trust promotion.

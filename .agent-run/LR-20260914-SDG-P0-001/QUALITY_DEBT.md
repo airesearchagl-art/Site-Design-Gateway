@@ -27,3 +27,7 @@
 ## Wave 1 checkpoint
 
 D01/D02 unchanged. Python/cache local environment issues repaired without credential, OS or global configuration changes.
+
+## Wave 2 checkpoint
+
+D01 and D02 remain OPEN. Python tests are executable and passed, so LOCAL_PYTHON_UNAVAILABLE debt is unnecessary.

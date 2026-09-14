@@ -4,7 +4,7 @@
 
 ## ローカルで開始する
 
-前提: Node.js 22 以上、npm、Python 3.12 以上。以下はすべてリポジトリのルートで実行します。
+前提: Node.js 22.18 以上、npm、Python 3.12 以上。以下はすべてリポジトリのルートで実行します。
 
 ```sh
 npm install
@@ -13,7 +13,8 @@ npm run dev
 
 起動ログに表示されるローカル URL を開き、「サンプルを読み込む」から動作を確認します。開発用の環境変数や API キーは不要です。
 
-Python は仮想環境へインストールします。
+Python は仮想環境へインストールします。Phase 0はsource/editable installを対象とし、
+正本Schemaを読むためリポジトリを保持してください。wheel単体での配布は対象外です。
 
 ```sh
 python -m venv .venv

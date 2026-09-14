@@ -35,3 +35,9 @@ credentials, identifying workstation paths or complete environment output.
 Foundation docs/AGENTS reviewed against public/private and Phase 0 boundaries. git diff --check PASS. .env/example policy and exact snapshot exclusion checked. Existing Python 3.12.14 created .venv successfully. npm metadata requests with workspace-local cache succeeded: Next 16.3.5, React 19.3.0, Ajv 8.20.0.
 
 Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).
+
+## Wave 2 checkpoint
+
+Python worker reports 103 passed in 2.38s; sample CLI PASS errors=0; invalid input CLI FAIL errors=5 exit 1; import PASS. Lead reviewed package source, schema loading and safe CLI output. Installed jsonschema 4.26.0 / pytest 8.4.2 in local venv. Web unit tests already 26 PASS; complete Web checkpoint follows.
+
+Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).

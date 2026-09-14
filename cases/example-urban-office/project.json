@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "0.1",
+  "project": {
+    "id": "example-urban-office",
+    "name": "Example Urban Office",
+    "intendedUses": ["office", "retail"]
+  },
+  "site": {
+    "area": { "value": 200, "unit": "m2", "status": "user_provided" }
+  },
+  "zoning": {
+    "buildingCoverageRatio": { "value": 80, "unit": "percent", "status": "assumed" },
+    "floorAreaRatio": { "value": 600, "unit": "percent", "status": "llm_researched" },
+    "heightLimit": { "value": 31, "unit": "m", "status": "assumed" }
+  }
+}

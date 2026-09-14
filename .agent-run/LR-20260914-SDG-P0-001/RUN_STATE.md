@@ -7,9 +7,9 @@
 - Repository: airesearchagl-art/Site-Design-Gateway
 - Working branch: feat/phase0-bootstrap
 - Base SHA: 62f8925b804cb26bddf73d91096d8490f444817f
-- Current head: 61e9d4dd0c698c2cfbfef0431ad35bf071375eaa (observed before checkpoint commit)
-- Current wave: 1
-- Last successful checkpoint: Wave 1; identify carrying commit with git log.
+- Current head: d1e9e339dd9eed8f8c8326bc0b54d4309f301ced (observed before checkpoint commit)
+- Current wave: 2
+- Last successful checkpoint: Wave 2; identify carrying commit with git log.
 - Task Packet ID: LRP-20260914-SDG-P0-001
 - Task Packet revision: 2
 - Task Packet snapshot: .agent-run/LR-20260914-SDG-P0-001/TASK_PACKET_SNAPSHOT.md (local only)
@@ -33,15 +33,15 @@ acceptance criteria are fixed by PUBLIC_CONTRACT.md and the exact local packet.
 
 ## Completed
 
-Wave 0 and Wave 1: repository/run initialization, public/private rules, AGENTS and project instructions, README, architecture/ADR, ignore rules, env explanation and CI foundation.
+Waves 0–2: foundation, SDG Project Schema v0.1, synthetic example-urban-office, importable BVE Core validation/CLI, Python tests.
 
 ## Current implementation state
 
-Repository foundation ready. CI currently checks foundation only; full synthetic validation jobs arrive in Wave 4.
+Python source/editable package ready. Shared schema is the sole contract. Web source is being prepared independently and is not part of this checkpoint commit.
 
 ## Checks
 
-Clean starting tree and expected base confirmed. Safety documents reviewed. Only empty .env.example allowed; exact snapshot ignored. Python 3.12 virtual environment and workspace-local npm cache work. Snapshot digest MATCH.
+Python worker: 103 pytest tests PASS, package import PASS, sample CLI PASS errors=0, invalid schema-as-input CLI FAIL exit 1. Covers enum, malformed JSON, units, null provenance, size/depth, nonfinite numbers, no mutation and no CLI input logging. Snapshot digest MATCH.
 
 ## Quality Debt
 
@@ -49,8 +49,7 @@ See QUALITY_DEBT.md. Existing PR read, remote authentication and preview unverif
 
 ## Explicit unverified items
 
-Python environment install/tests; Web install/lint/tests/build; CI; existing PRs;
-remote push; Draft PR; Vercel Preview; final privacy scan; independent verification.
+Web build/lint/browser; full CI; existing PRs; remote authentication/push/Draft PR; Vercel Preview; final public scan; independent verification. Python wheel distribution is outside Phase 0 support.
 
 ## Known failures
 
@@ -62,11 +61,11 @@ See DECISIONS.md. The exact human packet is local-only to protect personal paths
 
 ## Files changed
 
-AGENTS.md, README.md, docs/, .env.example, .gitattributes, .github/workflows/ci.yml and run checkpoint documents.
+schemas/, cases/example-urban-office/, pyproject.toml, src/bve/, tests/test_validation.py, README support clarification and run checkpoints. Web files remain local work in progress until Wave 3.
 
 ## Remaining tasks / Next action
 
-Implement the common schema and Python boundary, then Web MVP, CI integration and final convergence. Remote push/PR only after local completion.
+Finish Web checks and browser smoke verification, integrate CI, then review all changes and remote delivery.
 
 ## Stop conditions status
 
