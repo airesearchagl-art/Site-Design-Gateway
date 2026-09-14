@@ -49,6 +49,9 @@ export function validateJson(text: string): ValidationResult {
   while (pending.length > 0) {
     const item = pending.pop()!;
     if (item.depth > 32) return invalid("JSONの入れ子は32階層以内にしてください。");
+    if (typeof item.value === "string" && !item.value.isWellFormed()) {
+      return invalid("JSONに不正なUnicode文字が含まれています。");
+    }
     if (typeof item.value === "number" && !Number.isFinite(item.value)) {
       return invalid("数値は有限の値にしてください。");
     }
@@ -76,11 +79,14 @@ export function validateJson(text: string): ValidationResult {
   };
 }
 
-export async function validateFile(file: Pick<File, "name" | "size" | "text">): Promise<ValidationResult> {
+export async function validateFile(file: Pick<File, "name" | "size" | "arrayBuffer">): Promise<ValidationResult> {
   if (!file.name.toLowerCase().endsWith(".json")) return invalid(".jsonファイルを選択してください。");
   if (file.size > MAX_JSON_BYTES) return invalid("JSONは256 KiB以内にしてください。");
   try {
-    return validateJson(await file.text());
+    // Fatal decoding rejects malformed UTF-8; keep BOM so JSON.parse rejects it,
+    // matching the Python UTF-8 JSON boundary instead of silently replacing bytes.
+    const text = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(await file.arrayBuffer());
+    return validateJson(text);
   } catch {
     return invalid("ファイルを読み込めませんでした。もう一度選択してください。");
   }

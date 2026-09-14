@@ -51,3 +51,7 @@ D01/D02 unchanged. D03 below records the upstream ESLint compatibility limit.
 ## Wave 4 checkpoint
 
 D01 remote authority and D02 Preview remain deferred. D03 compatible pinned ESLint remains documented. No unresolved local required check failure.
+
+## Wave 5 checkpoint
+
+No review findings deferred. D01 awaits final remote check. D02/D03 are explicit nonblocking items; no required local test remains unexecuted.

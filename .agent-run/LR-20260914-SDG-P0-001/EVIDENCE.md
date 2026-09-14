@@ -53,3 +53,9 @@ Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad2
 Integrated Web lint, typecheck, 26 tests, build PASS. Public candidate scanner PASS (39 files), .env only example, no exact packet or runtime inputs tracked. CI explicitly runs Python tests/sample, Web lint/test/build and public scan; no upload steps or project input logging. Workflow contents:read and checkout persist-credentials:false. Pinned action v6 SHAs verified via git ls-remote using process-local OpenSSL after sandbox schannel failure. README setup commands exercised with source/editable Python and npm workspace; Vercel hosted execution NOT RUN.
 
 Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).
+
+## Wave 5 checkpoint
+
+Independent verifier (separate context) found three P2 inconsistencies: terminal-newline ID regex, escaped lone surrogate, and file UTF-8/BOM decoding. Lead fixed all and added regressions. Independent recheck: all four invalid examples FAIL in both runtimes; proper replacement character/Japanese/emoji PASS; no further finding. Python 113 passed in 1.67s. Web 28 PASS. Lint/types/build PASS after fix. Post-fix optimized-build browser: valid JSON VALID, invalid UTF-8 INVALID, no page errors. Public scan PASS at 38 files and git diff --check PASS. Verifier independently checked lockfile registry/integrity and source typecheck with Next-generated files treated as absent (zero diagnostics). Full source/scope/privacy/diff and rollback reviewed; no prohibited compute integration or runtime logging.
+
+Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).

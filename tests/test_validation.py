@@ -29,6 +29,30 @@ def test_synthetic_fixture_passes(project):
     assert validate_json(SAMPLE.read_bytes()).valid
 
 
+@pytest.mark.parametrize("ending", ["\n", "\r", "\r\n", "\u2028"])
+def test_project_id_ends_at_document_boundary(project, ending):
+    project["project"]["id"] = "example" + ending
+    assert not validate_json(json.dumps(project)).valid
+
+
+@pytest.mark.parametrize("name", ["\ud800", "\udfff"])
+def test_escaped_lone_surrogate_in_project_name_is_rejected(project, name):
+    project["project"]["name"] = name
+    assert validate_json(json.dumps(project)).code == "invalid_json"
+
+
+@pytest.mark.parametrize("name", ["架空の建物", "🏢", "\ufffd"])
+def test_valid_unicode_project_names_are_preserved(project, name):
+    project["project"]["name"] = name
+    assert validate_json(json.dumps(project, ensure_ascii=False)).valid
+
+
+def test_file_bytes_reject_malformed_utf8_and_bom():
+    payload = SAMPLE.read_bytes()
+    assert validate_json(payload.replace(b"Example", b"\xffxample")).code == "invalid_json"
+    assert validate_json(b"\xef\xbb\xbf" + payload).code == "invalid_json"
+
+
 def test_sole_schema_is_read_from_repository():
     assert validation.SCHEMA_PATH == ROOT / "schemas" / "sdg-project-v0.1.schema.json"
 

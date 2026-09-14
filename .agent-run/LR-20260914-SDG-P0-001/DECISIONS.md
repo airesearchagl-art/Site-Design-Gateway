@@ -28,3 +28,7 @@ Use native node:test rather than another test framework. Keep compatible ESLint 
 ## Wave 4 checkpoint
 
 Keep CI two independent jobs with synthetic-only inputs. Public scanner is a heuristic gate plus manual review, not proof against every possible secret format. No production or Preview deployment is attempted. Final independent review runs in a separate agent context with read-only code access.
+
+## Wave 5 checkpoint
+
+Use strict regex end assertion shared across Python/ECMAScript. Decode files without silent byte replacement or BOM stripping, and reject lone surrogates; accept well-formed Japanese/emoji/U+FFFD. Generated next-env.d.ts is ignored and removed from index only because dev/build rewrite its type paths; local file retained. No task-packet, objective or scope change. Rollback remains feature-branch revert commits; no destructive operation needed.

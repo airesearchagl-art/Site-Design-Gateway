@@ -103,9 +103,32 @@ test("file reading, extension, size and read errors use the actual input boundar
   assert.equal((await validateFile(new File([text], "sample.JSON"))).schema, "PASS");
   assert.equal((await validateFile(new File([text], "sample.txt"))).schema, "FAIL");
   let read = false;
-  assert.equal((await validateFile({ name: "sample.json", size: MAX_JSON_BYTES + 1, text: async () => { read = true; return text; } })).schema, "FAIL");
+  assert.equal((await validateFile({ name: "sample.json", size: MAX_JSON_BYTES + 1, arrayBuffer: async () => { read = true; return new ArrayBuffer(0); } })).schema, "FAIL");
   assert.equal(read, false);
-  assert.equal((await validateFile({ name: "sample.json", size: 1, text: async () => { throw new Error("SYNTHETIC_DO_NOT_ECHO"); } })).schema, "FAIL");
+  assert.equal((await validateFile({ name: "sample.json", size: 1, arrayBuffer: async () => { throw new Error("SYNTHETIC_DO_NOT_ECHO"); } })).schema, "FAIL");
+});
+
+test("trailing newline ID and lone Unicode surrogates fail in both runtimes", () => {
+  const newline = structuredClone(sample);
+  for (const ending of ["\n", "\r", "\r\n", "\u2028"]) {
+    newline.project.id = `example${ending}`;
+    assert.equal(validateJson(JSON.stringify(newline)).schema, "FAIL");
+  }
+  const surrogate = structuredClone(sample);
+  surrogate.project.name = "\ud800";
+  assert.equal(validateJson(JSON.stringify(surrogate)).schema, "FAIL");
+  for (const name of ["架空の建物", "🏢", "\ufffd"]) {
+    surrogate.project.name = name;
+    assert.equal(validateJson(JSON.stringify(surrogate)).schema, "PASS");
+  }
+});
+
+test("file boundary rejects malformed UTF-8 and BOM instead of changing input", async () => {
+  const bytes = new TextEncoder().encode(JSON.stringify(sample));
+  const nameIndex = new TextDecoder().decode(bytes).indexOf("Example Urban Office");
+  bytes[nameIndex] = 0xff;
+  assert.equal((await validateFile(new File([bytes], "synthetic.json"))).schema, "FAIL");
+  assert.equal((await validateFile(new File(["\ufeff", JSON.stringify(sample)], "synthetic.json"))).schema, "FAIL");
 });
 
 test("copy prompt embeds the authoritative schema and synthetic sample", () => {
