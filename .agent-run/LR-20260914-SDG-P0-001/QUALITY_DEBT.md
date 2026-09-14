@@ -22,7 +22,7 @@
 - blocks_final_verify: true for remote delivery only
 - required_resolution: Check existing authentication at convergence without changing credentials.
 - evidence: Prior run gh HTTP 401; current anonymous PR metadata request unavailable.
-- status: OPEN
+- status: RESOLVED
 
 ## D02
 - id: D02
@@ -55,3 +55,7 @@ D01 remote authority and D02 Preview remain deferred. D03 compatible pinned ESLi
 ## Wave 5 checkpoint
 
 No review findings deferred. D01 awaits final remote check. D02/D03 are explicit nonblocking items; no required local test remains unexecuted.
+
+## Wave 5 delivery checkpoint
+
+D01 RESOLVED by existing-auth remote gate and successful push. D02 Preview and D03 upstream lint compatibility remain OPEN and must be disclosed at the top of the Draft PR.

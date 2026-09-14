@@ -59,3 +59,9 @@ Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad2
 Independent verifier (separate context) found three P2 inconsistencies: terminal-newline ID regex, escaped lone surrogate, and file UTF-8/BOM decoding. Lead fixed all and added regressions. Independent recheck: all four invalid examples FAIL in both runtimes; proper replacement character/Japanese/emoji PASS; no further finding. Python 113 passed in 1.67s. Web 28 PASS. Lint/types/build PASS after fix. Post-fix optimized-build browser: valid JSON VALID, invalid UTF-8 INVALID, no page errors. Public scan PASS at 38 files and git diff --check PASS. Verifier independently checked lockfile registry/integrity and source typecheck with Next-generated files treated as absent (zero diagnostics). Full source/scope/privacy/diff and rollback reviewed; no prohibited compute integration or runtime logging.
 
 Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).
+
+## Wave 5 delivery checkpoint
+
+Final remote gate through approved execution: expected remote main SHA confirmed; GitHub reported correct PUBLIC repository and existing write authority; open PR list empty; remote feature branch absent before push. Existing-auth feature push succeeded without interactive auth or credential changes. GitHub Actions run https://github.com/airesearchagl-art/Site-Design-Gateway/actions/runs/34827334137 completed SUCCESS on d6e11fc9df4159ad15d54c6d4a2a7d2815614e8d. Final CI output mode suppresses assertion payloads: Python --tb=no and node:test dot reporter, both tested locally (113/28 PASS). Main remains 62f8925b804cb26bddf73d91096d8490f444817f; no Ready/merge/production action.
+
+Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).

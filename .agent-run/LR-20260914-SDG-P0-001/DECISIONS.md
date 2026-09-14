@@ -32,3 +32,7 @@ Keep CI two independent jobs with synthetic-only inputs. Public scanner is a heu
 ## Wave 5 checkpoint
 
 Use strict regex end assertion shared across Python/ECMAScript. Decode files without silent byte replacement or BOM stripping, and reject lone surrogates; accept well-formed Japanese/emoji/U+FFFD. Generated next-env.d.ts is ignored and removed from index only because dev/build rewrite its type paths; local file retained. No task-packet, objective or scope change. Rollback remains feature-branch revert commits; no destructive operation needed.
+
+## Wave 5 delivery checkpoint
+
+Stop immediately after Draft creation, so the committed run state explicitly represents the pre-creation checkpoint. Final PR URL/isDraft and latest CI are recorded in PR metadata/body and the Completion Report rather than performing a forbidden post-creation write. CI uses summary reporters to avoid input payloads even when assertions fail. Documentation Sync Trigger: yes; no direct Vault/Notion update.
