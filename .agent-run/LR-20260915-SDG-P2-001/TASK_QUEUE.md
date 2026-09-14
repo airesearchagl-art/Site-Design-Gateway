@@ -6,6 +6,10 @@
 - [x] Wave 3: BCR/FAR/height calculations.
 - [x] Wave 4: Provenance/review/export/independent CLI.
 - [x] Wave 5: Adversarial tests, synthetic integration, CI, docs.
-- [ ] Wave 6: Independent verifier, convergence, exact-head CI, Draft PR then STOP.
+- [x] Wave 6: Independent verifier and final local convergence checkpoint.
+- [ ] Delivery after checkpoint: exact-head push CI, Draft PR then immediate STOP.
+
+Delivery receipts belong to the PR body and Completion Report because Draft creation
+is the final action. This pre-delivery queue does not assert remote completion.
 
 Future separate run: Vercel Preview Smoke — REQUIRED BEFORE PHASE 3.

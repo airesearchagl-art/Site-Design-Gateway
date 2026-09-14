@@ -81,3 +81,25 @@ Each probe verifies copy-local module import and uses isolated pytest root/cache
 All source/test SHA-256 values match before/after. Scripts/logs/copies are ignored in
 local/; only this synthetic summary is public. No mutant applied to the repository.
 Exact packet rehash MATCH. Independent verification remains Wave 6 work.
+
+## Wave 6
+
+Separate-context independent verification PASS, no blocking findings. Independently
+executed Python 492 (346 inherited + 146 added), Web 28, lint/type/build, pip check,
+public boundary scan and diff check all PASS. Additional independent probes passed
+184 assertions, including Fraction oracle arithmetic, ambient Decimal isolation,
+null combinations, normalized ring integrity, offline schemas, exact hashes and CLI.
+Those are supplemental assertions, not additional permanent pytest test cases.
+All four isolated mutations independently re-executed and killed with 5/1/5/8
+assertion failures; unmodified baseline 53 PASS. Source/test bytes were preserved.
+INDEPENDENT_VERIFICATION.md binds 48 tested files by local exact-byte SHA-256;
+these are explicitly distinct from Git blob hashes. Parent rechecked the bindings
+before this checkpoint. Public scan after the two final reports: 96 files PASS.
+Exact packet digest, branch and expected origin/main rechecked; no implementation
+changes after Wave 5. ACCEPTANCE.md records contract coverage and remaining debt.
+
+This is the final local pre-delivery checkpoint. Exact pushed head CI must succeed
+before Draft creation. The PR body and Completion Report record the final head,
+push CI and Draft receipt; they cannot be written back after the mandatory STOP.
+PR-triggered CI, Vercel, Production and Phase 3 remain unobserved/unexecuted here.
+Documentation Sync Trigger: yes. STOP — Independent Review required after Draft.
