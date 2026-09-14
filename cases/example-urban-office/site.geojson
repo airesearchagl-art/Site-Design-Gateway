@@ -1,0 +1,39 @@
+{
+  "type": "Feature",
+  "properties": {
+    "unit": "m",
+    "coordinateSystem": "local_xy",
+    "sourceStatus": "assumed"
+  },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          0,
+          0
+        ],
+        [
+          10,
+          0
+        ],
+        [
+          12,
+          10
+        ],
+        [
+          6,
+          20
+        ],
+        [
+          0,
+          20
+        ],
+        [
+          0,
+          0
+        ]
+      ]
+    ]
+  }
+}

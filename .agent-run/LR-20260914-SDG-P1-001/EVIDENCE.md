@@ -35,3 +35,8 @@ Snapshot rehash MATCH; branch/base MATCH.
 
 256 Python tests PASS: existing 113 unchanged + geometry 143 (including 21 export/CLI tests). Independent CLI, deterministic schema-conformant export and summary, no overwrite, no argument/native diagnostic disclosure. Initial mapping import corrected to shapely.geometry before passing suite.
 Snapshot rehash MATCH; branch/base MATCH.
+
+## Wave 5 checkpoint
+
+Synthetic fixture generation reproducible; m GeoJSON / mm DXF equivalent at 200 m2, difference 0, bounds [0,0,12,20]. 260 Python tests PASS (113 existing + 147 geometry), Web 28 PASS, lint/types/build PASS, both geometry CLI smokes PASS, public scan 64 files PASS, diff whitespace PASS. CI configured for Phase 1 branch; remote CI and independent verification pending.
+Snapshot rehash MATCH; branch/base MATCH.
