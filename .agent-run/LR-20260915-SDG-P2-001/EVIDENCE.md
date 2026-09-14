@@ -34,3 +34,15 @@ New boundary tests: 59 PASS. Full Python suite: 405 PASS (346 inherited + 59 new
 Initial oversized parameter labels exceeded the Windows environment limit; fixed
 to short synthetic IDs before rerunning. No input values included in case names.
 Original schemas/dependencies/fixtures remain unchanged; packet digest MATCH.
+
+## Wave 3
+
+Implemented the three explicit decimal functions and immutable traced ConstraintResult.
+Independent Context traps Inexact; caller precision/rounding/flags are preserved.
+72 focused tests PASS: both bases yield 160/1200/31; 200-vs-198 yields 160/1200
+or 158.4/1188 with difference 2; reverse difference -2 adds no threshold/review flag.
+Null conditions are individually UNAVAILABLE, absent height ABSENT, zero ratios
+COMPUTED. Long fractional expected value verified exactly, without float rounding.
+Per-input provenance/state fields added with the engine; Wave 4 verifies all seven
+statuses and adds deterministic export/CLI. Schema validation of computed/null/absent
+results PASS. No legal rules or shape generation. Packet digest MATCH.
