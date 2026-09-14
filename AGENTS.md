@@ -6,14 +6,16 @@
 - fixtureは `cases/example-urban-office/` のsynthetic dataのみ。
 - `schemas/sdg-project-v0.1.schema.json` が案件条件の正本。Web/Pythonで別schemaを作らない。
 - BVE Coreに案件・自治体固有処理を埋め込まない。LLM調査値をofficial_verifiedへ昇格しない。
-- Current Phase = Phase 1 Geometry Foundation。Pythonの敷地Polygon読込・m正規化・検証・出力まで。
-- massing、rule engine、認証、DB、外部storage、Bridge、Web compute接続は対象外。
+- Current Phase = Phase 2 Constraint Engine Foundation。検証済みProjectとnormalized Geometryを、
+  明示area basisでBCR/FAR/heightの決定論的Constraint Resultへ変換する。
+- Project/Geometry schemaは維持。自治体rulepack、massing、認証、DB、storage、Bridge、Web compute接続は対象外。
 - mainへ直接commitしない。作業branchでcheckpoint commitを残す。force push、破壊的cleanupは禁止。
-- このCampaignではReady、merge、Production、Phase 2開始は禁止。Draft PR作成直後にSTOP。
+- このCampaignではReady、merge、Vercel deploy、Production、Phase 3開始は禁止。Draft PR作成直後にSTOP。
+- Phase 2 merge後、Phase 3前に別RunでVercel Preview Smoke Gateを必須実施する。
 - Credentialの生成・取得・store変更、OS/GitHub権限変更は禁止。
 - Notion/Obsidianを開発IDEから直接更新しない。最終報告にDocumentation Sync Triggerを返す。
 - Scope拡張はHuman Gate。現Phaseで未使用のdependencyを将来用途で入れない。
-- Web入力はbrowser memoryだけで検証する。Python Geometryは独立CLIとして明示runtime出力のみ許可。
+- Web入力はbrowser memoryだけで検証する。Python Geometry/Constraintsは独立CLIとして明示runtime出力のみ許可。
 - upload API、telemetry、storage、入力全文や座標列のconsole/logを追加しない。
 - Required checks: `python -m pytest`, `npm run lint`, `npm run test`, `npm run build`。
   CIにはsyntheticのみを使う。変更に対応する境界テストを実施し、未実行をPASSとしない。

@@ -1,0 +1,736 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:constraint-result:0.1",
+  "title": "SDG deterministic constraint result v0.1",
+  "description": "Transforms declared conditions only. Not regulatory verification or proof of buildability.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "inputReferences",
+    "areaBasis",
+    "constraints",
+    "reviewRequired"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.1"
+    },
+    "inputReferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project",
+        "geometry"
+      ],
+      "properties": {
+        "project": {
+          "$ref": "#/$defs/reference"
+        },
+        "geometry": {
+          "$ref": "#/$defs/reference"
+        }
+      }
+    },
+    "areaBasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selectedBasis",
+        "declaredAreaM2",
+        "geometryAreaM2",
+        "differenceM2",
+        "basisAreaM2",
+        "provenance"
+      ],
+      "properties": {
+        "selectedBasis": {
+          "enum": [
+            "declared_project_area",
+            "geometry_area"
+          ]
+        },
+        "declaredAreaM2": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "exclusiveMinimum": 0
+        },
+        "geometryAreaM2": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "differenceM2": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "basisAreaM2": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "provenance": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": false,
+          "prefixItems": [
+            {
+              "$ref": "#/$defs/declaredArea"
+            },
+            {
+              "$ref": "#/$defs/geometryArea"
+            }
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "selectedBasis": {
+                "const": "declared_project_area"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "declaredAreaM2": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "declaredAreaM2": {
+                "type": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "differenceM2": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "differenceM2": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "buildingCoverage",
+        "floorAreaRatio",
+        "height"
+      ],
+      "properties": {
+        "buildingCoverage": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "calculationId",
+            "maxFootprintAreaM2",
+            "provenance",
+            "reviewRequired"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "COMPUTED",
+                "UNAVAILABLE"
+              ]
+            },
+            "calculationId": {
+              "const": "coverage_area_cap_v0.1"
+            },
+            "maxFootprintAreaM2": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "provenance": {
+              "type": "array"
+            },
+            "reviewRequired": {
+              "type": "boolean"
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "const": "COMPUTED"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "maxFootprintAreaM2": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "provenance": {
+                    "prefixItems": [
+                      {},
+                      {
+                        "properties": {
+                          "condition": {
+                            "properties": {
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "maxFootprintAreaM2": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "const": "ABSENT"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "provenance": {
+                    "type": "array",
+                    "minItems": 0,
+                    "maxItems": 0,
+                    "items": false
+                  },
+                  "reviewRequired": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "provenance": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": false,
+                    "prefixItems": [
+                      {
+                        "$ref": "#/$defs/areaProvenance"
+                      },
+                      {
+                        "$ref": "#/$defs/coverage"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "const": "UNAVAILABLE"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "provenance": {
+                    "prefixItems": [
+                      {},
+                      {
+                        "properties": {
+                          "condition": {
+                            "properties": {
+                              "value": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "properties": {
+                "provenance": {
+                  "prefixItems": [
+                    {
+                      "properties": {
+                        "condition": {
+                          "properties": {
+                            "value": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "floorAreaRatio": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "calculationId",
+            "maxTotalFloorAreaM2",
+            "provenance",
+            "reviewRequired"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "COMPUTED",
+                "UNAVAILABLE"
+              ]
+            },
+            "calculationId": {
+              "const": "floor_area_cap_v0.1"
+            },
+            "maxTotalFloorAreaM2": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "provenance": {
+              "type": "array"
+            },
+            "reviewRequired": {
+              "type": "boolean"
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "const": "COMPUTED"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "maxTotalFloorAreaM2": {
+                    "type": "number",
+                    "minimum": 0
+                  },
+                  "provenance": {
+                    "prefixItems": [
+                      {},
+                      {
+                        "properties": {
+                          "condition": {
+                            "properties": {
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "maxTotalFloorAreaM2": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "const": "ABSENT"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "provenance": {
+                    "type": "array",
+                    "minItems": 0,
+                    "maxItems": 0,
+                    "items": false
+                  },
+                  "reviewRequired": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "provenance": {
+                    "type": "array",
+                    "minItems": 2,
+                    "maxItems": 2,
+                    "items": false,
+                    "prefixItems": [
+                      {
+                        "$ref": "#/$defs/areaProvenance"
+                      },
+                      {
+                        "$ref": "#/$defs/far"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "const": "UNAVAILABLE"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "provenance": {
+                    "prefixItems": [
+                      {},
+                      {
+                        "properties": {
+                          "condition": {
+                            "properties": {
+                              "value": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "properties": {
+                "provenance": {
+                  "prefixItems": [
+                    {
+                      "properties": {
+                        "condition": {
+                          "properties": {
+                            "value": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "height": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "state",
+            "calculationId",
+            "maxHeightM",
+            "provenance",
+            "reviewRequired"
+          ],
+          "properties": {
+            "state": {
+              "enum": [
+                "COMPUTED",
+                "UNAVAILABLE",
+                "ABSENT"
+              ]
+            },
+            "calculationId": {
+              "const": "height_cap_v0.1"
+            },
+            "maxHeightM": {
+              "type": [
+                "number",
+                "null"
+              ]
+            },
+            "provenance": {
+              "type": "array"
+            },
+            "reviewRequired": {
+              "type": "boolean"
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "const": "COMPUTED"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "maxHeightM": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "provenance": {
+                    "prefixItems": [
+                      {
+                        "properties": {
+                          "condition": {
+                            "properties": {
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "maxHeightM": {
+                    "type": "null"
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "const": "ABSENT"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "provenance": {
+                    "type": "array",
+                    "minItems": 0,
+                    "maxItems": 0,
+                    "items": false
+                  },
+                  "reviewRequired": {
+                    "const": false
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "provenance": {
+                    "type": "array",
+                    "minItems": 1,
+                    "maxItems": 1,
+                    "items": false,
+                    "prefixItems": [
+                      {
+                        "$ref": "#/$defs/height"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "const": "UNAVAILABLE"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "provenance": {
+                    "prefixItems": [
+                      {
+                        "properties": {
+                          "condition": {
+                            "properties": {
+                              "value": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "reviewRequired": {
+      "type": "boolean"
+    }
+  },
+  "$defs": {
+    "reference": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "declaredArea": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input",
+        "reference",
+        "condition"
+      ],
+      "properties": {
+        "input": {
+          "const": "site.area"
+        },
+        "reference": {
+          "$ref": "#/$defs/reference"
+        },
+        "condition": {
+          "$ref": "urn:sdg:project:0.1#/$defs/area"
+        }
+      }
+    },
+    "geometryArea": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input",
+        "reference",
+        "condition"
+      ],
+      "properties": {
+        "input": {
+          "const": "geometry.areaM2"
+        },
+        "reference": {
+          "$ref": "#/$defs/reference"
+        },
+        "condition": {
+          "$ref": "urn:sdg:project:0.1#/$defs/area",
+          "properties": {
+            "value": {
+              "type": "number"
+            }
+          }
+        }
+      }
+    },
+    "areaProvenance": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/declaredArea"
+        },
+        {
+          "$ref": "#/$defs/geometryArea"
+        }
+      ]
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input",
+        "reference",
+        "condition"
+      ],
+      "properties": {
+        "input": {
+          "const": "zoning.buildingCoverageRatio"
+        },
+        "reference": {
+          "$ref": "#/$defs/reference"
+        },
+        "condition": {
+          "$ref": "urn:sdg:project:0.1#/$defs/coverage"
+        }
+      }
+    },
+    "far": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input",
+        "reference",
+        "condition"
+      ],
+      "properties": {
+        "input": {
+          "const": "zoning.floorAreaRatio"
+        },
+        "reference": {
+          "$ref": "#/$defs/reference"
+        },
+        "condition": {
+          "$ref": "urn:sdg:project:0.1#/$defs/far"
+        }
+      }
+    },
+    "height": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input",
+        "reference",
+        "condition"
+      ],
+      "properties": {
+        "input": {
+          "const": "zoning.heightLimit"
+        },
+        "reference": {
+          "$ref": "#/$defs/reference"
+        },
+        "condition": {
+          "$ref": "urn:sdg:project:0.1#/$defs/height"
+        }
+      }
+    }
+  }
+}

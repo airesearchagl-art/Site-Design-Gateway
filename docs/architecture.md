@@ -1,7 +1,7 @@
 # アーキテクチャ
 
-Current Phase = Phase 1 Geometry Foundation。Web と Python は同じ SDG Project JSON Schemaを
-使う独立した検証クライアントです。Pythonに独立Geometryを追加し、両者はAPIで接続しません。
+Current Phase = Phase 2 Constraint Engine Foundation。WebとPythonは同じSDG Project JSON Schemaを
+使う独立したクライアントです。PythonのGeometry/ConstraintsとWebはAPIで接続しません。
 
 ```text
 生成用プロンプト → ユーザーがコピー
@@ -45,6 +45,21 @@ pyproj等の投影機構は追加しません。単位スケール以外の座�
 
 ## 将来拡張と過去の判断
 
+Phase 2は次の独立データフローを追加します。
+
+```text
+Project exact bytes → shared Project schema → immutable numeric conditions + SHA-256
+Normalized Geometry exact bytes → Geometry schema/Core再検証 → SiteGeometry + SHA-256
+  + 明示area basis → 固定Decimal計算 → traced ConstraintResult → 明示新規JSON出力
+```
+
+`bve.geometry.load_normalized_geometry`がPolygon・再計算面積/boundsの検証を担い、
+Constraint側へ同じ検証を複製しません。`bve.constraints`はarea比較、3上限、個別state、
+provenance/reviewRequiredを保持します。Project/Geometry schemaは維持し、出力にだけ
+`sdg-constraint-result-v0.1.schema.json`を追加。Project条件/statusの参照はoffline registryに限定します。
+JSON数値のDecimal読込・厳密境界とschema参照だけを小さな共通helperで共有します。
+詳細は[Constraint契約](constraint-contract.md)と[ADR 0003](adr/0003-constraint-engine-foundation.md)。
+
 将来のPython computeは独立サービスへ移せる境界とします。Run Packageは、その計算結果と
 CAD/BIM Bridgeの間で入力版・入力参照・成果物・検証記録を受け渡す契約候補です。
 Phase 0ではサービスもBridgeも接続しません。
@@ -53,7 +68,9 @@ Phase 0ではサービスもBridgeも接続しません。
 
 Phase 0では幾何計算・DXF読込も対象外でした。過去のADRとRun記録は当時の判断として保持します。
 現在も法規計算、自治体固有処理、実案件固有処理、DXF / PDF出力、CAD/BIM連携、Web compute接続は対象外です。
-WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Production、Phase 2、
+WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel deploy、Production、Phase 3、
 Vault/Notion直接更新は行いません。
+
+Next Gate: Vercel Preview Smoke — REQUIRED BEFORE PHASE 3。Phase 2 merge後の別Runで扱います。
 
 [公開・非公開データの境界](public-private-data-boundary.md) と [採用判断の ADR](adr/0001-monorepo-and-contract-boundary.md) を併せて参照してください。

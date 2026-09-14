@@ -3,8 +3,8 @@
 CAD上で一案ずつ試す初期検討から、入力条件・制約・計算根拠・候補比較を明示した
 再現可能な探索へ進めるWeb Gatewayです。計算主体はBVE Core（Buildable Volume Engine）です。
 
-Current Phase = Phase 1 Geometry Foundation。共通JSON Schemaによる案件条件の検証を維持し、
-Python BVE CoreにDXF / GeoJSONからの敷地Polygon読込・m正規化・検証を追加しています。
+Current Phase = Phase 2 Constraint Engine Foundation。共通JSON Schemaによる案件条件検証と
+Phase 1 Geometryを維持し、明示した面積basisからBCR/FAR/heightの上限と出典を計算します。
 Webは従来のプロンプトコピー、合成サンプル・JSON読込、構文・Schema・出典状態確認を提供します。
 
 ## ローカルで開始する
@@ -98,11 +98,38 @@ synthetic fixtureは両形式とも200 m2、面積差0です。WebにはGeometry
 - README、開発指示、ignore 設定、空の環境変数サンプル、境界文書、ADR、合成データ専用 CI、再開用 Run 記録。
 - DXF / PDF は無効なプレースホルダーのみ。成果物は Draft PR まで。
 
-Phase 1の追加範囲はPython Geometry Foundationです。マッシング、検索、法規エンジン、認証、
+Phase 1でPython Geometry Foundationを追加しました。マッシング、検索、本番法規rulepack、認証、
 保存・DB、CAD/BIM連携、最適化、Web compute APIは範囲外です。Run Packageは文書上の契約検討に留めます。
 
-Phase 0は独立レビューとHuman承認後にmerge済みです。今回の出口はPhase 1のDraft PRです。
-作成直後にSTOPし、Ready、merge、production、Phase 2へ進みません。過去のADR・Run記録は維持します。
+Phase 0/1は独立レビューとHuman承認後にmerge済みです。今回の出口はPhase 2のDraft PRです。
+作成直後にSTOPし、Ready、merge、Vercel deploy、Production、Phase 3へ進みません。
+過去のADR・Run記録は維持します。
+
+## Phase 2 Constraint Engine
+
+Projectの宣言面積とGeometryの計算面積を別々に保持し、計算時にarea basisを必須指定します。
+GeometryはPhase 1 CLIで出力したnormalized契約を再検証し、面積・boundsの改変を拒否します。
+あらかじめGit除外の`runtime-data`を作成し、未使用のファイル名を指定してください。
+
+```sh
+python -m bve.geometry cases/example-urban-office/site.geojson --format geojson --output runtime-data/normalized-site.geojson
+python -m bve.constraints --project cases/example-urban-office/project.json --geometry runtime-data/normalized-site.geojson --area-basis declared_project_area --output runtime-data/constraints.json
+```
+
+`--area-basis geometry_area`へ切り替えるとPolygonの面積を使います。既定値・自動統合はありません。
+`--output`省略時は計算と件数表示だけ。指定した出力は上書きしません。
+synthetic caseでは両basisとも最大建築面積160 m²、最大延べ面積1200 m²、最大高さ31 mです。
+既存のassumed / llm_researched等を保持し、`reviewRequired=true`になります。
+
+BCR/FAR/heightのnullは個別にUNAVAILABLE、heightの欠落はABSENTとして扱います。
+選択した宣言面積がnullならAREA_BASIS_UNAVAILABLE。面積差は証跡だけで、許容閾値は設けません。
+入力bytesのSHA-256、計算identifier、入力別の出典を出力し、任意の丸め・出典昇格は行いません。
+**計算成功は法規確認・建築可能性証明ではありません。** WebとPythonは引き続き接続しません。
+[Constraint契約/API/CLI](docs/constraint-contract.md)と[ADR 0003](docs/adr/0003-constraint-engine-foundation.md)を参照してください。
+
+Next Gate: **Vercel Preview Smoke — REQUIRED BEFORE PHASE 3**。
+Phase 2 merge後の別RunでPreviewのpage load・synthetic判定・390px・console/network/storage境界を
+確認します。このPhase 2 PRではdeployしません。既存認証/linkのみ利用し、credential/権限等の変更はHuman Gateです。
 
 ## Vercel のビルド構成
 
@@ -126,3 +153,5 @@ Vercel 上の `npm run build` は Web workspace のスクリプトを実行し�
 - [ADR: モノレポと共通契約](docs/adr/0001-monorepo-and-contract-boundary.md)
 - [Geometry契約とCLI](docs/geometry-contract.md)
 - [ADR: local XY Geometry基盤](docs/adr/0002-local-xy-geometry-foundation.md)
+- [Constraint出力契約](docs/constraint-contract.md)
+- [ADR: 明示area basisと出典付き計算](docs/adr/0003-constraint-engine-foundation.md)

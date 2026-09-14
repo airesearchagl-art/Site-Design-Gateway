@@ -24,12 +24,18 @@ CLI はローカルファイルを検証します。案件名や入力全文を�
 
 ignore 設定だけで公開可否を判断せず、コミット前に対象ファイルと差分を確認します。秘密情報・個人情報・入力全文の混入、データ破損が見つかった場合は共有を止めて報告します。認証や権限の変更、非公開情報の別経路への移送で解消しません。
 
-Current Phase = Phase 1 Geometry Foundation。Vault / Notion への書込は禁止です。
+Current Phase = Phase 2 Constraint Engine Foundation。Vault / Notion への書込は禁止です。
 公開 Git への反映は feature branch と Draft PR まで。Draft作成後STOPし、Ready、merge、
-production、Phase 2には進みません。最終報告にDocumentation Sync Triggerを返します。
+Vercel deploy、Production、Phase 3には進みません。最終報告にDocumentation Sync Triggerを返します。
 
 Geometry fixtureはゼロから作った `cases/example-urban-office/site.geojson` と `site.dxf`
 だけを許可します。一般のDXF/GeoJSON原本・出力は公開しません。Python CLIの出力先は明示し、
 通常はGit除外の `runtime-data/` を使います。source_referenceは入力bytesのSHA-256とし、
 ファイル名、絶対パス、レイヤ名、任意の入力propertiesを出力へコピーしません。
 エラーは固定codeのみ。ezdxfの診断ログと例外内容も公開しません。
+
+Constraint Resultも明示したruntime出力のみ。Project名/id、private filename/path、入力全文、
+座標列を複製せず、固定field名・数値条件・申告status・exact bytes SHA-256だけを保持します。
+CLIはreviewRequiredと件数、または固定failure codeだけを表示します。追加fixtureはtest内/temporaryのsyntheticのみ。
+Vercel Preview SmokeはPhase 2 merge後、Phase 3前に必須の別Runです。既存認証/linkのみを使い、
+credential・権限・visibility・Deployment Protection変更やProductionにはHuman Gateを適用します。
