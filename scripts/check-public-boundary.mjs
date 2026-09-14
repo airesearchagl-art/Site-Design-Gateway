@@ -15,12 +15,16 @@ const patterns = [
 ];
 const failures = new Map();
 const fail = (category) => failures.set(category, (failures.get(category) ?? 0) + 1);
+const syntheticGeometry = new Set([
+  "cases/example-urban-office/site.dxf", "cases/example-urban-office/site.geojson",
+]);
 
 for (const file of files) {
   if (/(^|\/)(runtime-data|uploads|private-data|\.venv|node_modules|\.next|\.cache|local)(\/|$)/.test(file) ||
-      /\.(dxf|dwg|rvt|ifc|pdf|log)$/i.test(file) || file.endsWith("TASK_PACKET_SNAPSHOT.md") ||
+      /\.(dwg|rvt|ifc|pdf|log)$/i.test(file) ||
+      /\.(dxf|geojson)$/i.test(file) && !syntheticGeometry.has(file) || file.endsWith("TASK_PACKET_SNAPSHOT.md") ||
       /(^|\/)\.env(?:\.|$)/.test(file) && !file.endsWith(".env.example")) fail("forbidden-file");
-  if (file.startsWith("cases/") && !/^cases\/example-urban-office\/(project\.json|README\.md)$/.test(file)) fail("non-synthetic-fixture-path");
+  if (file.startsWith("cases/") && !/^cases\/example-urban-office\/(project\.json|site\.geojson|site\.dxf|README\.md)$/.test(file)) fail("non-synthetic-fixture-path");
   const text = readFileSync(file, "utf8");
   if (file.endsWith(".env.example") && text.split(/\r?\n/).some((line) => line.trim() && !line.trimStart().startsWith("#"))) fail("env-example-value");
   for (const [name, pattern] of patterns) if (pattern.test(text)) fail(name);

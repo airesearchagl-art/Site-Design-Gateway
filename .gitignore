@@ -22,6 +22,9 @@ runtime-data/
 uploads/
 private-data/
 *.dxf
+!cases/example-urban-office/site.dxf
+*.geojson
+!cases/example-urban-office/site.geojson
 *.dwg
 *.rvt
 *.ifc

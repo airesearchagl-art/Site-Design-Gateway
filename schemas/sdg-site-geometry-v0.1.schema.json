@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:site-geometry:0.1",
+  "title": "SDG normalized local XY site geometry v0.1",
+  "description": "Local XY meters, NOT geographic RFC 7946. Structure only; polygon validity, closure, finite values and derived metrics must be checked by the geometry core.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "type", "geometry", "properties"],
+  "properties": {
+    "schemaVersion": {"const": "0.1"},
+    "type": {"const": "Feature"},
+    "geometry": {
+      "type": "object", "additionalProperties": false,
+      "required": ["type", "coordinates"],
+      "properties": {
+        "type": {"const": "Polygon"},
+        "coordinates": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "array", "minItems": 4,
+            "items": {
+              "type": "array", "minItems": 2, "maxItems": 2,
+              "items": {"type": "number"}
+            }
+          }
+        }
+      }
+    },
+    "properties": {
+      "type": "object", "additionalProperties": false,
+      "required": ["unit", "coordinateSystem", "areaM2", "bounds", "sourceFormat", "sourceUnit", "sourceStatus", "sourceReference", "warnings", "valid"],
+      "properties": {
+        "unit": {"const": "m"},
+        "coordinateSystem": {"const": "local_xy"},
+        "areaM2": {"type": "number", "exclusiveMinimum": 0},
+        "bounds": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"type": "number"}},
+        "sourceFormat": {"enum": ["geojson", "dxf"]},
+        "sourceUnit": {"enum": ["m", "mm"]},
+        "sourceStatus": {"$ref": "urn:sdg:project:0.1#/$defs/status"},
+        "sourceReference": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"},
+        "warnings": {"type": "array", "uniqueItems": true, "maxItems": 1, "items": {"const": "UNIT_OVERRIDDEN"}},
+        "valid": {"const": true}
+      }
+    }
+  }
+}

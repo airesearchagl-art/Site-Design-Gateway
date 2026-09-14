@@ -6,13 +6,15 @@
 - fixtureは `cases/example-urban-office/` のsynthetic dataのみ。
 - `schemas/sdg-project-v0.1.schema.json` が案件条件の正本。Web/Pythonで別schemaを作らない。
 - BVE Coreに案件・自治体固有処理を埋め込まない。LLM調査値をofficial_verifiedへ昇格しない。
-- Phase 0はvalidationまで。geometry、massing、rule engine、認証、DB、外部storage、Bridgeは対象外。
+- Current Phase = Phase 1 Geometry Foundation。Pythonの敷地Polygon読込・m正規化・検証・出力まで。
+- massing、rule engine、認証、DB、外部storage、Bridge、Web compute接続は対象外。
 - mainへ直接commitしない。作業branchでcheckpoint commitを残す。force push、破壊的cleanupは禁止。
-- Human承認なしReady/merge禁止。このCampaignではProductionとPhase 1開始も禁止。
+- このCampaignではReady、merge、Production、Phase 2開始は禁止。Draft PR作成直後にSTOP。
 - Credentialの生成・取得・store変更、OS/GitHub権限変更は禁止。
 - Notion/Obsidianを開発IDEから直接更新しない。最終報告にDocumentation Sync Triggerを返す。
-- Scope拡張はHuman Gate。Phase 0で未使用のdependencyを将来用途で入れない。
-- 入力はbrowser memoryだけで検証する。upload API、telemetry、storage、入力全文のconsole/logを追加しない。
+- Scope拡張はHuman Gate。現Phaseで未使用のdependencyを将来用途で入れない。
+- Web入力はbrowser memoryだけで検証する。Python Geometryは独立CLIとして明示runtime出力のみ許可。
+- upload API、telemetry、storage、入力全文や座標列のconsole/logを追加しない。
 - Required checks: `python -m pytest`, `npm run lint`, `npm run test`, `npm run build`。
   CIにはsyntheticのみを使う。変更に対応する境界テストを実施し、未実行をPASSとしない。
 - Project instructions: `docs/project-instructions.md`。Public境界: `docs/public-private-data-boundary.md`。
