@@ -58,3 +58,26 @@ equality PASS. CLI permits explicit output only, rejects overwrite/duplicate arg
 and emits counts or fixed codes with empty stderr on tested successes and failures.
 No-output mode creates no files. Missing/invalid input/path and tampered metadata
 fail without output artifacts. Packet digest MATCH.
+
+## Wave 5
+
+Full local regression: Python 492 PASS (346 existing + 146 added), Web 28 PASS,
+ESLint/TypeScript/build PASS, pip check PASS, public scan 94 candidates PASS,
+git diff --check PASS. No Project/Geometry schema, existing fixture, Web source,
+dependency or prior test-file changes relative to exact base.
+Additional checks cover output state/provenance contradictions, all-null conditions,
+extreme decimal lexemes without rounding, offline schema resolution, both existing
+geometry producers through the new consumer, partial write errors, CLI unexpected
+exceptions and boolean schema strictness. Runtime/private markers remain temporary.
+CI now includes the Phase 2 push branch, pip check, and both basis CLI paths through
+temporary normalized Geometry. Remote CI is not yet observed; it is required before Draft.
+README/instructions/architecture/privacy docs identify Phase 2 and the separate
+Vercel Preview Smoke gate required before Phase 3. No deployment performed.
+
+Isolated-copy mutation probes: baseline 53 PASS; llm status promotion killed by 5
+failures; default area selection by 1; ignored metadata mismatch by 5; fake Project
+and Geometry digests by 8. These are assertion failures, not collection errors.
+Each probe verifies copy-local module import and uses isolated pytest root/cache/temp.
+All source/test SHA-256 values match before/after. Scripts/logs/copies are ignored in
+local/; only this synthetic summary is public. No mutant applied to the repository.
+Exact packet rehash MATCH. Independent verification remains Wave 6 work.

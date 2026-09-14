@@ -1,5 +1,5 @@
 """Stable decimal JSON numbers and exclusive, explicit local output."""
-from decimal import Decimal
+from decimal import Decimal, DecimalException
 import json
 from pathlib import Path
 
@@ -40,8 +40,11 @@ def result_bytes(result: ConstraintResult) -> bytes:
         validator = schema_validator("constraints")
     except Exception:
         raise ConstraintError(Code.SCHEMA_UNAVAILABLE) from None
-    if not validator.is_valid(data):
-        raise ConstraintError(Code.OUTPUT_SCHEMA_INVALID)
+    try:
+        if not validator.is_valid(data):
+            raise ConstraintError(Code.OUTPUT_SCHEMA_INVALID)
+    except DecimalException:
+        raise ConstraintError(Code.NUMERIC_RANGE) from None
     return (_encode(data) + "\n").encode("utf-8")
 
 

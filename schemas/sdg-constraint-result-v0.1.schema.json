@@ -85,7 +85,48 @@
             }
           ]
         }
-      }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "selectedBasis": {
+                "const": "declared_project_area"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "declaredAreaM2": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "declaredAreaM2": {
+                "type": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "differenceM2": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "differenceM2": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      ]
     },
     "constraints": {
       "type": "object",
@@ -143,6 +184,22 @@
                   "maxFootprintAreaM2": {
                     "type": "number",
                     "minimum": 0
+                  },
+                  "provenance": {
+                    "prefixItems": [
+                      {},
+                      {
+                        "properties": {
+                          "condition": {
+                            "properties": {
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
                   }
                 }
               },
@@ -191,6 +248,54 @@
                       }
                     ]
                   }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "const": "UNAVAILABLE"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "provenance": {
+                    "prefixItems": [
+                      {},
+                      {
+                        "properties": {
+                          "condition": {
+                            "properties": {
+                              "value": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "properties": {
+                "provenance": {
+                  "prefixItems": [
+                    {
+                      "properties": {
+                        "condition": {
+                          "properties": {
+                            "value": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -243,6 +348,22 @@
                   "maxTotalFloorAreaM2": {
                     "type": "number",
                     "minimum": 0
+                  },
+                  "provenance": {
+                    "prefixItems": [
+                      {},
+                      {
+                        "properties": {
+                          "condition": {
+                            "properties": {
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
                   }
                 }
               },
@@ -291,6 +412,54 @@
                       }
                     ]
                   }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "const": "UNAVAILABLE"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "provenance": {
+                    "prefixItems": [
+                      {},
+                      {
+                        "properties": {
+                          "condition": {
+                            "properties": {
+                              "value": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "properties": {
+                "provenance": {
+                  "prefixItems": [
+                    {
+                      "properties": {
+                        "condition": {
+                          "properties": {
+                            "value": {
+                              "type": "number"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -344,6 +513,21 @@
                   "maxHeightM": {
                     "type": "number",
                     "exclusiveMinimum": 0
+                  },
+                  "provenance": {
+                    "prefixItems": [
+                      {
+                        "properties": {
+                          "condition": {
+                            "properties": {
+                              "value": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    ]
                   }
                 }
               },
@@ -386,6 +570,34 @@
                     "prefixItems": [
                       {
                         "$ref": "#/$defs/height"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "state": {
+                    "const": "UNAVAILABLE"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "provenance": {
+                    "prefixItems": [
+                      {
+                        "properties": {
+                          "condition": {
+                            "properties": {
+                              "value": {
+                                "type": "null"
+                              }
+                            }
+                          }
+                        }
                       }
                     ]
                   }
@@ -441,7 +653,12 @@
           "$ref": "#/$defs/reference"
         },
         "condition": {
-          "$ref": "urn:sdg:project:0.1#/$defs/area"
+          "$ref": "urn:sdg:project:0.1#/$defs/area",
+          "properties": {
+            "value": {
+              "type": "number"
+            }
+          }
         }
       }
     },

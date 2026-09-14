@@ -63,6 +63,7 @@ Project最大256 KiB、normalized Geometry最大4 MiB、JSON depth32。非有限
 出力はDecimalをfloatに戻さずJSON numberとして書く。キーをsort、配列順を固定、
 空白なし、末尾LF。不要な小数末尾0と負の0は表記だけ正規化し、数値を丸めない。
 同じ入力bytes/area basis/依存版なら結果bytes・summary・hash・orderingが一致する。
+精度を保持する消費側もJSON numberをDecimalとして読む。floatへの変換・丸めは別契約とする。
 inputReferences.project/geometryは`sha256:<64 lowercase hex>`。path/filename/URLを使わない。
 
 ## CLIとexport
@@ -79,6 +80,24 @@ OS書込障害時に部分出力が残る可能性があり、その場合はIO_
 成功はPASS、reviewRequiredとcomputed/unavailable/absent件数のみ。失敗はFAIL code=固定値。
 stdout/stderrへ値・座標・入力引数・例外・pathを出さない。exit 0=成功、1=入力reject、2=引数/I/O/内部障害。
 JSON/schema/Geometry/数値/area basisの拒否は固定codeで区別する。
+
+Python APIの最小例:
+
+```python
+from pathlib import Path
+from bve.geometry import load_normalized_geometry
+from bve.constraints import load_project, compute_constraints
+from bve.constraints.export import result_bytes
+
+project = load_project(Path("cases/example-urban-office/project.json").read_bytes())
+site = load_normalized_geometry(Path("runtime-data/normalized-site.geojson").read_bytes())
+result = compute_constraints(project, site, area_basis="geometry_area")
+output_bytes = result_bytes(result)
+```
+
+Python APIはValidatedProjectと検証済みSiteGeometryを受ける。geometry input referenceは
+渡されたSiteGeometryを作ったreaderのsource_referenceを使う。Phase 2のファイル消費経路は
+必ずload_normalized_geometryを使い、normalized JSONのexact bytesを参照する。
 
 Web接続、formula DSL、自治体rulepack、形状生成は範囲外。既存Web/Geometry検証を維持する。
 Vercel deployはこのRunでは行わない。
