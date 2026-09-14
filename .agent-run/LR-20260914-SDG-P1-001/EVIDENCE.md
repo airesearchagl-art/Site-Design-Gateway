@@ -25,3 +25,8 @@ Snapshot rehash MATCH; branch/base MATCH.
 
 GeoJSON reader and shared ring normalization implemented; 70 geometry tests PASS. Common Shapely validity checks implemented early because safe readers depend on them. DXF import font-cache diagnostics observed during dependency smoke; eliminate disclosure in reader integration before delivery. No runtime input used.
 Snapshot rehash MATCH; branch/base MATCH.
+
+## Wave 3 checkpoint
+
+122 geometry tests PASS (70 GeoJSON, 52 DXF). DXF m/mm and both polyline types equivalent at 220 m2. Unknown raw header units cannot inherit parser defaults; raw Z/nonfinite/zero-extrusion loss guarded. Diagnostic streams discarded and import font cache isolated to empty disposable cache; no input data or paths emitted.
+Snapshot rehash MATCH; branch/base MATCH.
