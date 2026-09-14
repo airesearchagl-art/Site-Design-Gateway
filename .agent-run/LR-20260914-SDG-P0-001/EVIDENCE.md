@@ -1,0 +1,67 @@
+# Evidence
+
+Only synthetic, public-safe summaries belong here. Never paste raw runtime inputs,
+credentials, identifying workstation paths or complete environment output.
+
+## Wave 0 — fresh gate and initialization
+
+- Anonymous HTTPS clone: PASS, no credential changes.
+- Origin: https://github.com/airesearchagl-art/Site-Design-Gateway.git
+- Initial HEAD and origin/main: 62f8925b804cb26bddf73d91096d8490f444817f.
+- Initial branch: main; worktree clean; tracked files: README.md only.
+- Existing branches: main and origin/main only. Feature branch created afterward.
+- Current branch: feat/phase0-bootstrap; base preserved.
+- Project instructions: human-provided instructions and existing global AGENTS read.
+  No repository AGENTS, test config or project instructions existed at the base.
+- Vault: Implementation_Task_Prompt and Codex_Capability_Tier_Orchestration read-only.
+  Long_Run_Development_Route and Long_Run_Task_Packet not present at requested paths.
+  Vault was not cloned, modified or pushed; Notion untouched.
+- Node 24.15.0 / npm 11.12.1 / GitHub CLI 2.96.0 available. Vercel CLI absent.
+- PATH Python shim fails (local execution); no py launcher. Existing bundled
+  Python 3.12.14 / pip 26.2.1 works without system configuration changes.
+- npm metadata fetch failed because the default cache is not writable; next
+  strategy is a workspace-local cache, not a permission change.
+- Git ignore-file warning under sandbox; normal approved Git gate confirmed clean.
+  A NUL exclude-file experiment failed, was abandoned, and is not used.
+- Git feature-branch creation succeeded through the approved execution boundary.
+- Existing PR metadata unavailable through anonymous local request; deferred.
+- Network boundary: public GitHub/npm/package documentation; no project inputs sent.
+- Filesystem boundary: repository writes only; Git metadata uses approved commands.
+- Exact revision 2 snapshot SHA-256: b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c.
+- Snapshot is ignored; no exact task-packet contents will be staged or published.
+
+## Wave 1 checkpoint
+
+Foundation docs/AGENTS reviewed against public/private and Phase 0 boundaries. git diff --check PASS. .env/example policy and exact snapshot exclusion checked. Existing Python 3.12.14 created .venv successfully. npm metadata requests with workspace-local cache succeeded: Next 16.3.5, React 19.3.0, Ajv 8.20.0.
+
+Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).
+
+## Wave 2 checkpoint
+
+Python worker reports 103 passed in 2.38s; sample CLI PASS errors=0; invalid input CLI FAIL errors=5 exit 1; import PASS. Lead reviewed package source, schema loading and safe CLI output. Installed jsonschema 4.26.0 / pytest 8.4.2 in local venv. Web unit tests already 26 PASS; complete Web checkpoint follows.
+
+Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).
+
+## Wave 3 checkpoint
+
+Lead reran Python with workspace-local temp/cache: 103 passed in 1.91s; sample PASS errors=0. Web node:test: 26 passed. npm audit after install: 0 vulnerabilities. Lint/TypeScript PASS. Turbopack build compiled/static prerender PASS. agent-browser desktop and 390px mobile smoke PASS with synthetic-only inputs. Clipboard button reports copied. VALID/INVALID/REVIEW_REQUIRED observed. Invalid enum path /site/area/status displayed. Malformed JSON error does not echo input. JSON operations: No requests captured, zero browser storage keys, no page exceptions/overlay. Local screenshots are excluded from public Git. React checklist: client events for browser APIs, stable keys, no effects/network, accessible labels/live results and native disabled controls.
+
+Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).
+
+## Wave 4 checkpoint
+
+Integrated Web lint, typecheck, 26 tests, build PASS. Public candidate scanner PASS (39 files), .env only example, no exact packet or runtime inputs tracked. CI explicitly runs Python tests/sample, Web lint/test/build and public scan; no upload steps or project input logging. Workflow contents:read and checkout persist-credentials:false. Pinned action v6 SHAs verified via git ls-remote using process-local OpenSSL after sandbox schannel failure. README setup commands exercised with source/editable Python and npm workspace; Vercel hosted execution NOT RUN.
+
+Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).
+
+## Wave 5 checkpoint
+
+Independent verifier (separate context) found three P2 inconsistencies: terminal-newline ID regex, escaped lone surrogate, and file UTF-8/BOM decoding. Lead fixed all and added regressions. Independent recheck: all four invalid examples FAIL in both runtimes; proper replacement character/Japanese/emoji PASS; no further finding. Python 113 passed in 1.67s. Web 28 PASS. Lint/types/build PASS after fix. Post-fix optimized-build browser: valid JSON VALID, invalid UTF-8 INVALID, no page errors. Public scan PASS at 38 files and git diff --check PASS. Verifier independently checked lockfile registry/integrity and source typecheck with Next-generated files treated as absent (zero diagnostics). Full source/scope/privacy/diff and rollback reviewed; no prohibited compute integration or runtime logging.
+
+Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).
+
+## Wave 5 delivery checkpoint
+
+Final remote gate through approved execution: expected remote main SHA confirmed; GitHub reported correct PUBLIC repository and existing write authority; open PR list empty; remote feature branch absent before push. Existing-auth feature push succeeded without interactive auth or credential changes. GitHub Actions run https://github.com/airesearchagl-art/Site-Design-Gateway/actions/runs/34827334137 completed SUCCESS on d6e11fc9df4159ad15d54c6d4a2a7d2815614e8d. Final CI output mode suppresses assertion payloads: Python --tb=no and node:test dot reporter, both tested locally (113/28 PASS). Main remains 62f8925b804cb26bddf73d91096d8490f444817f; no Ready/merge/production action.
+
+Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).

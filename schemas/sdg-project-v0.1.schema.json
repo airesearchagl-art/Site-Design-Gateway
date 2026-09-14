@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:project:0.1",
+  "title": "SDG Project v0.1",
+  "description": "Input structure and declared provenance only; no legal or geometric verification.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "project", "site", "zoning"],
+  "properties": {
+    "schemaVersion": { "const": "0.1" },
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*(?![\\s\\S])", "maxLength": 80 },
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "intendedUses": {
+          "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "enum": ["office", "retail"] }
+        }
+      }
+    },
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["area"],
+      "properties": { "area": { "$ref": "#/$defs/area" } }
+    },
+    "zoning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["buildingCoverageRatio", "floorAreaRatio"],
+      "properties": {
+        "buildingCoverageRatio": { "$ref": "#/$defs/coverage" },
+        "floorAreaRatio": { "$ref": "#/$defs/far" },
+        "heightLimit": { "$ref": "#/$defs/height" }
+      }
+    }
+  },
+  "$defs": {
+    "status": {
+      "type": "string",
+      "enum": ["official_verified", "user_provided", "drawing_derived", "llm_researched", "assumed", "unknown", "review_required"]
+    },
+    "nullRequiresReview": {
+      "type": "object",
+      "if": { "properties": { "value": { "type": "null" } }, "required": ["value"] },
+      "then": { "properties": { "status": { "enum": ["unknown", "review_required"] } } }
+    },
+    "area": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "status"],
+      "properties": {
+        "value": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "unit": { "const": "m2" },
+        "status": { "$ref": "#/$defs/status" }
+      },
+      "allOf": [{ "$ref": "#/$defs/nullRequiresReview" }]
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "status"],
+      "properties": {
+        "value": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+        "unit": { "const": "percent" },
+        "status": { "$ref": "#/$defs/status" }
+      },
+      "allOf": [{ "$ref": "#/$defs/nullRequiresReview" }]
+    },
+    "far": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "status"],
+      "properties": {
+        "value": { "type": ["number", "null"], "minimum": 0 },
+        "unit": { "const": "percent" },
+        "status": { "$ref": "#/$defs/status" }
+      },
+      "allOf": [{ "$ref": "#/$defs/nullRequiresReview" }]
+    },
+    "height": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "unit", "status"],
+      "properties": {
+        "value": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "unit": { "const": "m" },
+        "status": { "$ref": "#/$defs/status" }
+      },
+      "allOf": [{ "$ref": "#/$defs/nullRequiresReview" }]
+    }
+  }
+}
