@@ -24,3 +24,7 @@ Draft 2020-12 schema is shared verbatim by Ajv and Python jsonschema. Explicit u
 ## Wave 3 checkpoint
 
 Use native node:test rather than another test framework. Keep compatible ESLint 9.39.5 while Next's React lint plugin is incompatible with v10. Set supported Next agentRules=false so dev startup does not generate/modify instruction files. Generated files were confirmed to contain only Next's own boilerplate and removed before staging.
+
+## Wave 4 checkpoint
+
+Keep CI two independent jobs with synthetic-only inputs. Public scanner is a heuristic gate plus manual review, not proof against every possible secret format. No production or Preview deployment is attempted. Final independent review runs in a separate agent context with read-only code access.

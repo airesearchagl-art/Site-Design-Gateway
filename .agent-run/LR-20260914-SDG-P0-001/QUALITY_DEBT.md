@@ -47,3 +47,7 @@ D01 and D02 remain OPEN. Python tests are executable and passed, so LOCAL_PYTHON
 ## Wave 3 checkpoint
 
 D01/D02 unchanged. D03 below records the upstream ESLint compatibility limit.
+
+## Wave 4 checkpoint
+
+D01 remote authority and D02 Preview remain deferred. D03 compatible pinned ESLint remains documented. No unresolved local required check failure.

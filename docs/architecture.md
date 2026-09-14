@@ -30,6 +30,10 @@ Schema 適合は値の真偽・法規適合・物理的妥当性を意味しま�
 
 ## 将来拡張の境界
 
+将来のPython computeは独立サービスへ移せる境界とします。Run Packageは、その計算結果と
+CAD/BIM Bridgeの間で入力版・入力参照・成果物・検証記録を受け渡す契約候補です。
+Phase 0ではサービスもBridgeも接続しません。
+
 将来の Run Package は、入力契約の版、入力への参照、成果物、検証記録を結ぶ文書上の契約検討に留めます。Phase 0 では Run Package 用の Schema、実行機構、ストレージ、API を実装しません。現在の SDG Project Schema を複製・拡張する先行実装も行いません。
 
 幾何計算、法規計算、自治体固有処理、実案件固有処理、DXF / PDF 出力、CAD/BIM 連携は Phase 0 の Core に入りません。DXF / PDF の画面要素は無効です。拡張は独立レビューと人の承認後、次の Phase で扱います。

@@ -4,6 +4,6 @@
 - [x] Wave 1: foundation, safety, architecture and project instructions.
 - [x] Wave 2: shared schema, synthetic fixture, Python package and tests.
 - [x] Wave 3: Next.js shell, validation, test/lint/build, browser smoke check.
-- [ ] Wave 4: synthetic-only CI and integrated setup documentation.
+- [x] Wave 4: synthetic-only CI and integrated setup documentation.
 - [ ] Wave 5: full diff, required checks, privacy scan, debt and independent review.
 - [ ] Final remote write: existing-auth push and Draft PR, then STOP.

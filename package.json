@@ -8,6 +8,7 @@
     "lint": "npm run lint --workspace @sdg/web",
     "test": "npm run test --workspace @sdg/web",
     "build": "npm run build --workspace @sdg/web",
-    "start": "npm run start --workspace @sdg/web"
+    "start": "npm run start --workspace @sdg/web",
+    "check:boundary": "node scripts/check-public-boundary.mjs"
   }
 }

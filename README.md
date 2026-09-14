@@ -1,5 +1,8 @@
 # Site Design Gateway
 
+CAD上で一案ずつ試す初期検討から、入力条件・制約・計算根拠・候補比較を明示した
+再現可能な探索へ進めるWeb Gatewayです。計算主体はBVE Core（Buildable Volume Engine）です。
+
 建築計画の入力 JSON を、共通の JSON Schema で確認する Phase 0 の開発基盤です。Web は生成用プロンプトのコピー、合成サンプルの読込、JSON ファイルの読込、構文・Schema・出典状態の確認を提供します。Python BVE Core は検証用の最小 CLI です。
 
 ## ローカルで開始する
@@ -42,6 +45,7 @@ macOS / Linux:
 npm run lint
 npm test
 npm run build
+npm run check:boundary
 ```
 
 仮想環境を有効にした場合、Python の確認は `python -m pytest`、CLI は `python -m bve cases/example-urban-office/project.json` でも実行できます。再現用の依存インストールにはルートで `npm ci` を使います。
