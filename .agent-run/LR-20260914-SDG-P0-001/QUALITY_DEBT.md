@@ -23,3 +23,7 @@
 - required_resolution: Optional later Preview verification using existing authorized configuration.
 - evidence: Vercel CLI inventory: NOT INSTALLED.
 - status: OPEN
+
+## Wave 1 checkpoint
+
+D01/D02 unchanged. Python/cache local environment issues repaired without credential, OS or global configuration changes.

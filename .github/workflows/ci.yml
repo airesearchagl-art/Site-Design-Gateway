@@ -1,0 +1,15 @@
+name: Synthetic validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Phase 0 foundation checkpoint
+        run: test -f AGENTS.md && test -f .gitignore

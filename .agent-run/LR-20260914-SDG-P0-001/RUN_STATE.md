@@ -7,9 +7,9 @@
 - Repository: airesearchagl-art/Site-Design-Gateway
 - Working branch: feat/phase0-bootstrap
 - Base SHA: 62f8925b804cb26bddf73d91096d8490f444817f
-- Current head: 62f8925b804cb26bddf73d91096d8490f444817f (observed before checkpoint commit)
-- Current wave: 0
-- Last successful checkpoint: Wave 0 initialization; identify carrying commit with git log.
+- Current head: 61e9d4dd0c698c2cfbfef0431ad35bf071375eaa (observed before checkpoint commit)
+- Current wave: 1
+- Last successful checkpoint: Wave 1; identify carrying commit with git log.
 - Task Packet ID: LRP-20260914-SDG-P0-001
 - Task Packet revision: 2
 - Task Packet snapshot: .agent-run/LR-20260914-SDG-P0-001/TASK_PACKET_SNAPSHOT.md (local only)
@@ -33,16 +33,15 @@ acceptance criteria are fixed by PUBLIC_CONTRACT.md and the exact local packet.
 
 ## Completed
 
-Anonymous clone, expected repository/base and clean-tree check, feature branch,
-exact revision 2 snapshot, SHA-256 binding, runtime discovery.
+Wave 0 and Wave 1: repository/run initialization, public/private rules, AGENTS and project instructions, README, architecture/ADR, ignore rules, env explanation and CI foundation.
 
 ## Current implementation state
 
-Run initialization only. README from the base is the sole original file.
+Repository foundation ready. CI currently checks foundation only; full synthetic validation jobs arrive in Wave 4.
 
 ## Checks
 
-See EVIDENCE.md, Wave 0. Snapshot digest matched at initialization.
+Clean starting tree and expected base confirmed. Safety documents reviewed. Only empty .env.example allowed; exact snapshot ignored. Python 3.12 virtual environment and workspace-local npm cache work. Snapshot digest MATCH.
 
 ## Quality Debt
 
@@ -55,9 +54,7 @@ remote push; Draft PR; Vercel Preview; final privacy scan; independent verificat
 
 ## Known failures
 
-PATH Python shim cannot launch; bundled Python 3.12 works. Default npm cache is not
-writable; use workspace-local cache. Git metadata writes require the tool's normal
-approval mechanism; no OS or credential settings changed.
+Broken PATH Python shim and default npm cache permissions are resolved for this task via explicit existing Python and local caches. No global settings changed. Remote metadata/auth and Preview remain deferred.
 
 ## Decisions
 
@@ -65,11 +62,11 @@ See DECISIONS.md. The exact human packet is local-only to protect personal paths
 
 ## Files changed
 
-.gitignore and .agent-run/LR-20260914-SDG-P0-001/ public artifacts.
+AGENTS.md, README.md, docs/, .env.example, .gitattributes, .github/workflows/ci.yml and run checkpoint documents.
 
 ## Remaining tasks / Next action
 
-Complete Waves 1–5 locally, then push and create Draft PR with existing auth.
+Implement the common schema and Python boundary, then Web MVP, CI integration and final convergence. Remote push/PR only after local completion.
 
 ## Stop conditions status
 

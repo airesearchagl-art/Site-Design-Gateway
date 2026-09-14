@@ -29,3 +29,9 @@ credentials, identifying workstation paths or complete environment output.
 - Filesystem boundary: repository writes only; Git metadata uses approved commands.
 - Exact revision 2 snapshot SHA-256: b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c.
 - Snapshot is ignored; no exact task-packet contents will be staged or published.
+
+## Wave 1 checkpoint
+
+Foundation docs/AGENTS reviewed against public/private and Phase 0 boundaries. git diff --check PASS. .env/example policy and exact snapshot exclusion checked. Existing Python 3.12.14 created .venv successfully. npm metadata requests with workspace-local cache succeeded: Next 16.3.5, React 19.3.0, Ajv 8.20.0.
+
+Snapshot SHA-256 recheck: MATCH (b791a519d0959ae697e87cd6ff8b93a5b51d4762da87ad25a24b61549842c21c).

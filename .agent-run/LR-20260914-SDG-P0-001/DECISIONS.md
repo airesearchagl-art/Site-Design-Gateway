@@ -12,3 +12,7 @@
 - Wave 0: Git metadata updates use approved tool execution when sandboxed writes
   are unavailable; do not alter filesystem ACLs or GitHub permissions.
 - Wave 0: Keep Web and Python independent; one root schemas/ contract is authoritative.
+
+## Wave 1 checkpoint
+
+Use standard npm workspaces; Next.js app root apps/web, root schemas/cases imported by the app. Document Vercel Root Directory apps/web and inclusion of sources outside that root; no deployment or project setting change. Documentation was delegated with disjoint file ownership.
