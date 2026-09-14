@@ -1,4 +1,5 @@
 """Strict ring validation and unit scaling. No projection or geometry repair."""
+from decimal import Decimal
 import math
 import warnings
 
@@ -9,6 +10,25 @@ from .errors import Code, GeometryError
 from .model import Unit
 
 MAX_POSITIONS = 100_000
+
+
+def finite_float(value: int | float | Decimal) -> float:
+    """Keep lexical decimals until conversion so nonzero underflow is detectable."""
+    if type(value) not in (int, float, Decimal):
+        raise GeometryError(Code.INVALID_COORDINATES)
+    if isinstance(value, Decimal) and not value.is_finite():
+        raise GeometryError(Code.NONFINITE_COORDINATES)
+    try:
+        number = float(value)
+    except (OverflowError, ValueError):
+        raise GeometryError(Code.NUMERIC_RANGE) from None
+    if not math.isfinite(number):
+        raise GeometryError(Code.NONFINITE_COORDINATES)
+    if value != 0 and number == 0:
+        raise GeometryError(Code.NUMERIC_RANGE)
+    if (type(value) is int or isinstance(value, Decimal) and value == value.to_integral_value()) and number != value:
+        raise GeometryError(Code.NUMERIC_RANGE)
+    return number
 
 
 def require_unit(value: object) -> Unit:
@@ -27,6 +47,7 @@ def normalized_polygon(coordinates: object, unit: Unit) -> Polygon:
     rings = []
     count = 0
     original_by_normalized = {}
+    originals_by_axis = [{}, {}]
     for ring in coordinates:
         if type(ring) is not list or not ring:
             raise GeometryError(Code.INVALID_COORDINATES)
@@ -40,20 +61,15 @@ def normalized_polygon(coordinates: object, unit: Unit) -> Polygon:
             if len(position) != 2:
                 raise GeometryError(Code.NON_2D)
             result = []
-            for value in position:
-                if type(value) not in (int, float):
-                    raise GeometryError(Code.INVALID_COORDINATES)
-                try:
-                    number = float(value)
-                except OverflowError:
-                    raise GeometryError(Code.NUMERIC_RANGE) from None
-                if not math.isfinite(number):
-                    raise GeometryError(Code.NONFINITE_COORDINATES)
-                if type(value) is int and number != value:
-                    raise GeometryError(Code.NUMERIC_RANGE)
+            for axis, value in enumerate(position):
+                number = finite_float(value)
                 scaled = number / 1000 if unit == "mm" else number
                 if number != 0 and scaled == 0:
                     raise GeometryError(Code.NUMERIC_RANGE)
+                seen = originals_by_axis[axis]
+                if scaled in seen and seen[scaled] != value:
+                    raise GeometryError(Code.NUMERIC_RANGE)
+                seen[scaled] = value
                 result.append(0.0 if scaled == 0 else scaled)
             point = tuple(result)
             original = tuple(position)

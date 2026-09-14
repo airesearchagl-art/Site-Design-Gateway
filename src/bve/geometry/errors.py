@@ -29,6 +29,7 @@ class Code(StrEnum):
     INVALID_ARGUMENTS = "INVALID_ARGUMENTS"
     IO_ERROR = "IO_ERROR"
     OUTPUT_EXISTS = "OUTPUT_EXISTS"
+    INTERNAL_ERROR = "INTERNAL_ERROR"
 
 
 class GeometryError(ValueError):

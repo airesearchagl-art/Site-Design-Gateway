@@ -1,13 +1,13 @@
 """Strict selection of straight, closed modelspace XY polylines using ezdxf."""
 from hashlib import sha256
+from decimal import Decimal
 import io
-import math
 
 from ._dxf_runtime import ezdxf_module, quiet_dxf
 from .errors import Code, GeometryError
 from .geojson import MAX_INPUT_BYTES
 from .model import SiteGeometry
-from .normalization import normalized_polygon, require_unit
+from .normalization import finite_float, normalized_polygon, require_unit
 
 
 def _unit(header_unit: int, override: str | None):
@@ -25,16 +25,22 @@ def _unit(header_unit: int, override: str | None):
     return override, "user_provided", ("UNIT_OVERRIDDEN",)
 
 
-def _preflight(text: str) -> int:
+def _preflight(text: str) -> tuple[int, dict[str, int]]:
     """Reject source tags that ezdxf would discard or coerce during entity loading."""
     from ezdxf.lldxf.tagger import ascii_tags_loader
     from ezdxf.lldxf.tags import group_tags
 
-    tags = list(ascii_tags_loader(io.StringIO(text)))
+    source = io.StringIO(text, newline=None)
+    tags = list(ascii_tags_loader(source))
+    if source.read().strip():
+        raise GeometryError(Code.INVALID_DXF)
     if not tags or (tags[0].code, tags[0].value) != (0, "SECTION") or (tags[-1].code, tags[-1].value) != (0, "EOF"):
         raise GeometryError(Code.INVALID_DXF)
     header_unit = 0
+    version = "AC1009"
     sections = set()
+    original_by_axis = {10: {}, 20: {}, 30: {}}
+    counts_by_type = {"LWPOLYLINE": 0, "POLYLINE": 0, "VERTEX": 0}
     for group in group_tags(tags):
         kind = group[0].value
         if kind == "SECTION":
@@ -42,6 +48,14 @@ def _preflight(text: str) -> int:
                 raise GeometryError(Code.INVALID_DXF)
             sections.add(group[1].value)
             if group[1].value == "HEADER":
+                versions = [i for i, tag in enumerate(group) if tag.code == 9 and tag.value == "$ACADVER"]
+                if len(versions) > 1:
+                    raise GeometryError(Code.INVALID_DXF)
+                if versions:
+                    version_tag = group[versions[0] + 1]
+                    if version_tag.code != 1:
+                        raise GeometryError(Code.INVALID_DXF)
+                    version = version_tag.value
                 units = [index for index, tag in enumerate(group) if tag.code == 9 and tag.value == "$INSUNITS"]
                 if len(units) > 1:
                     raise GeometryError(Code.INVALID_DXF)
@@ -52,12 +66,30 @@ def _preflight(text: str) -> int:
                     header_unit = int(next_tag.value)
         if kind not in ("LWPOLYLINE", "POLYLINE", "VERTEX"):
             continue
+        counts_by_type[kind] += 1
+        if any(tag.code == 102 for tag in group):
+            raise GeometryError(Code.INVALID_DXF)
+        subclasses = [tag.value for tag in group if tag.code == 100]
+        expected = {"LWPOLYLINE": ["AcDbEntity", "AcDbPolyline"],
+                    "POLYLINE": ["AcDbEntity", "AcDb2dPolyline"],
+                    "VERTEX": ["AcDbEntity", "AcDbVertex", "AcDb2dVertex"]}[kind]
+        # R12 POLYLINE/VERTEX has no subclass tags. Modern input must have exactly
+        # the supported structure; ezdxf may otherwise discard entire subclasses.
+        if subclasses != expected and (subclasses or kind == "LWPOLYLINE" or version != "AC1009"):
+            raise GeometryError(Code.INVALID_DXF)
+        geometric_codes = {10, 20, 30, 38, 39, 40, 41, 42, 43, 50, 70, 71, 72, 73, 74, 75, 90, 210, 220, 230}
+        if subclasses:
+            last_subclass = max(i for i, tag in enumerate(group) if tag.code == 100)
+            if any(tag.code in geometric_codes for tag in group[:last_subclass]):
+                raise GeometryError(Code.INVALID_DXF)
         # Point compiler accepts 3D vertices for LWPOLYLINE then drops Z.
         if kind == "LWPOLYLINE" and any(tag.code == 30 for tag in group):
             raise GeometryError(Code.NON_2D)
         # Repeated scalar fields can hide a curve/unit/plane declaration. Repeated
         # per-vertex LWPOLYLINE fields are legal, but at most once for each vertex.
-        scalar_codes = {38, 39, 43, 70, 90, 210, 220, 230}
+        scalar_codes = {5, 8, 67, 330, 410, 38, 39, 43, 70, 71, 72, 73, 74, 75, 90, 210, 220, 230}
+        if kind != "LWPOLYLINE":
+            scalar_codes |= {10, 20, 30, 40, 41, 42, 50}
         seen = set()
         vertex_seen = set()
         started = False
@@ -76,12 +108,31 @@ def _preflight(text: str) -> int:
                 if code in vertex_seen:
                     raise GeometryError(Code.INVALID_DXF)
                 vertex_seen.add(code)
-            if code in {10, 20, 30, 38, 39, 40, 41, 42, 43, 210, 220, 230}:
-                if not math.isfinite(float(tag.value)):
+            if code in {67, 70, 71, 72, 73, 74, 75, 90}:
+                integer = int(tag.value)  # no int(float(...)) truncation
+                if code == 75 and integer != 0:
+                    raise GeometryError(Code.UNSUPPORTED_CURVE)
+            if code in {10, 20, 30, 38, 39, 40, 41, 42, 43, 50, 210, 220, 230}:
+                exact = Decimal(tag.value)
+                if not exact.is_finite():
                     raise GeometryError(Code.NONFINITE_COORDINATES)
+                if code in {42, 50} and exact != 0:
+                    raise GeometryError(Code.UNSUPPORTED_CURVE)
+                if code in {40, 41, 43} and exact != 0:
+                    raise GeometryError(Code.UNSUPPORTED_WIDTH)
+                if (code in {38, 39} or kind == "POLYLINE" and code in {10, 20, 30}) and exact != 0:
+                    raise GeometryError(Code.UNSUPPORTED_PLANE)
+                if kind == "VERTEX" and code == 30 and exact != 0:
+                    raise GeometryError(Code.NON_2D)
+                number = finite_float(exact)
+                if code in original_by_axis:
+                    seen_axis = original_by_axis[code]
+                    if number in seen_axis and seen_axis[number] != exact:
+                        raise GeometryError(Code.NUMERIC_RANGE)
+                    seen_axis[number] = exact
         if kind in ("LWPOLYLINE", "POLYLINE"):
-            extrusion = {210: 0.0, 220: 0.0, 230: 1.0}
-            extrusion.update({tag.code: float(tag.value) for tag in group if tag.code in extrusion})
+            extrusion = {210: Decimal(0), 220: Decimal(0), 230: Decimal(1)}
+            extrusion.update({tag.code: Decimal(tag.value) for tag in group if tag.code in extrusion})
             if tuple(extrusion.values()) != (0, 0, 1):
                 raise GeometryError(Code.UNSUPPORTED_PLANE)
         if kind == "LWPOLYLINE":
@@ -95,7 +146,7 @@ def _preflight(text: str) -> int:
                 raise GeometryError(Code.INVALID_DXF)
     if "ENTITIES" not in sections:
         raise GeometryError(Code.INVALID_DXF)
-    return header_unit
+    return header_unit, counts_by_type
 
 
 def read_dxf(payload: bytes | str, *, layer: str | None = None,
@@ -116,9 +167,15 @@ def read_dxf(payload: bytes | str, *, layer: str | None = None,
         text = raw.decode("utf-8")
         with quiet_dxf():
             ezdxf = ezdxf_module()
-            header_unit = _preflight(text)
+            header_unit, raw_counts = _preflight(text)
             unit, status, notes = _unit(header_unit, unit_override)
-            doc = ezdxf.read(io.StringIO(text))
+            doc = ezdxf.read(io.StringIO(text, newline=None))
+            parsed_counts = dict.fromkeys(raw_counts, 0)
+            for entity in doc.entitydb.values():
+                if entity.is_alive and entity.dxftype() in parsed_counts:
+                    parsed_counts[entity.dxftype()] += 1
+            if parsed_counts != raw_counts:
+                raise GeometryError(Code.INVALID_DXF)
             if any(entity.dxftype() == "GEODATA" for entity in doc.objects):
                 raise GeometryError(Code.UNSUPPORTED_CRS)
             candidates = [entity for entity in doc.modelspace()

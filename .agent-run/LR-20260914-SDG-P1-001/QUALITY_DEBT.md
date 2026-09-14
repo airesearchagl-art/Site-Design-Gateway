@@ -12,6 +12,12 @@
 
 No unit, geometry integrity, privacy, credential or permission violation may become debt.
 
+## Wave 6 convergence
+
+All independent geometry/privacy findings are fixed and have regression coverage.
+No finding is deferred as debt. Required local checks have passed. D01/D02/D03 remain
+nonblocking external/tool/history limitations; actual remote CI is still required.
+
 ## Wave 0 checkpoint
 
 No hard-gate issue deferred; see current entries above.
@@ -38,6 +44,11 @@ No hard-gate issue deferred; see current entries above.
 Snapshot rehash MATCH; branch/base MATCH.
 
 ## Wave 5 checkpoint
+
+No hard-gate issue deferred; see current entries above.
+Snapshot rehash MATCH; branch/base MATCH.
+
+## Wave 6 checkpoint
 
 No hard-gate issue deferred; see current entries above.
 Snapshot rehash MATCH; branch/base MATCH.

@@ -177,6 +177,14 @@ def test_unrepresentable_int_and_scale_underflow_rejected():
     rejected(feature([[0, 0], [5e-324, 0], [1, 1], [0, 0]], "mm"), Code.NUMERIC_RANGE)
 
 
+@pytest.mark.parametrize("literal", ["1e-400", "9007199254740993.0", "1.00000000000000000001"])
+def test_lexical_float_loss_is_rejected_before_json_conversion(literal):
+    value = feature([[0, 0], [1, 0], [2, 0], [4, 4], [0, 4], [0, 0]])
+    raw = json.dumps(value).replace("[2, 0]", f"[{literal}, 0]")
+    with pytest.raises(GeometryError, match="^NUMERIC_RANGE$"):
+        read_geojson(raw)
+
+
 def test_model_immutable_and_cannot_adopt_invalid_polygon():
     site = read(feature())
     with pytest.raises(FrozenInstanceError):

@@ -25,6 +25,10 @@ def synthetic_files() -> dict[str, bytes]:
             doc.layers.new("SITE")
             doc.modelspace().add_lwpolyline([(x * 1000, y * 1000) for x, y in RING_M],
                                           close=True, dxfattribs={"layer": "SITE"})
+            # ezdxf discovers classes through a set of entity types; freeze their
+            # order explicitly so bytes do not depend on Python's hash seed.
+            doc.classes.add_required_classes(doc.dxfversion)
+            doc.classes.classes = dict(sorted(doc.classes.classes.items()))
             stream = io.StringIO()
             doc.write(stream)
             dxf = stream.getvalue().encode("utf-8")

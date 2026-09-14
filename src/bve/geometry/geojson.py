@@ -1,7 +1,7 @@
 """Bounded local-XY GeoJSON-shaped input; geographic GeoJSON is unsupported."""
 from hashlib import sha256
+from decimal import Decimal, DecimalException
 import json
-import math
 from typing import get_args
 
 from .errors import Code, GeometryError
@@ -33,7 +33,8 @@ def read_geojson(payload: bytes | str) -> SiteGeometry:
         raw = payload.encode("utf-8") if type(payload) is str else payload
         if len(raw) > MAX_INPUT_BYTES:
             raise GeometryError(Code.INPUT_TOO_LARGE)
-        data = json.loads(raw.decode("utf-8"), object_pairs_hook=_object, parse_constant=_constant)
+        data = json.loads(raw.decode("utf-8"), object_pairs_hook=_object,
+                          parse_constant=_constant, parse_float=Decimal)
         pending = [(data, 0)]
         while pending:
             value, depth = pending.pop()
@@ -47,11 +48,11 @@ def read_geojson(payload: bytes | str) -> SiteGeometry:
                 pending.extend((item, depth + 1) for item in value)
             elif type(value) is str:
                 value.encode("utf-8")
-            elif type(value) is float and not math.isfinite(value):
+            elif isinstance(value, Decimal) and not value.is_finite():
                 raise GeometryError(Code.NONFINITE_COORDINATES)
     except GeometryError:
         raise
-    except (ValueError, RecursionError, OverflowError):
+    except (ValueError, RecursionError, OverflowError, DecimalException):
         raise GeometryError(Code.INVALID_JSON) from None
     if type(data) is not dict:
         raise GeometryError(Code.UNSUPPORTED_TYPE)

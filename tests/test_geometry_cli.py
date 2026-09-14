@@ -1,5 +1,4 @@
 """Export and subprocess boundary tests use temporary synthetic inputs only."""
-from copy import deepcopy
 import json
 from pathlib import Path
 import subprocess
@@ -132,3 +131,23 @@ def test_io_failure_returns_fixed_error_without_native_message(tmp_path, monkeyp
     monkeypatch.setattr(Path, "open", fail)
     with pytest.raises(GeometryError, match="^IO_ERROR$"):
         write_outputs(site, output=tmp_path / "out.json")
+
+
+@pytest.mark.parametrize("literal", ["1e99999999999999999999", "1e-99999999999999999999", "0e99999999999999999999"])
+def test_decimal_parser_limit_has_fixed_cli_error(source, literal):
+    raw = json.dumps(INPUT).replace("[10, 0]", f"[{literal}, 0]")
+    with pytest.raises(GeometryError, match="^INVALID_JSON$"):
+        read_geojson(raw)
+    source.write_text(raw, encoding="utf-8")
+    result = run(source, "--format", "geojson")
+    assert result.returncode == 1
+    assert result.stdout == "FAIL code=INVALID_JSON\n" and result.stderr == ""
+
+
+def test_unexpected_failure_never_prints_traceback_or_native_values(source, monkeypatch, capsys):
+    from bve.geometry import __main__ as cli
+    def fail(*args):
+        raise RuntimeError("synthetic-private-marker")
+    monkeypatch.setattr(cli, "read_geojson", fail)
+    assert cli.main([str(source), "--format", "geojson"]) == 2
+    assert capsys.readouterr() == ("FAIL code=INTERNAL_ERROR\n", "")

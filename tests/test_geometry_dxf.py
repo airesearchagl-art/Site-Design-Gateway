@@ -78,7 +78,7 @@ def test_multiple_boundaries_require_explicit_layer_not_largest_area():
 def test_open_and_3d_candidates_are_not_silently_ignored():
     doc, _ = document()
     extra = doc.modelspace().add_polyline3d([(0, 0, 1), (1, 1, 1), (1, 0, 1)])
-    rejected(doc, Code.AMBIGUOUS_BOUNDARY)
+    rejected(doc, Code.INVALID_DXF)  # unsupported raw subclass fails before selection
     doc.modelspace().delete_entity(extra)
     doc.modelspace().add_lwpolyline(RING, close=False)
     rejected(doc, Code.AMBIGUOUS_BOUNDARY)
@@ -132,6 +132,67 @@ def test_raw_zero_extrusion_is_not_repaired_by_ezdxf():
         read_dxf(data[:at] + "210\n0\n220\n0\n230\n0\n" + data[at:])
 
 
+def raw_groups(doc):
+    lines = payload(doc).splitlines()
+    groups = []
+    for code, value in zip(lines[::2], lines[1::2]):
+        if int(code) == 0:
+            groups.append([])
+        groups[-1].append((int(code), value))
+    return groups
+
+
+def render(groups):
+    return "".join(f"{code}\n{value}\n" for group in groups for code, value in group)
+
+
+@pytest.mark.parametrize("tag,code", [(42, Code.UNSUPPORTED_CURVE), (38, Code.UNSUPPORTED_PLANE),
+                                      (39, Code.UNSUPPORTED_PLANE), (43, Code.UNSUPPORTED_WIDTH)])
+def test_raw_nonzero_attributes_cannot_underflow_to_supported_zero(tag, code):
+    doc, _ = document()
+    groups = raw_groups(doc)
+    entity = next(group for group in groups if group[0] == (0, "LWPOLYLINE"))
+    at = next(i for i, pair in enumerate(entity) if pair[0] == 20) + 1
+    entity.insert(at, (tag, "1e-400"))
+    with pytest.raises(GeometryError) as error:
+        read_dxf(render(groups))
+    assert error.value.code == code
+
+
+@pytest.mark.parametrize("kind,tag,value", [("LWPOLYLINE", 70, "1.9"), ("POLYLINE", 70, "1.9"),
+                                          ("POLYLINE", 75, "0.5")])
+def test_integer_attributes_cannot_be_truncated(kind, tag, value):
+    doc, _ = document(kind)
+    groups = raw_groups(doc)
+    entity = next(group for group in groups if group[0] == (0, kind))
+    entity[:] = [pair for pair in entity if pair[0] != tag]
+    entity.append((tag, value))
+    with pytest.raises(GeometryError, match="^INVALID_DXF$"):
+        read_dxf(render(groups))
+
+
+@pytest.mark.parametrize("tag,value", [(75, "5"), (30, "5"), (40, "1")])
+def test_duplicate_polyline_attributes_cannot_hide_shape_information(tag, value):
+    doc, _ = document("POLYLINE")
+    groups = raw_groups(doc)
+    entity = next(group for group in groups if group[0] == (0, "POLYLINE"))
+    entity.extend([(tag, value), (tag, "0")])
+    with pytest.raises(GeometryError):
+        read_dxf(render(groups))
+
+
+@pytest.mark.parametrize("value", ["9007199254740993", "1e-400", "4.00000000000000000001"])
+def test_raw_coordinates_cannot_disappear(value):
+    doc, _ = document(points=[(0, 0), (1, 0), (4, 0), (4, 4), (0, 4)])
+    groups = raw_groups(doc)
+    entity = next(group for group in groups if group[0] == (0, "LWPOLYLINE"))
+    for i, (code, text) in enumerate(entity):
+        if code == 10 and text == "1.0":
+            entity[i] = (code, value)
+    with pytest.raises(GeometryError, match="^NUMERIC_RANGE$"):
+        read_dxf(render(groups))
+
+
 @pytest.mark.parametrize("unit", [1, 2, 5, 21, 24])
 def test_other_known_units_not_reinterpreted(unit):
     doc, _ = document(units=unit)
@@ -178,7 +239,7 @@ def test_unsupported_planes(kind, attribute, value):
 def test_3d_polyline_and_vertex_z_rejected():
     doc = ezdxf.new("R2010", units=6)
     doc.modelspace().add_polyline3d([(0, 0, 0), (1, 0, 0), (1, 1, 0)], close=True)
-    rejected(doc, Code.NON_2D)
+    rejected(doc, Code.INVALID_DXF)  # explicitly unsupported 3D subclass
     doc, entity = document("POLYLINE")
     entity.vertices[0].dxf.location = (0, 0, 1)
     rejected(doc, Code.NON_2D)
@@ -248,3 +309,66 @@ def test_cold_import_does_not_print_machine_paths_or_build_font_cache(tmp_path):
     assert completed.returncode == 0
     assert completed.stdout == "PASS\n" and completed.stderr == ""
     assert list(tmp_path.iterdir()) == []
+
+
+@pytest.mark.parametrize("newline", ["\n", "\r\n", "\r"])
+def test_text_dxf_newlines_preserve_geometry(newline):
+    doc, _ = document()
+    site = read_dxf(payload(doc).replace("\n", newline))
+    assert site.area_m2 == 220
+
+
+@pytest.mark.parametrize("mode", ["repeated_subclass", "appdata", "before_subclass"])
+def test_lwpolyline_vertices_cannot_be_hidden_from_parser(mode):
+    doc, _ = document()
+    groups = raw_groups(doc)
+    entity = next(group for group in groups if group[0] == (0, "LWPOLYLINE"))
+    if mode == "repeated_subclass":
+        at = [i for i, pair in enumerate(entity) if pair[0] == 10][-1]
+        entity.insert(at, (100, "AcDbPolyline"))
+    elif mode == "appdata":
+        at = [i for i, pair in enumerate(entity) if pair[0] == 10][-1]
+        entity.insert(at, (102, "{SYNTHETIC"))
+        entity.append((102, "}"))
+    else:
+        at = next(i for i, pair in enumerate(entity) if pair[0] == 10)
+        point = entity[at:at + 2]
+        del entity[at:at + 2]
+        at = entity.index((100, "AcDbPolyline"))
+        entity[at:at] = point
+    with pytest.raises(GeometryError, match="^INVALID_DXF$"):
+        read_dxf(render(groups))
+
+
+@pytest.mark.parametrize("kind,subclass", [("POLYLINE", "AcDb3dPolyline"), ("VERTEX", "AcDb3dPolylineVertex")])
+def test_inconsistent_3d_subclass_cannot_be_adopted_as_2d(kind, subclass):
+    doc, _ = document("POLYLINE")
+    groups = raw_groups(doc)
+    entity = next(group for group in groups if group[0] == (0, kind))
+    at = [i for i, pair in enumerate(entity) if pair[0] == 100][-1]
+    entity[at] = (100, subclass)
+    with pytest.raises(GeometryError, match="^INVALID_DXF$"):
+        read_dxf(render(groups))
+
+
+def test_trailing_dxf_after_eof_is_not_ignored():
+    doc, _ = document()
+    data = payload(doc)
+    with pytest.raises(GeometryError, match="^INVALID_DXF$"):
+        read_dxf(data + "0\nSECTION\n2\nOBJECTS\n0\nGEODATA\n0\nENDSEC\n0\nEOF\n")
+    assert read_dxf(data + "\n  \n").area_m2 == 220
+
+
+def test_modern_missing_subclasses_rejected_but_r12_supported():
+    doc, _ = document("POLYLINE")
+    groups = raw_groups(doc)
+    for group in groups:
+        if group[0] in ((0, "POLYLINE"), (0, "VERTEX")):
+            group[:] = [pair for pair in group if pair[0] != 100]
+    with pytest.raises(GeometryError, match="^INVALID_DXF$"):
+        read_dxf(render(groups))
+    with quiet_dxf():
+        old = ezdxf.new("R12")
+        old.modelspace().add_polyline2d(RING, close=True)
+        text = payload(old)
+    assert read_dxf(text, unit_override="m").area_m2 == 220

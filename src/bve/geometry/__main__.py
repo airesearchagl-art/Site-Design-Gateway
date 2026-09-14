@@ -37,6 +37,11 @@ def main(argv: list[str] | None = None) -> int:
     except GeometryError as error:
         print(f"FAIL code={error.code.value}")
         return 2 if error.code in (Code.INVALID_ARGUMENTS, Code.IO_ERROR, Code.OUTPUT_EXISTS) else 1
+    except Exception:
+        # Last-resort CLI boundary: unexpected failures must not print traceback,
+        # filenames, argument values or third-party diagnostic messages.
+        print("FAIL code=INTERNAL_ERROR")
+        return 2
     print(f"PASS code=VALID warnings={len(site.warnings)}")
     return 0
 

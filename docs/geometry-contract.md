@@ -69,6 +69,13 @@ NON_2D、NONFINITE_COORDINATES、NUMERIC_RANGEです。全codeは `geometry/erro
 - DXFはUTF-8 text（ASCII含む）。binary、旧codepage、recover/auditによる修復は非対応。
 - ezdxfが省略単位を既定値で補う前に原文headerを検査します。LWPOLYLINEのZ、非有限値、
   頂点数不整合・重複scalar・不正extrusionも、parserが捨てる前に検査します。
+- 数値tokenをDecimalで保持してfloat化前の非零underflow、整数精度損失、座標衝突を拒否します。
+  Decimalは読込境界だけで使用し、面積・validity・bounds計算はShapelyの倍精度です。
+  DXFはsubclassの順序と個数、属性位置、読込前後のentity数も照合します。
+  polyline/vertexのapplication-data group102、重複・矛盾subclassは非対応です。
+  保守的にファイル内の全polyline/vertexを構造検査するため、未選択layer/blockに不正・非対応の
+  情報があっても拒否する場合があります。LF / CRLF / CR改行は同じGeometryとして処理します。
+  EOF以降の非空データも拒否します。subclass無しはR12のPOLYLINE/VERTEXだけを対象とします。
 - ezdxf初回importは一時ディレクトリの空font cacheを使い、既存home cacheを作成・更新しません。
   設定はスコープ終了時に復元します。reader中の診断は保存せず捨て、固定codeで失敗を返します。
   この診断抑制はプロセス全体の標準stream/logに一時作用するため、Phase 1は同期CLIで使用します。

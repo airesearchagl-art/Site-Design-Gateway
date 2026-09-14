@@ -1,12 +1,13 @@
 """Publishable fixture provenance and whole-flow checks, no real input."""
 import importlib.util
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
 
 from bve.geometry import read_dxf, read_geojson
-from bve.geometry.export import json_bytes, normalized_feature
+import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
 CASE = ROOT / "cases/example-urban-office"
@@ -51,3 +52,18 @@ def test_legacy_project_cli_unchanged():
                             capture_output=True, text=True, timeout=30)
     assert result.returncode == 0
     assert result.stdout == "PASS errors=0\n" and result.stderr == ""
+
+
+@pytest.mark.parametrize("seed", ["1", "23"])
+def test_fixture_generation_is_independent_of_process_hash_seed(seed):
+    script = (
+        "from runpy import run_path; from pathlib import Path; "
+        "m=run_path('scripts/generate_synthetic_geometry.py'); "
+        "assert all((Path('cases/example-urban-office')/n).read_bytes()==b "
+        "for n,b in m['synthetic_files']().items()); print('PASS')"
+    )
+    result = subprocess.run([sys.executable, "-c", script], cwd=ROOT,
+                            env=dict(os.environ, PYTHONHASHSEED=seed),
+                            capture_output=True, text=True, timeout=30)
+    assert result.returncode == 0
+    assert result.stdout == "PASS\n" and result.stderr == ""
