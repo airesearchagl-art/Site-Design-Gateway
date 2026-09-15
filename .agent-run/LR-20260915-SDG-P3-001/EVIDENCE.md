@@ -24,3 +24,10 @@ Implementation/tests not yet claimed PASS. Historical Phase 0/1/2 records retain
 - Covered semantic/schema tampering, unavailable/absent states, strict JSON resources,
   exact Geometry reference mismatch at identical area/bounds, status binding and explicit floor height.
 - Only validated immutable Constraint Result objects cross the Massing input boundary.
+
+## Wave 3
+
+- 23 footprint tests plus 110 Geometry geojson/normalized regressions: 133 PASS.
+- Convex-only homothety, strict actual-area cap, containment, zero-underflow failure,
+  deterministic context independence and exactly bounded 64 downward ULP adjustments verified.
+- Extracted the existing normalize/orient operation as a shared Geometry helper; no repair added.

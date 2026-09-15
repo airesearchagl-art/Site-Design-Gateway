@@ -12,6 +12,11 @@ from .model import Unit
 MAX_POSITIONS = 100_000
 
 
+def canonical_polygon(polygon: Polygon) -> Polygon:
+    """Stable ring start/order/orientation only; never a geometry repair."""
+    return orient_polygons(normalize(polygon))
+
+
 def finite_float(value: int | float | Decimal) -> float:
     """Keep lexical decimals until conversion so nonzero underflow is detectable."""
     if type(value) not in (int, float, Decimal):
@@ -94,6 +99,6 @@ def normalized_polygon(coordinates: object, unit: Unit, *, canonical: bool = Tru
                 raise GeometryError(Code.ZERO_AREA)
             if not polygon.is_valid:
                 raise GeometryError(Code.INVALID_POLYGON)
-            return orient_polygons(normalize(polygon)) if canonical else polygon
+            return canonical_polygon(polygon) if canonical else polygon
     except (GEOSException, RuntimeWarning, OverflowError):
         raise GeometryError(Code.NUMERIC_RANGE) from None
