@@ -1,6 +1,6 @@
 # アーキテクチャ
 
-Current Phase = Phase 5 Web Results Viewer Foundation。WebとPythonは同じcanonical schemasを参照する
+Current Phase = Phase 7 Results Interpretation UX Foundation。WebとPythonは同じcanonical schemasを参照する
 独立したclientです。PythonのGeometry/Constraints/Massing/SearchとWebはAPIで接続しません。
 
 ```text
@@ -68,7 +68,7 @@ Phase 0ではサービスもBridgeも接続しません。
 
 Phase 0では幾何計算・DXF読込も対象外でした。過去のADRとRun記録は当時の判断として保持します。
 現在も法規計算、自治体固有処理、実案件固有処理、DXF / PDF出力、CAD/BIM連携、Web compute接続は対象外です。
-WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 6、
+WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 8、
 Vault/Notion直接更新は行いません。
 
 ## Phase 3 Massing
@@ -115,3 +115,10 @@ Pythonのarithmetic、geometry/cap、candidateReference、input binding、rankin
 表示はsummary、既存rank/rejection、review state、zero accepted、rank/reference選択とexterior ringの2D Local XY SVG。
 入力はReact stateだけに保持しClearで破棄する。API、upload、persistence、telemetry、編集、download、3Dはない。
 public sampleはcanonical Python bytesを追跡しexact-byte testでbindingする。詳細: docs/web-results-contract.md。
+
+## Phase 7 Results Interpretation
+
+Search v0.2はcanonical Constraint由来のareaBasisとcapを内包する。旧v0.1もWebで受理し、
+offline registryは6schemaとなる。Pythonがcontext/referenceの意味検証を担い、
+Webはpure display helperでremaining/usageと数値書式だけを作る。入力documentやrankは変更しない。
+zero acceptedでもcontextを表示し、Clearはcontextを含む結果全体を破棄する。D04はOPEN。

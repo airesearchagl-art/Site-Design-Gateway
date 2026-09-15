@@ -110,6 +110,20 @@ code { overflow-wrap: anywhere; font-family: Consolas, monospace; font-size: 12p
 .rejection-table { margin: 20px 0; }
 .rejection-table table { min-width: 420px; }
 .numeric-note { margin: 20px 0 0; }
+.area-basis, .constraint-usage { margin: 22px 0; padding: 20px; border: 1px solid var(--line); border-radius: 8px; }
+.area-basis h3, .constraint-usage h3 { margin: 0 0 10px; font-size: 18px; }
+.basis-selected { margin-bottom: 12px; }
+.basis-values { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 0; }
+.basis-values dt, .usage-metric dt { color: var(--muted); font-size: 12px; }
+.basis-values dd { margin: 3px 0 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.usage-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.usage-metric { min-width: 0; padding: 14px; border-radius: 6px; background: #f5f8f5; }
+.usage-metric h4 { margin: 0 0 10px; }
+.usage-metric dl { margin: 0; }
+.usage-metric dl div { display: flex; justify-content: space-between; gap: 12px; }
+.usage-metric dd { margin: 0; text-align: right; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; min-width: 0; }
+.usage-disclaimer { margin: 14px 0 0; }
+.ranking-rules { padding-left: 22px; font-size: 13px; }
 footer { display: flex; justify-content: space-between; gap: 20px; padding: 0 0 30px; color: var(--muted); font-size: 11px; }
 @media (max-width: 760px) {
   main { padding: 0 18px; }
@@ -128,6 +142,8 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 0 0 
   .search-controls button { width: 100%; }
   .viewer-content { padding: 0 22px; }
   .summary-grid { grid-template-columns: 1fr 1fr; }
+  .basis-values { grid-template-columns: 1fr 1fr; }
+  .usage-grid { grid-template-columns: 1fr; }
   .strategy-list, .candidate-detail { grid-template-columns: 1fr; }
   .review-banner, .ranking-warning { flex-direction: column; gap: 5px; }
   .footprint-frame { min-height: 220px; }

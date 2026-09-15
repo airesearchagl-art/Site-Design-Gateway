@@ -1,14 +1,14 @@
 # Project instructions
 
 目的は建築初期検討の入力条件と出典状態を明示するWeb Gatewayの最小基盤。
-計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 5 Web Results Viewer Foundation。
+計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 7 Results Interpretation UX Foundation。
 Phase 0〜4を維持し、canonical Search Resultをbrowser-onlyで比較表示する。
 
 - Next.js / TypeScriptはProject検証とSearch Resultの形式確認・read-only表示、PythonはProject検証・Geometry・Constraints・Massing・Search計算とsemantic exportを担当する。
 - 単位を暗黙変換しない。面積はm2、比率はpercent、高さはmをschemaで明示する。
   検証成功は法規適合や建築可能性の証明ではない。
-- Phase 5では既存5schemaを維持し、Webはoffline registryから正本を直接参照する。
-  schemaVersionの変更は互換性判断を伴うためHumanへ相談する。
+- 既存5schemaを維持し、Human承認済みSearch v0.2を追加する。Webは6schemaをoffline参照しv0.1/v0.2を受け入れる。
+  追加のschemaVersion変更は互換性判断を伴うためHuman Gateとする。
 - 日本語で簡潔に結果と未確認事項を報告する。UI内へ運用上の実装手順を混ぜない。
 - Runtime dataをpublic fixtureに転用しない。開発・CI・ブラウザ検証もsyntheticのみ。
 - `AGENTS.md`、README、対象ファイルと直接依存を先に読む。
@@ -26,7 +26,7 @@ Massingは凸・穴なし敷地、固定homothetic footprintと同形整数階st
 Constraint Resultはschemaと再計算で検証し、Geometry referenceを一致させる。階高の既定値は禁止。
 actual areaを丸めずcapと包含を再確認する。法規適合・後退・最適性を主張しない。
 WebからPythonを呼ばない。floorHeight以外の探索、3D、本番rulepacks、Run Package、Bridge、API、保存基盤は対象外。
-Draft PR作成後STOP。Ready、merge、Vercel操作、Production、Phase 6、Vault/Notion直接更新は禁止。
+Draft PR作成後STOP。Ready、merge、Vercel操作、Production、Phase 8、Vault/Notion直接更新は禁止。
 旧Preview必須GateはSDG-VP-001 BLOCKED_EXTERNAL、D02 OPEN / PLATFORM_BLOCKEDとして切り離された。
 意図しないProduction分類2件は削除済み。Git切断確認後、HumanのPhase 3 transition exception = AUTHORIZED。
 このPhaseではVercelを再検証せず、別Runで原因と安全経路をfresh auditする。
@@ -41,3 +41,8 @@ Phase 5 WebはSearch Resultをbrowser memoryだけで読み、8 MiB viewer limit
 summary/ranking/rejection/zero accepted、review warning、rank/reference選択、exterior ringの2D SVGだけを表示する。
 BVE arithmetic、canonical hash、ranking semantic validatorをTypeScriptへ移植しない。Schema PASSはPython semantic PASSを意味しない。
 upload、fetch、storage、telemetry、編集・保存・download、3D、Project/Search hash bindingは対象外。詳細: docs/web-results-contract.md。
+
+Phase 7ではauthoritative Constraint Result由来のcontextをSearch v0.2へcopyし、Pythonでexact referenceと照合する。
+UIにはbasis、cap、actual、remaining、usage、ranking ruleを表示する。単純な表示用差分/比率のみ許可し、
+法規計算、governing constraint、clamp、再sort、同順位badgeを追加しない。en-US丸め表示と原本保持を明記する。
+D04 OPEN。Phase 6 private workspaceや詳細reportを参照・転記しない。Vercel状態は継承のみ。

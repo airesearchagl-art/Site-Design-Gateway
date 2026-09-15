@@ -2,7 +2,7 @@ name: Synthetic validation
 
 on:
   push:
-    branches: [feat/phase0-bootstrap, feat/phase1-geometry-foundation, feat/phase2-constraint-engine, feat/phase3-massing-candidate-foundation, feat/phase4-search-ranking-foundation, feat/phase5-web-results-viewer]
+    branches: [feat/phase0-bootstrap, feat/phase1-geometry-foundation, feat/phase2-constraint-engine, feat/phase3-massing-candidate-foundation, feat/phase4-search-ranking-foundation, feat/phase5-web-results-viewer, feat/phase7-results-interpretation]
   pull_request:
     branches: [main]
   workflow_dispatch:

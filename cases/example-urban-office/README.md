@@ -24,3 +24,7 @@ Polygon同値、面積差0、出力schemaとCLI非開示を検証します。
 `search-result.json` は、この合成ProjectとGeometryからconstraintsを生成し、明示階高
 `[4,5,6,7,8]` をPhase 4 Searchへ渡したcanonical bytesです。Web Results Viewerのsample専用で、
 実案件runtime outputではありません。Python integration testが同じCLI pipelineを再実行し、exact bytes一致を検証します。
+
+Phase 7で同じpipelineからv0.2へ再生成しました。Constraint由来のareaBasis/capsを含みます。
+旧v0.1 schemaは保持し、contextを除いたlegacy表現が旧canonical fixtureのhashと一致することもtestします。
+Phase 6 private workspaceからの転記はありません。

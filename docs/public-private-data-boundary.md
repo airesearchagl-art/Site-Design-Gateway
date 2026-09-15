@@ -24,9 +24,9 @@ CLI はローカルファイルを検証します。案件名や入力全文を�
 
 ignore 設定だけで公開可否を判断せず、コミット前に対象ファイルと差分を確認します。秘密情報・個人情報・入力全文の混入、データ破損が見つかった場合は共有を止めて報告します。認証や権限の変更、非公開情報の別経路への移送で解消しません。
 
-Current Phase = Phase 5 Web Results Viewer Foundation。Vault / Notion への書込は禁止です。
+Current Phase = Phase 7 Results Interpretation UX Foundation。Vault / Notion への書込は禁止です。
 公開 Git への反映は feature branch と Draft PR まで。Draft作成後STOPし、Ready、merge、
-Vercel操作、Production、Phase 6には進みません。最終報告にDocumentation Sync Triggerを返します。
+Vercel操作、Production、Phase 8には進みません。最終報告にDocumentation Sync Triggerを返します。
 
 Geometry fixtureはゼロから作った `cases/example-urban-office/site.geojson` と `site.dxf`
 だけを許可します。一般のDXF/GeoJSON原本・出力は公開しません。Python CLIの出力先は明示し、
@@ -51,3 +51,7 @@ candidate形状・hash・順位・rejection詳細は明示新規fileだけに出
 `runtime-data/*.json`、ブラウザ入力、file name/path、JSON全文、座標列をGit・CI artifact・log・screenshotへ含めない。
 Phase 5 Webは入力をbrowser memoryだけで処理し、upload/API/fetch、localStorage、sessionStorage、IndexedDB、
 Cache API、sendBeacon、analytics、telemetry、WebSocket、EventSourceを使わない。ClearはReact stateを破棄する。
+
+Phase 7の公開Search fixtureは既存public synthetic CLIから再生成したv0.2だけ。
+Phase 6 private workspaceのinput/output、詳細report、値、画像、パスをpublic code/docs/fixtureへ転記しない。
+非ゼロarea difference等はtest内で完全syntheticに生成する。

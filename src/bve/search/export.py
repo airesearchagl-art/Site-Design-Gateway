@@ -8,7 +8,7 @@ import warnings
 from shapely.errors import GEOSException
 
 from bve._schemas import schema_validator
-from bve.constraints.export import _encode
+from bve.constraints.export import _encode, result_bytes
 from bve.massing.export import candidate_bytes
 
 from .engine import POINT_REJECTIONS, _validate_shared
@@ -22,11 +22,28 @@ def _require(condition) -> None:
         raise SearchError(Code.OUTPUT_SEMANTIC_INVALID)
 
 
+def _validate_context(data: dict, authoritative: dict) -> None:
+    """Bind the serialized context and each candidate to the same Constraint Result."""
+    context = data["constraintContext"]
+    _require(_encode(context["areaBasis"]) == _encode(authoritative["areaBasis"]))
+    constraints = authoritative["constraints"]
+    caps = {"maxFootprintAreaM2": constraints["buildingCoverage"]["maxFootprintAreaM2"],
+            "maxTotalFloorAreaM2": constraints["floorAreaRatio"]["maxTotalFloorAreaM2"],
+            "maxHeightM": constraints["height"]["maxHeightM"]}
+    _require(_encode(context["constraintCaps"]) == _encode(caps))
+    for entry in data["rankedCandidates"]:
+        _require(_encode(entry["candidate"]["constraintCaps"]) == _encode(context["constraintCaps"]))
+
+
 def _validate_result(result: SearchResult, data: dict) -> None:
     heights = result.floor_heights_m
     _require(type(heights) is tuple and all(type(h) is Decimal for h in heights))
     _require(canonical_heights(heights) == heights)
     _validate_shared(result.site, result.constraints, heights[0])
+    canonical_constraints = result_bytes(result.constraints.result)
+    _require(result.constraints.reference == "sha256:" + sha256(canonical_constraints).hexdigest())
+    authoritative = json.loads(canonical_constraints, parse_float=Decimal, parse_int=Decimal)
+    _validate_context(data, authoritative)
     refs = {"project": result.constraints.result.project_reference, "geometry": result.site.source_reference,
             "constraints": result.constraints.reference}
     review = result.constraints.result.review_required
@@ -67,7 +84,8 @@ def _validate_result(result: SearchResult, data: dict) -> None:
     _require(rejected_heights == sorted(rejected_heights))
     _require(sorted(seen_heights + rejected_heights) == list(heights))
     accepted_count, rejected_count = len(expected_entries), len(expected_rejections)
-    expected = {"schemaVersion": "0.1", "inputReferences": refs,
+    expected = {"schemaVersion": "0.2", "inputReferences": refs,
+                "constraintContext": data["constraintContext"],  # Independently bound above.
                 "search": {"strategy": "floor_height_sweep_v0.1", "ranking": "maximize_gross_floor_area_v0.1",
                            "floorHeightsM": list(heights), "floorHeightStatus": "user_provided"},
                 "summary": {"evaluated": accepted_count + rejected_count, "accepted": accepted_count,

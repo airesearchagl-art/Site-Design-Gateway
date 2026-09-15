@@ -16,8 +16,8 @@ function sourceFiles(directory: string): string[] {
   });
 }
 
-test("Phase 5 header and all viewer states are explicit", () => {
-  assert.ok(page.includes("PHASE 5 / RESULTS VIEWER"));
+test("current phase header and all viewer states are explicit", () => {
+  assert.ok(page.includes("PHASE 7 / RESULTS INTERPRETATION"));
   for (const state of ["EMPTY", "LOADING", "DISPLAYABLE", "INVALID", "VIEWER_LIMIT"]) {
     assert.ok(component.includes(state), `missing viewer state ${state}`);
   }

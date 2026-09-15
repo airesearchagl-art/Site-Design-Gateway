@@ -1,6 +1,6 @@
-# Phase 5 Web Results Viewer contract
+# Web Results Viewer / Phase 7 interpretation contract
 
-Current Phase = Phase 5 Web Results Viewer Foundation。
+Current Phase = Phase 7 Results Interpretation UX Foundation。Phase 5 privacy/resource境界を維持する。
 
 Web は、ローカル BVE Core が canonical export した Search Result JSON をユーザーが選択し、
 ブラウザ内だけで形式確認・比較表示する read-only consumer である。
@@ -30,8 +30,8 @@ parse後にも同じnode/depth上限を防御として確認する。byte上限8
 
 ## Schema 境界
 
-正本は `schemas/sdg-search-result-v0.1.schema.json`。Ajv の offline registry へ Project、Geometry、
-Constraint Result、Massing Candidate、Search Result の既存5schemaを登録し、Web用copyを作らない。
+正本はSearch Result v0.1とv0.2のschema。Ajv の offline registry へ Project、Geometry、
+Constraint Result、Massing Candidate、Search Result v0.1/v0.2の6schemaを登録し、Web用copyを作らない。
 Ajv の問題表示は instance path、keyword、固定の一般説明だけとし、入力断片や raw exception message を含めない。
 
 Schema PASS はブラウザで BVE Core の semantic validation を再実行したことを意味しない。
@@ -54,8 +54,25 @@ floor height / fixed code のrejection一覧を表示する。fixed codeへ法�
 source coordinatesは変更せず、Y反転は描画座標だけに適用する。repair、補間、setback、convex hull、3D化はしない。
 有限で正の描画boundsを安全に得られない場合は、そのpreviewだけを unavailable とする。
 
-数値はSearch ResultからJavaScript Numberとして表示するだけで、計算や意味のある丸めをしない。
-JavaScript NumberはPython Decimalおよび元JSONの数値字句の正本ではない（D04）。
+数値はJavaScript Numberによる表示値であり、m/m²は最大小数3桁、割合は小数1桁、en-USの桁区切りを使う。
+丸め表示とcanonical JSON不変をUIで明示する。法規丸めではない。JavaScript NumberはPython Decimalおよび
+元JSONの数値字句の正本ではない（D04 OPEN）。lossless parserは追加しない。
+
+## Phase 7 interpretation
+
+Pythonの新規exportはv0.2。root必須constraintContext.areaBasisは既存Constraint schemaへの$ref、
+constraintCapsは既存Massing schemaへの$ref。Pythonがcanonical Constraint bytesのhashとcontext exact copyを照合する。
+candidate capsはroot capsと一致する。v0.1を改版せず、legacyではArea basisに
+`Context unavailable in legacy Search Result v0.1`と表示する。2ファイル選択やbasis推測は行わない。
+
+Area basisはselectedBasis / basis / declared / geometry / signed differenceを表示する。
+nullはUnavailable。zero acceptedでもbasisとcapは表示し、candidate usageはUnavailableとする。
+選択候補のfootprint/GFA/heightにActual、Cap、Remaining、Usage %を表示する。
+許される表示用演算はcap-actualとactual/capのみ。clampしない。ゼロ除算・非有限の表示値はUnavailable。
+これは支配的な法規制約の判定でも法規適合の証明でもない旨をpanel直下に明示する。
+
+Ranking ruleはGFA降順、正本GFAが等しければ階高昇順、最後にcandidateReference辞書順と説明する。
+authoritative rankと配列順を保ち、ブラウザで再sort・Decimal equality推定・TIED badge付与をしない。
 
 ## 公開fixture
 

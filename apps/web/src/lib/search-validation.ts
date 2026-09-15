@@ -5,6 +5,7 @@ import geometrySchema from "../../../../schemas/sdg-site-geometry-v0.1.schema.js
 import constraintSchema from "../../../../schemas/sdg-constraint-result-v0.1.schema.json" with { type: "json" };
 import massingSchema from "../../../../schemas/sdg-massing-candidate-v0.1.schema.json" with { type: "json" };
 import searchSchema from "../../../../schemas/sdg-search-result-v0.1.schema.json" with { type: "json" };
+import searchSchemaV2 from "../../../../schemas/sdg-search-result-v0.2.schema.json" with { type: "json" };
 
 export const MAX_SEARCH_BYTES = 8 * 1024 * 1024;
 export const MAX_SEARCH_DEPTH = 64;
@@ -18,10 +19,10 @@ const ajv = new Ajv2020({
   strictTypes: false,
   strictTuples: false,
 });
-for (const schema of [projectSchema, geometrySchema, constraintSchema, massingSchema, searchSchema]) {
+for (const schema of [projectSchema, geometrySchema, constraintSchema, massingSchema, searchSchema, searchSchemaV2]) {
   ajv.addSchema(schema);
 }
-const validateSearchSchema = ajv.getSchema(searchSchema.$id)!;
+const validators = { "0.1": ajv.getSchema(searchSchema.$id)!, "0.2": ajv.getSchema(searchSchemaV2.$id)! };
 
 export type SearchIssue = {
   path: string;
@@ -29,8 +30,25 @@ export type SearchIssue = {
   message: string;
 };
 
-export type SearchResultDocument = {
-  schemaVersion: "0.1";
+export type ConstraintCaps = {
+  maxFootprintAreaM2: number;
+  maxTotalFloorAreaM2: number;
+  maxHeightM: number;
+};
+
+export type AreaBasis = {
+  selectedBasis: "declared_project_area" | "geometry_area";
+  declaredAreaM2: number | null;
+  geometryAreaM2: number;
+  differenceM2: number | null;
+  basisAreaM2: number;
+  provenance: { input: string; reference: string; condition: { value: number | null; unit: "m2"; status: string } }[];
+};
+
+export type ConstraintContext = { areaBasis: AreaBasis; constraintCaps: ConstraintCaps };
+
+export type SearchResultDocument = ({ schemaVersion: "0.1"; constraintContext?: never }
+  | { schemaVersion: "0.2"; constraintContext: ConstraintContext }) & {
   inputReferences: { project: string; geometry: string; constraints: string };
   search: {
     strategy: "floor_height_sweep_v0.1";
@@ -54,6 +72,7 @@ export type RankedCandidateDocument = {
   candidateReference: string;
   grossFloorAreaM2: number;
   candidate: {
+    constraintCaps: ConstraintCaps;
     generator: { floorHeightM: number };
     candidate: {
       footprint: { type: "Polygon"; coordinates: number[][][] };
@@ -125,6 +144,10 @@ export function validateSearchJson(text: string): SearchValidationResult {
   }
   const resourceFailure = inspectResources(value);
   if (resourceFailure) return resourceFailure;
+  const version = value !== null && typeof value === "object" && "schemaVersion" in value
+    ? value.schemaVersion : undefined;
+  // Unsupported versions still receive generic schema diagnostics from the legacy contract.
+  const validateSearchSchema = version === "0.2" ? validators["0.2"] : validators["0.1"];
   if (!validateSearchSchema(value)) {
     return {
       state: "INVALID",

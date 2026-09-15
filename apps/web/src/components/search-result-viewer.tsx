@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { AreaBasisPanel, ConstraintUsagePanel } from "./search-interpretation";
+import { formatMeasure, RANKING_RULES, ROUNDING_NOTICE } from "../lib/search-display.ts";
 import searchSample from "../../../../cases/example-urban-office/search-result.json" with { type: "json" };
 import {
   validateSearchFile,
@@ -149,10 +151,15 @@ export function SearchResultViewer() {
               <div><dt>Ranking strategy</dt><dd><code>{model.ranking}</code><span>{strategyLabels[model.ranking]}</span></dd></div>
             </dl>
 
+            <AreaBasisPanel model={model} />
+
             <div className="ranking-warning" role="note">
               <strong>順位の読み方</strong>
               <span>順位はGFA降順による比較であり、設計品質・推奨・最適性・法規適合を意味しません。</span>
             </div>
+
+            <ol className="ranking-rules">{RANKING_RULES.map((rule) => <li key={rule}>{rule}</li>)}</ol>
+            <p className="small">Search Resultの正本の順位を表示しています。表示上の丸めや同値に見える数値で並べ替えません。</p>
 
             {model.candidates.length === 0 ? (
               <div className="zero-result"><strong>Search completed.</strong><p>この探索条件では表示可能なaccepted candidateはありません。</p></div>
@@ -167,11 +174,11 @@ export function SearchResultViewer() {
                       return (
                         <tr key={`${candidate.rank}-${candidate.candidateReference}`} className={active ? "selected-row" : undefined}>
                           <th scope="row">{candidate.rank}</th>
-                          <td>{candidate.floorHeightM} m</td>
+                          <td>{formatMeasure(candidate.floorHeightM)} m</td>
                           <td>{candidate.floorCount}</td>
-                          <td>{candidate.heightM} m</td>
-                          <td>{candidate.footprintAreaM2} m²</td>
-                          <td>{candidate.grossFloorAreaM2} m²</td>
+                          <td>{formatMeasure(candidate.heightM)} m</td>
+                          <td>{formatMeasure(candidate.footprintAreaM2)} m²</td>
+                          <td>{formatMeasure(candidate.grossFloorAreaM2)} m²</td>
                           <td><code title={candidate.candidateReference}>{shortenReference(candidate.candidateReference)}</code></td>
                           <td><button type="button" className="select-candidate" aria-pressed={active} aria-label={`Rank ${candidate.rank} を選択`} onClick={() => setSelection(selectionOf(candidate))}>{active ? "選択中" : "表示"}</button></td>
                         </tr>
@@ -182,12 +189,14 @@ export function SearchResultViewer() {
               </div>
             )}
 
+            <ConstraintUsagePanel model={model} selected={selected} />
+
             {selected ? (
               <section className="candidate-detail" aria-labelledby="footprint-title">
                 <div>
                   <span className="small">Selected candidate</span>
                   <h3 id="footprint-title">Conceptual footprint · Local XY</h3>
-                  <p>Rank {selected.rank} · floor height {selected.floorHeightM} m · GFA {selected.grossFloorAreaM2} m²</p>
+                  <p>Rank {selected.rank} · floor height {formatMeasure(selected.floorHeightM)} m · GFA {formatMeasure(selected.grossFloorAreaM2)} m²</p>
                   <p className="small">exterior ringのみを表示。形状の修復・補間・後退・3D化は行いません。</p>
                 </div>
                 <div className="footprint-frame">
@@ -205,12 +214,12 @@ export function SearchResultViewer() {
                 <table>
                   <caption>Rejected search points · fixed code</caption>
                   <thead><tr><th scope="col">Floor height</th><th scope="col">Code</th></tr></thead>
-                  <tbody>{model.rejections.map((rejection) => <tr key={`${rejection.floorHeightM}-${rejection.code}`}><th scope="row">{rejection.floorHeightM} m</th><td><code>{rejection.code}</code></td></tr>)}</tbody>
+                  <tbody>{model.rejections.map((rejection) => <tr key={`${rejection.floorHeightM}-${rejection.code}`}><th scope="row">{formatMeasure(rejection.floorHeightM)} m</th><td><code>{rejection.code}</code></td></tr>)}</tbody>
                 </table>
               </div>
             ) : null}
 
-            <p className="numeric-note">表示数値はSearch Result由来です。JavaScript Numberによる表示はPython Decimalの正本ではなく、WebでBVE計算を再実行していません。</p>
+            <p className="numeric-note">{ROUNDING_NOTICE}<br />JavaScript NumberはPython Decimalや元JSON数値字句の正本ではありません（D04 OPEN）。</p>
           </div>
         ) : null}
       </div>
