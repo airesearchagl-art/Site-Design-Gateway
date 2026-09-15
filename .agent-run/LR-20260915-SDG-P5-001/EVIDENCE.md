@@ -26,7 +26,7 @@ At 390px requested viewport, controls, 5 rows, initial Rank 1 and SVG remained a
 
 ## Wave 5
 
-Full local checks PASS: Python 763 (Phase 4 baseline 762 + exact-byte fixture gate 1), Web 45 (previous baseline 28 + Phase 5 17), ESLint and TypeScript, Next production build, pip check, public boundary scan over 157 tracked/public-candidate files, and git diff-check. `npm ci` used the unchanged lockfile; no npm or Python dependency changed. The existing Project validation tests remain included and pass.
+Full local checks PASS: Python 763 (Phase 4 baseline 762 + exact-byte fixture gate 1), Web 46 (previous baseline 28 + Phase 5 18), ESLint and TypeScript, Next production build, pip check, public boundary scan over 158 tracked/public-candidate files, and git diff-check. `npm ci` used the unchanged lockfile; no npm or Python dependency changed. The existing Project validation tests remain included and pass.
 
 Eight mutations ran under fresh copies below `.agent-run/.../local/`. The pristine copied Web baseline passed first. Every mutation exited 1 with an assertion/test failure, not setup or collection failure; SHA-256 maps for original affected source/test files matched before and after.
 
@@ -42,3 +42,9 @@ Eight mutations ran under fresh copies below `.agent-run/.../local/`. The pristi
 | M8 fetch/localStorage privacy guard weakened | privacy-contract.test.ts | KILLED |
 
 AGENTS, README, project instructions, architecture, public/private boundary, Web Results contract, ADR 0006 and synthetic CI branch coverage were updated. The Phase 4 Search contract only received the Phase 5 consumer/authority note. Vercel was not touched and D02 remains OPEN / PLATFORM_BLOCKED.
+
+## Wave 6
+
+The first independent review at `7c89c4ba04207c1df643881b042991294e64fac2` found a wide-array memory amplification before the node guard and eight extra EOF blank lines. The traversal was changed to bounded-depth recursive visitation, and a 4,000,003-byte / 2,000,001-element probe now reaches `VIEWER_LIMIT / NOT_CHECKED` under a 128 MiB Node heap. Branch-wide `git diff --check` passes.
+
+At repair head `0c70a2941701e09239e6fa91ee3ac77940aca430`, fresh independent re-verification found no P0/P1 code issue and independently passed Python 763, Web 46 including the memory probe, lint/type, production build, pip check, public boundary 158, fixture exact-byte, dependency/schema immutability, desktop/390px smoke, Clear, SVG/rank selection and zero console errors. Its sole P2 was that this run evidence still recorded Web 45 / boundary 157; those stale counts are corrected in this convergence update. Browser harness restrictions prevented direct Storage/Performance API inspection and local chooser activation during that re-review; the prior local-file smoke, unchanged-resource observation and current static prohibited-API guard remain the available privacy evidence.
