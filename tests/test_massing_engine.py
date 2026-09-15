@@ -114,6 +114,50 @@ def test_final_bcr_cap_guard_survives_faulty_geometry_stage(project_document, no
         engine._validate_candidate(candidate)
 
 
+def test_final_far_cap_guard_survives_faulty_floor_count(project_document, normalized_document, monkeypatch):
+    candidate = replace(make(project_document, normalized_document, floor_height=3), floor_count=8)
+    result = candidate.constraints.result
+    actual = candidate.footprint_area_m2
+    assert actual.is_finite() and 0 < actual <= result.building_coverage.value
+    assert candidate.footprint.is_valid and not candidate.footprint.interiors
+    assert candidate.footprint.equals(candidate.footprint.convex_hull)
+    assert candidate.site.polygon.covers(candidate.footprint)
+    assert candidate.target_footprint_area_m2 == min(
+        Decimal(str(candidate.site.area_m2)), result.building_coverage.value, result.floor_area_ratio.value)
+    assert actual <= candidate.target_footprint_area_m2
+    assert candidate.height_m == 24 < result.height.value
+    assert candidate.gross_floor_area_m2 == actual * 8 > result.floor_area_ratio.value
+    assert candidate.site.source_reference == result.geometry_reference
+    assert type(candidate.floor_count) is int and 1 <= candidate.floor_count <= engine.MAX_FLOORS
+    # Only neutralize floor-count consistency; the final FAR cap must still reject.
+    monkeypatch.setattr(engine, "_floor_count", lambda *args: 8)
+    assert engine._floor_count(result, actual, candidate.floor_height_m) == candidate.floor_count
+    with pytest.raises(MassingError, match="^GEOMETRY_GENERATION_FAILED$"):
+        engine._validate_candidate(candidate)
+
+
+def test_final_height_cap_guard_survives_faulty_floor_count(project_document, normalized_document, monkeypatch):
+    candidate = replace(make(project_document, normalized_document, floor_height=Decimal("4.5")), floor_count=7)
+    result = candidate.constraints.result
+    actual = candidate.footprint_area_m2
+    assert actual.is_finite() and 0 < actual <= result.building_coverage.value
+    assert candidate.footprint.is_valid and not candidate.footprint.interiors
+    assert candidate.footprint.equals(candidate.footprint.convex_hull)
+    assert candidate.site.polygon.covers(candidate.footprint)
+    assert candidate.target_footprint_area_m2 == min(
+        Decimal(str(candidate.site.area_m2)), result.building_coverage.value, result.floor_area_ratio.value)
+    assert actual <= candidate.target_footprint_area_m2
+    assert candidate.gross_floor_area_m2 == actual * 7 < result.floor_area_ratio.value
+    assert candidate.height_m == Decimal("31.5") > result.height.value
+    assert candidate.site.source_reference == result.geometry_reference
+    assert type(candidate.floor_count) is int and 1 <= candidate.floor_count <= engine.MAX_FLOORS
+    # Only neutralize floor-count consistency; the final height cap must still reject.
+    monkeypatch.setattr(engine, "_floor_count", lambda *args: 7)
+    assert engine._floor_count(result, actual, candidate.floor_height_m) == candidate.floor_count
+    with pytest.raises(MassingError, match="^GEOMETRY_GENERATION_FAILED$"):
+        engine._validate_candidate(candidate)
+
+
 def test_metrics_and_export_independent_of_ambient_context(project_document, normalized_document):
     original = make(project_document, normalized_document, "4.00000000000000000000001")
     baseline = candidate_bytes(original)

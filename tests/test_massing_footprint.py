@@ -45,6 +45,21 @@ def test_containment_postcondition_rejects_small_outside_footprint():
         engine._check_footprint(site, outside, Decimal(100))
 
 
+def test_containment_rejects_partial_overlap_despite_intersection():
+    site = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
+    partial_outside = Polygon([(9, 1), (11, 1), (11, 3), (9, 3)])
+    target = Decimal(100)
+    assert site.intersects(partial_outside)
+    assert not site.covers(partial_outside)
+    assert partial_outside.is_valid and not partial_outside.interiors
+    assert partial_outside.equals(partial_outside.convex_hull)
+    assert math.isfinite(partial_outside.area) and 0 < Decimal(str(partial_outside.area)) < target
+    assert all(len(point) == 2 and all(math.isfinite(value) for value in point)
+               for point in partial_outside.exterior.coords)
+    with pytest.raises(MassingError, match="^GEOMETRY_GENERATION_FAILED$"):
+        engine._check_footprint(site, partial_outside, target)
+
+
 def test_strict_cap_no_epsilon():
     site = Polygon([(0, 0), (10, 0), (10, 10), (0, 10)])
     with pytest.raises(MassingError, match="^GEOMETRY_GENERATION_FAILED$"):
