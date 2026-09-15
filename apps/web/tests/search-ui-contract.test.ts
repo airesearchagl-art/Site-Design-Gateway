@@ -59,8 +59,11 @@ test("Web source has no input network, persistence or realtime capability", () =
     /\blocalStorage\b/,
     /\bsessionStorage\b/,
     /\bindexedDB\b/,
+    /\bcaches\b/,
+    /\bCacheStorage\b/,
     /\bWebSocket\b/,
     /\bEventSource\b/,
+    /\bconsole\s*(?:\.|\[)/,
   ]) {
     assert.doesNotMatch(source, forbidden);
   }

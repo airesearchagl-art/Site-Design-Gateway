@@ -67,4 +67,10 @@ jobs:
       - run: npm run lint
       - name: Web tests (no assertion payloads in CI log)
         run: npm run test:ci --workspace @sdg/web
+      - name: Search resource regressions (128 MiB heap; summary only)
+        run: |
+          node --max-old-space-size=128 --experimental-strip-types apps/web/tests/search-resource-probe.ts wide4
+          node --max-old-space-size=128 --experimental-strip-types apps/web/tests/search-resource-probe.ts wide6
+          node --max-old-space-size=128 --experimental-strip-types apps/web/tests/search-resource-probe.ts wide8
+          node --max-old-space-size=128 --experimental-strip-types apps/web/tests/search-resource-probe.ts deep6
       - run: npm run build

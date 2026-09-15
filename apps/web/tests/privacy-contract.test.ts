@@ -14,8 +14,11 @@ test("privacy guard explicitly covers every prohibited browser capability", () =
     "localStorage",
     "sessionStorage",
     "indexedDB",
+    "caches",
+    "CacheStorage",
     "WebSocket",
     "EventSource",
+    "console",
   ]) {
     assert.ok(guard.includes(token), `privacy guard missing ${token}`);
   }

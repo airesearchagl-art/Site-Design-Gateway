@@ -22,6 +22,12 @@ viewer state は `EMPTY`、`LOADING`、`DISPLAYABLE`、`INVALID`、`VIEWER_LIMIT
 上限は 8 MiB。超過時は bytes を読まず `VIEWER_LIMIT` とし、Search Result 自体を `INVALID` と呼ばない。
 拡張子、UTF-8、JSON 構文、nesting depth と Schema をブラウザ内で検証する。silent truncation はしない。
 
+JSON.parseの前にraw textを1回走査し、値の出現数250,000・root depth 0からの深さ64を確認する。
+文字列内の記号やobject keyは数えず、重複keyで後から上書きされる値も割当予算として数える。
+stackは深さ上限に比例する大きさだけを保持し、token列・object graphを作らない。
+予算超過は直ちにVIEWER_LIMIT / NOT_CHECKEDとし、parseしない。構文判定はJSON.parseに委ねる。
+parse後にも同じnode/depth上限を防御として確認する。byte上限8 MiBと表示・semantic境界は変更しない。
+
 ## Schema 境界
 
 正本は `schemas/sdg-search-result-v0.1.schema.json`。Ajv の offline registry へ Project、Geometry、

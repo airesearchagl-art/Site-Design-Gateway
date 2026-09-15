@@ -1,5 +1,10 @@
 # Evidence
 
+Current continuation: see FOCUSED_SAFETY_REPAIR.md. Independent FULL Review of the original Draft
+found a 6 MB bounded-input OOM and missing Cache API regression coverage. That review and the later
+focused repair supersede the historical verifier verdicts below; the historical entries are preserved.
+The former Cache guard proof and body-only responsive conclusion are corrected in that record.
+
 Only executed checks may be marked PASS. Private paths, runtime results and raw logs remain ignored.
 
 ## Wave 0

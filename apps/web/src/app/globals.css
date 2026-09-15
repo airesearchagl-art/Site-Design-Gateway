@@ -92,6 +92,7 @@ code { overflow-wrap: anywhere; font-family: Consolas, monospace; font-size: 12p
 .strategy-list dt { color: var(--muted); font-size: 11px; }
 .strategy-list dd { display: flex; flex-direction: column; margin: 4px 0 0; }
 .strategy-list dd span { color: var(--muted); font-size: 12px; }
+.candidate-table { position: relative; }
 .candidate-table table { min-width: 980px; }
 .candidate-table tbody tr { transition: background .12s ease; }
 .selected-row { background: #edf6f1; }

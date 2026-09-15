@@ -5,9 +5,12 @@ import test from "node:test";
 import sample from "../../../cases/example-urban-office/search-result.json" with { type: "json" };
 import {
   MAX_SEARCH_BYTES,
+  MAX_SEARCH_DEPTH,
+  MAX_SEARCH_NODES,
   validateSearchFile,
   validateSearchJson,
 } from "../src/lib/search-validation.ts";
+import { searchTextWithinResources } from "../src/lib/search-resource-preflight.ts";
 
 function changed(mutator: (value: typeof sample) => void): string {
   const value = structuredClone(sample);
@@ -78,15 +81,104 @@ test("viewer byte and depth limits stay distinct from schema invalid", () => {
   assert.equal(deeplyNested.schema, "NOT_CHECKED");
 });
 
-test("wide input reaches the node limit under a 128 MiB heap", () => {
-  const probe = fileURLToPath(new URL("search-resource-probe.ts", import.meta.url));
-  const execution = spawnSync(
-    process.execPath,
-    ["--max-old-space-size=128", "--experimental-strip-types", probe],
-    { encoding: "utf8", timeout: 30_000 },
-  );
-  assert.equal(execution.status, 0, execution.stderr);
-  assert.equal(execution.stdout.trim(), "PASS");
+for (const kind of ["wide4", "wide6", "wide8", "deep6"]) {
+  test(`${kind} input is rejected before parsing under a 128 MiB heap`, () => {
+    const probe = fileURLToPath(new URL("search-resource-probe.ts", import.meta.url));
+    const execution = spawnSync(
+      process.execPath,
+      ["--max-old-space-size=128", "--experimental-strip-types", probe, kind],
+      { encoding: "utf8", timeout: 30_000 },
+    );
+    assert.equal(execution.status, 0, execution.stderr);
+    assert.equal(execution.stdout.trim(), "PASS");
+  });
+}
+
+test("raw resource rejection precedes JSON.parse for node and depth budgets", (t) => {
+  const parse = t.mock.method(JSON, "parse");
+  for (const input of [
+    `[${"0,".repeat(MAX_SEARCH_NODES - 1)}0]`,
+    "[".repeat(MAX_SEARCH_DEPTH + 1) + "0" + "]".repeat(MAX_SEARCH_DEPTH + 1),
+  ]) {
+    const result = validateSearchJson(input);
+    assert.equal(result.state, "VIEWER_LIMIT");
+    assert.equal(result.schema, "NOT_CHECKED");
+  }
+  assert.equal(parse.mock.callCount(), 0);
+});
+
+test("node budget counts root and values but not object keys", () => {
+  for (const count of [MAX_SEARCH_NODES - 1, MAX_SEARCH_NODES, MAX_SEARCH_NODES + 1]) {
+    const array = `[${"0,".repeat(count - 2)}0]`;
+    const object = `{${Array.from({ length: count - 1 }, (_, index) => `"k${index}":0`).join(",")}}`;
+    for (const input of [array, object]) {
+      assert.equal(searchTextWithinResources(input, MAX_SEARCH_DEPTH, MAX_SEARCH_NODES), count <= MAX_SEARCH_NODES);
+      const result = validateSearchJson(input);
+      assert.equal(result.state, count <= MAX_SEARCH_NODES ? "INVALID" : "VIEWER_LIMIT");
+      if (count <= MAX_SEARCH_NODES) assert.equal(result.issues[0].message, "Search Result Schemaに適合しません。");
+    }
+  }
+});
+
+test("preflight and parsed depth agree at root zero and depth 64", () => {
+  for (const depth of [0, MAX_SEARCH_DEPTH, MAX_SEARCH_DEPTH + 1]) {
+    for (const pair of [["[", "]"], ['{"k":', "}"]]) {
+      for (const leaf of ["0", '"value"', "null", "{}", "[]"]) {
+        const input = pair[0].repeat(depth) + leaf + pair[1].repeat(depth);
+        assert.equal(searchTextWithinResources(input, MAX_SEARCH_DEPTH, MAX_SEARCH_NODES), depth <= MAX_SEARCH_DEPTH);
+        assert.equal(validateSearchJson(input).state, depth <= MAX_SEARCH_DEPTH ? "INVALID" : "VIEWER_LIMIT");
+      }
+    }
+  }
+});
+
+test("resource scanner ignores string structure, escaped quotes and backslashes", () => {
+  const strings = [",,,:", "[]{}:".repeat(100), 'abc\\\"[,]{}', "\\\\", "日本語🌱", 'a\\\\\"b'];
+  for (const value of strings) {
+    for (const input of [JSON.stringify(value), JSON.stringify({ [value]: value }), JSON.stringify([value])]) {
+      assert.equal(searchTextWithinResources(input, 1, 2), true);
+      assert.equal(searchTextWithinResources(input, 1, 1), !input.startsWith("{") && !input.startsWith("["));
+    }
+  }
+  const largeString = JSON.stringify("[],{}:".repeat(500_000));
+  assert.equal(searchTextWithinResources(largeString, 0, 1), true);
+  assert.equal(validateSearchJson(largeString).state, "INVALID");
+});
+
+test("duplicate member occurrences consume preflight budget before overwriting", () => {
+  assert.equal(searchTextWithinResources('{"k":0,"k":1}', 1, 3), true);
+  assert.equal(searchTextWithinResources('{"k":0,"k":1}', 1, 2), false);
+});
+
+test("preflight leaves below-budget malformed syntax to JSON.parse", (t) => {
+  const parse = t.mock.method(JSON, "parse");
+  const inputs = ['{"k":}', "[0,]", "[", '"unterminated', "{]", "true false", "", '"\\uZZZZ"'];
+  for (const input of inputs) {
+    const result = validateSearchJson(input);
+    assert.equal(result.state, "INVALID");
+    assert.equal(result.issues[0].keyword, "syntax");
+  }
+  assert.equal(parse.mock.callCount(), inputs.length);
+});
+
+test("manageable input at and just under the byte limit retains EOF whitespace", async () => {
+  const text = JSON.stringify(sample);
+  for (const size of [MAX_SEARCH_BYTES - 1, MAX_SEARCH_BYTES]) {
+    const input = text + " ".repeat(size - Buffer.byteLength(text) - 4) + "\t\r\n\n";
+    const file = new File([input], "boundary.json");
+    assert.equal(file.size, size);
+    assert.equal((await validateSearchFile(file)).state, "DISPLAYABLE");
+  }
+});
+
+test("actual-buffer limit precedes UTF-8 decoding when reported size is small", async () => {
+  const result = await validateSearchFile({
+    name: "search.json",
+    size: 1,
+    arrayBuffer: async () => new Uint8Array(MAX_SEARCH_BYTES + 1).fill(0xff).buffer,
+  });
+  assert.equal(result.state, "VIEWER_LIMIT");
+  assert.equal(result.schema, "NOT_CHECKED");
 });
 
 test("malformed JSON and non-finite parsing stay invalid with generic diagnostics", () => {

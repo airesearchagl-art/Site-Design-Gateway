@@ -1,4 +1,5 @@
 import Ajv2020 from "ajv/dist/2020.js";
+import { searchTextWithinResources } from "./search-resource-preflight.ts";
 import projectSchema from "../../../../schemas/sdg-project-v0.1.schema.json" with { type: "json" };
 import geometrySchema from "../../../../schemas/sdg-site-geometry-v0.1.schema.json" with { type: "json" };
 import constraintSchema from "../../../../schemas/sdg-constraint-result-v0.1.schema.json" with { type: "json" };
@@ -90,7 +91,12 @@ function inspectResources(value: unknown): SearchValidationResult | null {
     if (typeof item === "number" && !Number.isFinite(item)) {
       return failure("INVALID", "number", "数値は有限の値にしてください。");
     }
-    if (item !== null && typeof item === "object") {
+    if (Array.isArray(item)) {
+      for (let index = 0; index < item.length; index += 1) {
+        const childFailure = visit(item[index], depth + 1);
+        if (childFailure) return childFailure;
+      }
+    } else if (item !== null && typeof item === "object") {
       for (const key in item) {
         if (!Object.hasOwn(item, key)) continue;
         const child = (item as Record<string, unknown>)[key];
@@ -107,6 +113,9 @@ function inspectResources(value: unknown): SearchValidationResult | null {
 export function validateSearchJson(text: string): SearchValidationResult {
   if (new TextEncoder().encode(text).byteLength > MAX_SEARCH_BYTES) {
     return failure("VIEWER_LIMIT", "maxBytes", "このファイルは8 MiBのviewer上限を超えています。");
+  }
+  if (!searchTextWithinResources(text, MAX_SEARCH_DEPTH, MAX_SEARCH_NODES)) {
+    return failure("VIEWER_LIMIT", "viewerResource", "表示用JSONの入れ子または要素数が上限を超えています。");
   }
   let value: unknown;
   try {

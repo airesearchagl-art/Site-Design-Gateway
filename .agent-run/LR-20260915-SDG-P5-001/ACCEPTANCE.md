@@ -1,5 +1,9 @@
 # Acceptance
 
+The checklist below records the original Draft checkpoint. Current acceptance is superseded by
+the independent FULL Review and FOCUSED_SAFETY_REPAIR.md. Required repair regression/mutation
+checks are executed there; new exact-head CI and Human Focused Independent Re-Review are separate gates.
+
 - [x] Exact merged base and dedicated feature branch; private exact packet SHA-256 binding.
 - [x] Existing Project validation is preserved.
 - [x] Canonical synthetic Search Result fixture and Python exact-byte gate.
