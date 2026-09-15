@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:massing-candidate:0.1",
+  "title": "SDG constraint-bounded conceptual massing candidate v0.1",
+  "description": "One baseline candidate. Not legal buildability or optimization. Semantic validation is required in the generator.",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "inputReferences", "generator", "constraintCaps", "candidate"],
+  "properties": {
+    "schemaVersion": {"const": "0.1"},
+    "inputReferences": {
+      "type": "object", "additionalProperties": false,
+      "required": ["project", "geometry", "constraints"],
+      "properties": {
+        "project": {"$ref": "urn:sdg:constraint-result:0.1#/$defs/reference"},
+        "geometry": {"$ref": "urn:sdg:constraint-result:0.1#/$defs/reference"},
+        "constraints": {"$ref": "urn:sdg:constraint-result:0.1#/$defs/reference"}
+      }
+    },
+    "generator": {
+      "type": "object", "additionalProperties": false,
+      "required": ["strategy", "footprintMethod", "floorHeightM", "floorHeightStatus"],
+      "properties": {
+        "strategy": {"const": "max_footprint_stack_v0.1"},
+        "footprintMethod": {"const": "convex_homothetic_footprint_v0.1"},
+        "floorHeightM": {"$ref": "#/$defs/positive"},
+        "floorHeightStatus": {"const": "user_provided"}
+      }
+    },
+    "constraintCaps": {
+      "type": "object", "additionalProperties": false,
+      "required": ["maxFootprintAreaM2", "maxTotalFloorAreaM2", "maxHeightM"],
+      "properties": {
+        "maxFootprintAreaM2": {"$ref": "#/$defs/positive"},
+        "maxTotalFloorAreaM2": {"$ref": "#/$defs/positive"},
+        "maxHeightM": {"$ref": "#/$defs/positive"}
+      }
+    },
+    "candidate": {
+      "type": "object", "additionalProperties": false,
+      "required": ["footprint", "targetFootprintAreaM2", "footprintAreaM2", "floorCount", "heightM", "grossFloorAreaM2", "reviewRequired"],
+      "properties": {
+        "footprint": {
+          "$ref": "urn:sdg:site-geometry:0.1#/properties/geometry",
+          "properties": {"coordinates": {"maxItems": 1, "items": {"maxItems": 100000}}}
+        },
+        "targetFootprintAreaM2": {"$ref": "#/$defs/positive"},
+        "footprintAreaM2": {"$ref": "#/$defs/positive"},
+        "floorCount": {"type": "integer", "minimum": 1, "maximum": 10000},
+        "heightM": {"$ref": "#/$defs/positive"},
+        "grossFloorAreaM2": {"$ref": "#/$defs/positive"},
+        "reviewRequired": {"type": "boolean"}
+      }
+    }
+  },
+  "$defs": {"positive": {"type": "number", "exclusiveMinimum": 0}}
+}

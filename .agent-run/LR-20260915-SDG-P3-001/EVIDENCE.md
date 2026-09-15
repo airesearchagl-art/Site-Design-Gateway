@@ -10,3 +10,10 @@ Phase 2 merge and Human Phase 3 exception are explicit in the packet. Prior clos
 confirmed Git Integration DISCONNECTED and no live deployment/domain; no Vercel
 operation repeated here. Public records omit private paths and deployment URLs.
 Implementation/tests not yet claimed PASS. Historical Phase 0/1/2 records retained.
+
+## Wave 1
+
+- Added Massing contract/schema/ADR and immutable Constraint Result consumer.
+- Reused Phase 2 computation path; existing 49 engine/provenance tests PASS.
+- New reader checks: 6 PASS (roundtrip/canonical hash, three derived tamper cases, extreme derived decimal).
+- No candidate generation or final integration PASS claimed at this checkpoint.
