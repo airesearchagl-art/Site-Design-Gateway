@@ -9,3 +9,7 @@ Fresh GitHub PR 4 MERGED with squash commit 6869e9e521d6ba490e82e1ca503e274cfd82
 ## Wave 1
 
 Search contract, reused offline schema references and ADR 0005 defined. Offline Search schema construction PASS. Implementation and acceptance tests pending.
+
+## Wave 2
+
+Phase 3 scalar parser exposed without behavior changes. New search input tests and all four massing test modules PASS (130 selected cases). Missing/65+/numeric duplicate/invalid scalar boundaries exercised.
