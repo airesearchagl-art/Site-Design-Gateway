@@ -13,3 +13,7 @@ Search contract, reused offline schema references and ADR 0005 defined. Offline 
 ## Wave 2
 
 Phase 3 scalar parser exposed without behavior changes. New search input tests and all four massing test modules PASS (130 selected cases). Missing/65+/numeric duplicate/invalid scalar boundaries exercised.
+
+## Wave 3
+
+Serial sweep reuses Phase 3 generator once per canonical point. Candidate canonical SHA-256 and duplicate identity guard added. Shared validation is outside the two-code per-point whitelist. Search input/sweep tests: 45 PASS, including synthetic, mixed, zero and actual resource limit.
