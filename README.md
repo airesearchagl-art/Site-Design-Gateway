@@ -3,8 +3,8 @@
 CAD上で一案ずつ試す初期検討から、入力条件・制約・計算根拠・候補比較を明示した
 再現可能な探索へ進めるWeb Gatewayです。計算主体はBVE Core（Buildable Volume Engine）です。
 
-Current Phase = Phase 2 Constraint Engine Foundation。共通JSON Schemaによる案件条件検証と
-Phase 1 Geometryを維持し、明示した面積basisからBCR/FAR/heightの上限と出典を計算します。
+Current Phase = Phase 3 Massing Candidate Foundation。共通JSON Schema、Geometry、Constraintsを維持し、
+検証済み敷地と上限・明示階高から、敷地内でcapを超えないconceptual candidateを1案生成します。
 Webは従来のプロンプトコピー、合成サンプル・JSON読込、構文・Schema・出典状態確認を提供します。
 
 ## ローカルで開始する
@@ -98,11 +98,11 @@ synthetic fixtureは両形式とも200 m2、面積差0です。WebにはGeometry
 - README、開発指示、ignore 設定、空の環境変数サンプル、境界文書、ADR、合成データ専用 CI、再開用 Run 記録。
 - DXF / PDF は無効なプレースホルダーのみ。成果物は Draft PR まで。
 
-Phase 1でPython Geometry Foundationを追加しました。マッシング、検索、本番法規rulepack、認証、
+Phase 1でPython Geometry Foundationを追加しました。検索、本番法規rulepack、認証、
 保存・DB、CAD/BIM連携、最適化、Web compute APIは範囲外です。Run Packageは文書上の契約検討に留めます。
 
-Phase 0/1は独立レビューとHuman承認後にmerge済みです。今回の出口はPhase 2のDraft PRです。
-作成直後にSTOPし、Ready、merge、Vercel deploy、Production、Phase 3へ進みません。
+Phase 0〜2は独立レビューとHuman承認後にmerge済みです。今回の出口はPhase 3のDraft PRです。
+作成直後にSTOPし、Ready、merge、Vercel操作、Production、Phase 4へ進みません。
 過去のADR・Run記録は維持します。
 
 ## Phase 2 Constraint Engine
@@ -127,9 +127,28 @@ BCR/FAR/heightのnullは個別にUNAVAILABLE、heightの欠落はABSENTとして
 **計算成功は法規確認・建築可能性証明ではありません。** WebとPythonは引き続き接続しません。
 [Constraint契約/API/CLI](docs/constraint-contract.md)と[ADR 0003](docs/adr/0003-constraint-engine-foundation.md)を参照してください。
 
-Next Gate: **Vercel Preview Smoke — REQUIRED BEFORE PHASE 3**。
-Phase 2 merge後の別RunでPreviewのpage load・synthetic判定・390px・console/network/storage境界を
-確認します。このPhase 2 PRではdeployしません。既存認証/linkのみ利用し、credential/権限等の変更はHuman Gateです。
+旧条件は「Vercel Preview Smoke required before Phase 3」でした。
+SDG-VP-001は **BLOCKED_EXTERNAL**、D02は **OPEN / PLATFORM_BLOCKED**。
+CLIとGit接続UIの独立2経路でPreviewを意図しましたが、実metadataがProductionに分類され、両deploymentを削除しました。
+直前closureでGit Integration DISCONNECTED、deployments0、latestDeployment null、live false、domains0を確認済み。
+Humanの **Phase 3 transition exception = AUTHORIZED** により進行します。Preview PASSではありません。
+Phase 3ではVercelを操作しません。原因特定・公式の安全経路確認・新strategy設計後、またはProduction直前に別途fresh auditします。
+
+## Phase 3 Massing Candidate
+
+上記のnormalized GeometryとConstraint出力を使い、階高を明示します。4mは架空synthetic設計値です。
+
+```sh
+python -m bve.massing --geometry runtime-data/normalized-site.geojson --constraints runtime-data/constraints.json --floor-height-m 4 --output runtime-data/massing.json
+```
+
+固定strategy `max_footprint_stack_v0.1`、凸・穴なし敷地のcentroid中心一様縮小と整数階stackです。
+Constraintはprovenanceから再計算し、Geometry hash一致を確認します。敷地・BCR・FARからfootprint targetを選び、
+actual面積と全cap・包含を最後に検証します。syntheticでは7階・高さ28m・footprint<=160m2・GFA約1120m2です。
+階高省略、利用不能constraint、改変結果、hash不一致、凹敷地・穴付きは拒否します。
+これは **constraint-bounded conceptual massing candidate** です。法規後退・斜線等は未計算で、最適化も行いません。
+Web表示・3D・複数案探索は対象外。CLIの出力は件数/判定だけで、形状は明示新規fileにのみ保存します。
+[Massing契約](docs/massing-contract.md)と[ADR 0004](docs/adr/0004-baseline-massing-candidate.md)を参照してください。
 
 ## Vercel のビルド構成
 

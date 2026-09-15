@@ -5,6 +5,6 @@
 - [x] Wave 2: Constraint semantic integrity and geometry reference binding.
 - [x] Wave 3: Convex homothetic footprint and strict post-validation.
 - [x] Wave 4: Floor stack, immutable candidate, deterministic export, safe CLI.
-- [ ] Wave 5: Synthetic/adversarial integration, mutation probes, CI and docs.
+- [x] Wave 5: Synthetic/adversarial integration, mutation probes, CI and docs.
 - [ ] Wave 6: Convergence, independent verification, final local checkpoint.
 - [ ] Delivery: exact-head push CI PASS, Draft PR, immediate STOP.

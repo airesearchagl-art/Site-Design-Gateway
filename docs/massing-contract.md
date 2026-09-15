@@ -23,6 +23,8 @@ Required statesはbuildingCoverage / floorAreaRatio / heightすべてCOMPUTED。
 UNAVAILABLE / ABSENTは `REQUIRED_CONSTRAINT_UNAVAILABLE`。
 階高は明示finite >0 meterの設計入力。未指定は `FLOOR_HEIGHT_REQUIRED`、不正は `INVALID_FLOOR_HEIGHT`。
 statusは固定 `user_provided`。既定値・法規値への昇格・Project schema変更はない。
+Python APIはstr/int/float/Decimalを受け、floatはstr経由でDecimal化する。boolは拒否。
+数値文字列はASCII decimal/scientific表記のみ、係数1024桁・指数絶対値1024まで。空白・単位suffixは拒否する。
 
 ## 固定アルゴリズム
 
@@ -63,6 +65,7 @@ python -m bve.massing --geometry runtime-data/normalized-site.geojson --constrai
 output省略時は検証とsummaryだけ。成功は `PASS floors=N reviewRequired=true|false`、
 失敗は `FAIL code=<fixed code>`。座標・入力値全文・path・filename・raw exception/argsを表示しない。
 Web接続、runtime upload、保存サービス、telemetry、新dependencyは追加しない。
+OS書込障害時はIO_ERRORで停止し、部分fileが残る可能性がある。既存出力を再試行で上書きしない。
 
 synthetic floorHeight=4は架空設計値。site200、target160、actual<=160、7階、28m、GFA約1120<=1200、
 height<=31、敷地内、reviewRequired=trueを期待する。actualを160へ丸め直さない。

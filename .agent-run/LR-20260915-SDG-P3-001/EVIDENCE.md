@@ -39,3 +39,35 @@ Implementation/tests not yet claimed PASS. Historical Phase 0/1/2 records retain
   resource limit, ambient Decimal isolation, exclusive I/O, fixed diagnostics and hash-seed determinism.
 - Pipeline output bytes identical for seeds 1/23/997 and three seed-23 repetitions.
 - Output schema uses offline references to the unchanged Geometry/Constraint contracts.
+
+## Wave 5
+
+- Full Python: 638 PASS = existing 492 + Phase 3 146. Web: 28 PASS.
+- npm lint (ESLint + tsc), npm build, pip check, public boundary and git diff --check PASS.
+- Existing Project/Geometry/Constraint schemas, Web sources/tests and dependency manifests unchanged.
+- Synthetic actual Shapely area 160.0 m2 (not rounded to target), target160, floors7,
+  floorHeight4, height28, GFA1120.0, caps160/1200/31, inside=true, reviewRequired=true.
+- Shapely2.1.2 / GEOS3.13.1; candidate SHA-256
+  bb37010bbae5fe9f4b85fdb2b08f28c4a129c7df3fb1ee1d53756614b53d84aa.
+- CI extended with Phase 3 branch trigger and synthetic massing CLI; no Vercel job.
+- Current-phase docs updated with the Human exception and retained two-attempt failure history.
+
+### Isolated mutation verification
+
+Every probe ran its selected test baseline PASS in a fresh copy, confirmed imports
+from that copy, applied one mutation, and observed pytest assertion failure (KILLED).
+Original source/test/schema SHA-256 map unchanged. No mutation touched the working source.
+
+| Mutation | Oracle | Result |
+| --- | --- | --- |
+| Remove Geometry reference check | same shape/area/bounds with different input bytes | KILLED |
+| Remove final maxFootprint cap check | faulty geometry-stage actual area161 with other caps fitting | KILLED |
+| Remove site.covers | small outside footprint with area below target | KILLED |
+| Remove concavity rejection | unsupported-site fixed-code contract | KILLED |
+| Default floorHeight=4 | missing public API design input | KILLED |
+| floor to ceil | independent Fraction floor oracle | KILLED |
+| reviewRequired to false | synthetic inherited review flag | KILLED |
+| Bypass semantic comparison | schema-valid derived cap tampering | KILLED |
+
+Hosted state is carried from prior closure, not rechecked in Phase 3. No Vercel
+operation/deployment triggered by this agent. GitHub CI observation remains pending.

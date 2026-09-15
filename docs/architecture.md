@@ -1,7 +1,7 @@
 # アーキテクチャ
 
-Current Phase = Phase 2 Constraint Engine Foundation。WebとPythonは同じSDG Project JSON Schemaを
-使う独立したクライアントです。PythonのGeometry/ConstraintsとWebはAPIで接続しません。
+Current Phase = Phase 3 Massing Candidate Foundation。WebとPythonは同じSDG Project JSON Schemaを
+使う独立したクライアントです。PythonのGeometry/Constraints/MassingとWebはAPIで接続しません。
 
 ```text
 生成用プロンプト → ユーザーがコピー
@@ -68,9 +68,25 @@ Phase 0ではサービスもBridgeも接続しません。
 
 Phase 0では幾何計算・DXF読込も対象外でした。過去のADRとRun記録は当時の判断として保持します。
 現在も法規計算、自治体固有処理、実案件固有処理、DXF / PDF出力、CAD/BIM連携、Web compute接続は対象外です。
-WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel deploy、Production、Phase 3、
+WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 4、
 Vault/Notion直接更新は行いません。
 
-Next Gate: Vercel Preview Smoke — REQUIRED BEFORE PHASE 3。Phase 2 merge後の別Runで扱います。
+## Phase 3 Massing
+
+```text
+Normalized Geometry → Geometry再検証 + exact bytes hash
+Constraint Result → schema + Phase 2計算経路で再計算 → immutable validated result + canonical hash
+  → Geometry hash/area/status binding + explicit floor height
+  → convex homothetic footprint → integer floor stack → all caps/containment検証
+  → 1 conceptual candidate → 明示新規JSON出力
+```
+
+既存3schemaは維持しCandidate schemaを追加。Phase 1のnormalize/orientとPhase 2の計算・Decimal encoderを共有する。
+floorはGeneratorの整数階離散化。法規丸め・後退・3D・探索・ランキング・Web接続は実装しない。
+詳細は[Massing契約](massing-contract.md)と[ADR 0004](adr/0004-baseline-massing-candidate.md)。
+
+旧Preview必須GateはSDG-VP-001 BLOCKED_EXTERNAL、D02 OPEN / PLATFORM_BLOCKED。
+Previewを意図した2経路がProduction分類され両deployment削除済み。直前closureでGit切断とdeployment/domain0を確認。
+HumanのPhase 3 transition exception = AUTHORIZED。Phase 3ではVercel操作・再試行をしない。
 
 [公開・非公開データの境界](public-private-data-boundary.md) と [採用判断の ADR](adr/0001-monorepo-and-contract-boundary.md) を併せて参照してください。
