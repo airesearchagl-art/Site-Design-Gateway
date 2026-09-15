@@ -17,3 +17,10 @@ Implementation/tests not yet claimed PASS. Historical Phase 0/1/2 records retain
 - Reused Phase 2 computation path; existing 49 engine/provenance tests PASS.
 - New reader checks: 6 PASS (roundtrip/canonical hash, three derived tamper cases, extreme derived decimal).
 - No candidate generation or final integration PASS claimed at this checkpoint.
+
+## Wave 2
+
+- Reader and Massing input checks: 82 PASS after correcting a no-op review mutation fixture.
+- Covered semantic/schema tampering, unavailable/absent states, strict JSON resources,
+  exact Geometry reference mismatch at identical area/bounds, status binding and explicit floor height.
+- Only validated immutable Constraint Result objects cross the Massing input boundary.

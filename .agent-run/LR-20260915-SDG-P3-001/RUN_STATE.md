@@ -1,8 +1,8 @@
 # Run state
 
 - State: IN_PROGRESS
-- Last completed wave: 1 (carrying checkpoint identified by git log)
-- Next: Wave 2 semantic adversarial checks and input binding.
+- Last completed wave: 2 (carrying checkpoint identified by git log)
+- Next: Wave 3 convex homothetic footprint generation.
 - Branch: feat/phase3-massing-candidate-foundation
 - Exact base: 62529f4d3d92a03f02404f53434ea750adbb317e
 - Packet revision 1 SHA-256: 67ccd7881329c13616437f3e124cdfe2e095d5926e89de5cb10bfd879af0152a
