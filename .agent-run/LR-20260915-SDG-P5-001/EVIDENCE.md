@@ -13,3 +13,7 @@ The complete current Python CLI pipeline generated `cases/example-urban-office/s
 ## Wave 2
 
 Search validation tests cover the canonical shared-schema registry, six contract tamper classes, extension, 8 MiB pre-read and actual-buffer limits, malformed UTF-8/BOM/JSON, depth overflow, non-finite values, read errors and raw-value suppression. Pure view tests cover five accepted candidates, zero/mixed rejection results, preserved order, exact rank/reference lookup, exterior-ring Local XY rendering and degenerate/non-finite fallback. Full Web checks remain for later waves.
+
+## Wave 3
+
+The production UI compiles with STEP 03 and explicit EMPTY / LOADING / DISPLAYABLE / INVALID / VIEWER_LIMIT states. Web 38 tests, ESLint/TypeScript and Next production build PASS. React review found no effects, server data flow, nested component definitions or persistence; async file races are cancelled by request identity. Browser interaction and responsive smoke remain pending.

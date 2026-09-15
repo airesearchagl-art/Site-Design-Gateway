@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Site Design Gateway",
-  description: "建築初期検討のProject JSONと出典状態を確認するGateway。",
+  description: "建築初期検討のProject JSONとローカルSearch Resultをブラウザ内で確認するGateway。",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
