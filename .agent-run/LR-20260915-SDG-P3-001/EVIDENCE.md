@@ -71,3 +71,30 @@ Original source/test/schema SHA-256 map unchanged. No mutation touched the worki
 
 Hosted state is carried from prior closure, not rechecked in Phase 3. No Vercel
 operation/deployment triggered by this agent. GitHub CI observation remains pending.
+
+## Wave 6 independent verification
+
+Independent Verifier PASS / no Required fix on implementation head
+d32cb50fceeb8f6eb5b592eb451804c753c3ad27. Exact packet hash matched and tree was clean.
+Final checkpoint only adds handoff evidence; source/tests remain that verified implementation.
+
+- 56 individual Constraint Result scalar mutations: all rejected.
+- 240 varied convex-site/cap/floor-height probes: 191 generated candidates passed
+  reloaded-coordinate area/containment, all caps, independent Fraction floors and repeat bytes.
+- 11 GEOMETRY_GENERATION_FAILED and 38 NO_FEASIBLE_MASSING were conservative fixed-code
+  failures; no out-of-site or cap-exceeding candidate was accepted.
+- 15 API/binding/immutability checks and 9 CLI/privacy/exclusive-I/O checks PASS.
+- Explicit 4e0 accepted. Negative scientific notation rejected without disclosure;
+  separated -1e3 is argparse INVALID_ARGUMENTS, equals-form is INVALID_FLOOR_HEIGHT.
+- Old schemas/Web/dependencies unchanged; no Vercel operation by verifier.
+- Verifier did not duplicate parent regression/mutation runs or claim remote CI.
+
+Limits: finite-double geometry may conservatively fail on a valid convex site.
+No cross-version bit identity, source authenticity without original Project, legal
+compliance, real-project verification or hosted Preview PASS is claimed.
+Windows symlink rejection was simulated; OS output errors can leave a partial new file.
+
+Required local checks and convergence are complete. Delivery must observe the
+carrying commit's push CI before Draft creation. Its URL/result and Draft URL are
+recorded in the PR/completion report without another source commit or post-Draft action.
+Human Gate: STOP — Independent Review required after Draft creation.
