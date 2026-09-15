@@ -31,3 +31,11 @@ Implementation/tests not yet claimed PASS. Historical Phase 0/1/2 records retain
 - Convex-only homothety, strict actual-area cap, containment, zero-underflow failure,
   deterministic context independence and exactly bounded 64 downward ULP adjustments verified.
 - Extracted the existing normalize/orient operation as a shared Geometry helper; no repair added.
+
+## Wave 4
+
+- Added immutable Candidate with derived actual metrics, integer stack, export validation and standalone CLI.
+- 41 engine/CLI checks PASS: synthetic 7 floors / 28 m, site/BCR/FAR caps, Fraction floor oracle,
+  resource limit, ambient Decimal isolation, exclusive I/O, fixed diagnostics and hash-seed determinism.
+- Pipeline output bytes identical for seeds 1/23/997 and three seed-23 repetitions.
+- Output schema uses offline references to the unchanged Geometry/Constraint contracts.

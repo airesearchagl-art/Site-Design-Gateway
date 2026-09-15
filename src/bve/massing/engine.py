@@ -14,8 +14,10 @@ from bve.geometry import SiteGeometry
 from bve.geometry.normalization import MAX_POSITIONS, canonical_polygon
 
 from .errors import Code, MassingError
+from .model import MassingCandidate
 
 MAX_SHRINK_ATTEMPTS = 64
+MAX_FLOORS = 10_000
 
 
 def _floor_height(value) -> Decimal:
@@ -102,4 +104,60 @@ def _generate_footprint(site: Polygon, target: Decimal) -> Polygon:
             _check_footprint(site, footprint, target)
             return footprint
     except (GEOSException, RuntimeWarning, OverflowError, ZeroDivisionError, DecimalException):
+        raise MassingError(Code.GEOMETRY_GENERATION_FAILED) from None
+
+
+def _floor_quotient(cap: Decimal, divisor: Decimal) -> int:
+    """Integer ratio division, with no Decimal rounding or float conversion."""
+    numerator, denominator = (Fraction(cap) / Fraction(divisor)).as_integer_ratio()
+    return numerator // denominator
+
+
+def _floor_count(result, actual: Decimal, floor_height: Decimal) -> int:
+    floors = min(_floor_quotient(result.floor_area_ratio.value, actual),
+                 _floor_quotient(result.height.value, floor_height))
+    if floors < 1:
+        raise MassingError(Code.NO_FEASIBLE_MASSING)
+    if floors > MAX_FLOORS:
+        raise MassingError(Code.RESOURCE_LIMIT)
+    return floors
+
+
+def _validate_candidate(candidate: MassingCandidate) -> None:
+    height, result = _validate_inputs(candidate.site, candidate.constraints, candidate.floor_height_m)
+    _require_supported_site(candidate.site.polygon)
+    actual = _check_footprint(candidate.site.polygon, candidate.footprint, candidate.target_footprint_area_m2)
+    # Check each final cap explicitly, even though target selection also bounds
+    # the generated area. These checks protect export and future internal changes.
+    if actual > result.building_coverage.value:
+        raise MassingError(Code.GEOMETRY_GENERATION_FAILED)
+    if candidate.gross_floor_area_m2 > result.floor_area_ratio.value or candidate.height_m > result.height.value:
+        raise MassingError(Code.GEOMETRY_GENERATION_FAILED)
+    expected_target = min(Decimal(str(candidate.site.area_m2)), result.building_coverage.value,
+                          result.floor_area_ratio.value)
+    if (candidate.target_footprint_area_m2 != expected_target or type(candidate.floor_count) is not int
+            or candidate.floor_count != _floor_count(result, actual, height)):
+        raise MassingError(Code.GEOMETRY_GENERATION_FAILED)
+
+
+def generate_massing_candidate(site_geometry, constraint_result, *, floor_height_m=None) -> MassingCandidate:
+    """Return one convex baseline stack; floor height is always explicit."""
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", RuntimeWarning)
+            floor_height, result = _validate_inputs(site_geometry, constraint_result, floor_height_m)
+            _require_supported_site(site_geometry.polygon)
+            target = min(Decimal(str(site_geometry.area_m2)), result.building_coverage.value,
+                         result.floor_area_ratio.value)
+            if target <= 0 or result.floor_area_ratio.value <= 0 or result.height.value <= 0:
+                raise MassingError(Code.NO_MASSING_CAPACITY)
+            footprint = _generate_footprint(site_geometry.polygon, target)
+            actual = Decimal(str(footprint.area))
+            floors = _floor_count(result, actual, floor_height)
+            candidate = MassingCandidate(site_geometry, constraint_result, footprint, target, floors, floor_height)
+            _validate_candidate(candidate)
+            return candidate
+    except DecimalException:
+        raise MassingError(Code.NUMERIC_RANGE) from None
+    except (GEOSException, RuntimeWarning, OverflowError, ZeroDivisionError):
         raise MassingError(Code.GEOMETRY_GENERATION_FAILED) from None
