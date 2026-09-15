@@ -20,7 +20,8 @@ MAX_SHRINK_ATTEMPTS = 64
 MAX_FLOORS = 10_000
 
 
-def _floor_height(value) -> Decimal:
+def parse_floor_height(value) -> Decimal:
+    """Parse one explicit meter value using the Phase 3 numeric limits."""
     if value is None:
         raise MassingError(Code.FLOOR_HEIGHT_REQUIRED)
     if type(value) not in (str, int, float, Decimal):
@@ -39,7 +40,7 @@ def _floor_height(value) -> Decimal:
 
 
 def _validate_inputs(site_geometry, constraint_result, floor_height_m):
-    height = _floor_height(floor_height_m)
+    height = parse_floor_height(floor_height_m)
     if type(site_geometry) is not SiteGeometry or type(constraint_result) is not ValidatedConstraintResult:
         raise MassingError(Code.INVALID_ARGUMENTS)
     site_geometry.__post_init__()

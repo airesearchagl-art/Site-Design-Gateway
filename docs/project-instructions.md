@@ -1,13 +1,13 @@
 # Project instructions
 
 目的は建築初期検討の入力条件と出典状態を明示するWeb Gatewayの最小基盤。
-計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 3 Massing Candidate Foundation。
-Phase 0〜2を維持し、検証済みGeometryとConstraint Resultから明示階高で1つのconceptual candidateを生成する。
+計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 4 Search & Ranking Foundation。
+Phase 0〜3を維持し、検証済みGeometryとConstraint ResultからHuman明示の有限階高集合を逐次評価する。
 
-- Next.js / TypeScriptは入力と検証結果の表示、PythonはProject検証・Geometry・Constraints・Massingを担当する。
+- Next.js / TypeScriptは入力と検証結果の表示、PythonはProject検証・Geometry・Constraints・Massing・Searchを担当する。
 - 単位を暗黙変換しない。面積はm2、比率はpercent、高さはmをschemaで明示する。
   検証成功は法規適合や建築可能性の証明ではない。
-- Phase 3ではProject/Geometry/Constraint schemaを維持し、Massing出力schemaだけを追加する。
+- Phase 4では既存4schemaを維持し、Search出力schemaだけを追加する。
   schemaVersionの変更は互換性判断を伴うためHumanへ相談する。
 - 日本語で簡潔に結果と未確認事項を報告する。UI内へ運用上の実装手順を混ぜない。
 - Runtime dataをpublic fixtureに転用しない。開発・CI・ブラウザ検証もsyntheticのみ。
@@ -25,8 +25,14 @@ Polygon検証はGeometryへ集約する。面積の自動選択・任意threshol
 Massingは凸・穴なし敷地、固定homothetic footprintと同形整数階stackだけ。
 Constraint Resultはschemaと再計算で検証し、Geometry referenceを一致させる。階高の既定値は禁止。
 actual areaを丸めずcapと包含を再確認する。法規適合・後退・最適性を主張しない。
-WebからPythonを呼ばない。探索、3D、本番rulepacks、Run Package、Bridge、API、保存基盤は対象外。
-Draft PR作成後STOP。Ready、merge、Vercel操作、Production、Phase 4、Vault/Notion直接更新は禁止。
+WebからPythonを呼ばない。floorHeight以外の探索、3D、本番rulepacks、Run Package、Bridge、API、保存基盤は対象外。
+Draft PR作成後STOP。Ready、merge、Vercel操作、Production、Phase 5、Vault/Notion直接更新は禁止。
 旧Preview必須GateはSDG-VP-001 BLOCKED_EXTERNAL、D02 OPEN / PLATFORM_BLOCKEDとして切り離された。
 意図しないProduction分類2件は削除済み。Git切断確認後、HumanのPhase 3 transition exception = AUTHORIZED。
 このPhaseではVercelを再検証せず、別Runで原因と安全経路をfresh auditする。
+
+Phase 4 SearchはfloorHeightだけを探索し、Human明示値1..64件を使う。default gridなし、duplicate拒否。
+Phase 3 Generatorを逐次再利用し、GFA降順だけでrankingする。rankingはdesign qualityではない。
+tie-breakは階高昇順/hash昇順でserialization用。footprint探索・optimizer・実法規・weighted scoreはない。
+Search schema、exact candidate hash、partition/rank/summary/reviewのsemantic再検証を追加する。
+Vercel D02はOPEN / PLATFORM_BLOCKEDを維持する。詳細: docs/search-contract.md。

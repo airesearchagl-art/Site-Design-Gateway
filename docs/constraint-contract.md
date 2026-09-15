@@ -1,6 +1,6 @@
 # Constraint Result v0.1
 
-Phase 2で導入、Current Phase = Phase 3 Massing Candidate Foundation。入力済みの面積・BCR・FAR・heightを
+Phase 2で導入した、Phase 3以降のconsumerも再利用する契約。入力済みの面積・BCR・FAR・heightを
 決定論的に変換する独立Python API/CLI。法規確認、行政確認、建築可能性証明ではない。
 Project/Geometry v0.1を改版せず、出力だけを`sdg-constraint-result-v0.1.schema.json`で定義する。
 

@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:search-result:0.1",
+  "title": "SDG explicit floor-height search result v0.1",
+  "description": "GFA ordering only, not design quality, recommendation, optimization or legal verification. Semantic export validation is required.",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "inputReferences", "search", "summary", "rankedCandidates", "rejections"],
+  "properties": {
+    "schemaVersion": {"const": "0.1"},
+    "inputReferences": {"$ref": "urn:sdg:massing-candidate:0.1#/properties/inputReferences"},
+    "search": {
+      "type": "object", "additionalProperties": false,
+      "required": ["strategy", "ranking", "floorHeightsM", "floorHeightStatus"],
+      "properties": {
+        "strategy": {"const": "floor_height_sweep_v0.1"},
+        "ranking": {"const": "maximize_gross_floor_area_v0.1"},
+        "floorHeightsM": {"type": "array", "minItems": 1, "maxItems": 64, "uniqueItems": true, "items": {"$ref": "urn:sdg:massing-candidate:0.1#/$defs/positive"}},
+        "floorHeightStatus": {"const": "user_provided"}
+      }
+    },
+    "summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["evaluated", "accepted", "rejected", "hasFeasibleCandidate", "reviewRequired"],
+      "properties": {
+        "evaluated": {"type": "integer", "minimum": 1, "maximum": 64},
+        "accepted": {"$ref": "#/$defs/count"},
+        "rejected": {"$ref": "#/$defs/count"},
+        "hasFeasibleCandidate": {"type": "boolean"},
+        "reviewRequired": {"type": "boolean"}
+      }
+    },
+    "rankedCandidates": {"type": "array", "maxItems": 64, "items": {
+      "type": "object", "additionalProperties": false,
+      "required": ["rank", "candidateReference", "grossFloorAreaM2", "candidate"],
+      "properties": {
+        "rank": {"type": "integer", "minimum": 1, "maximum": 64},
+        "candidateReference": {"$ref": "urn:sdg:constraint-result:0.1#/$defs/reference"},
+        "grossFloorAreaM2": {"$ref": "urn:sdg:massing-candidate:0.1#/$defs/positive"},
+        "candidate": {"$ref": "urn:sdg:massing-candidate:0.1"}
+      }
+    }},
+    "rejections": {"type": "array", "maxItems": 64, "items": {
+      "type": "object", "additionalProperties": false,
+      "required": ["floorHeightM", "code"],
+      "properties": {
+        "floorHeightM": {"$ref": "urn:sdg:massing-candidate:0.1#/$defs/positive"},
+        "code": {"enum": ["NO_FEASIBLE_MASSING", "RESOURCE_LIMIT"]}
+      }
+    }}
+  },
+  "$defs": {"count": {"type": "integer", "minimum": 0, "maximum": 64}}
+}
