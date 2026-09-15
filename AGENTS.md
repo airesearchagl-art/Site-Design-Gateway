@@ -6,11 +6,11 @@
 - fixtureは `cases/example-urban-office/` のsynthetic dataのみ。
 - `schemas/sdg-project-v0.1.schema.json` が案件条件の正本。Web/Pythonで別schemaを作らない。
 - BVE Coreに案件・自治体固有処理を埋め込まない。LLM調査値をofficial_verifiedへ昇格しない。
-- Current Phase = Phase 4 Search & Ranking Foundation。検証済みGeometry/Constraint ResultとHuman明示階高集合から、
-  Phase 3 Generatorを逐次実行し、GFA降順でconceptual candidatesを並べる。
-- Project/Geometry/Constraint/Massing schemaは維持。floorHeight以外の探索・最適化・法規後退・3D・認証・DB・Bridge・Web compute接続は対象外。
+- Current Phase = Phase 5 Web Results Viewer Foundation。ローカルBVE Coreがcanonical exportしたSearch Result JSONを、
+  serverへ送らずbrowser memoryだけで検証・比較表示するread-only consumerを構築する。
+- Project/Geometry/Constraint/Massing/Search schemaは維持。Web compute、semantic再計算、編集・保存、3D、認証、DB、Bridgeは対象外。
 - mainへ直接commitしない。作業branchでcheckpoint commitを残す。force push、破壊的cleanupは禁止。
-- このCampaignではReady、merge、Vercel操作、Production、Phase 5開始は禁止。Draft PR作成直後にSTOP。
+- このCampaignではReady、merge、Vercel操作、Production、Phase 6開始は禁止。Draft PR作成直後にSTOP。
 - SDG-VP-001はBLOCKED_EXTERNAL。D02 OPEN / PLATFORM_BLOCKEDを継承し、Preview PASSとは扱わない。
   Preview意図の2経路がProduction分類され両方削除済み。Git Integration DISCONNECTED確認後、
   HumanのPhase 3 transition exception = AUTHORIZED。旧Preview必須条件はこの例外で解除された。
@@ -25,8 +25,9 @@
 - Long Run再開はmanifest/state/queue/debtを読み、branch/base/treeとexact local packetのSHA-256を確認する。
   exact packetは個人パスを含むためGit除外。公開要約をexact snapshotの代用にしない。
 
-Phase 4 SearchはfloorHeightだけを探索し、Human明示値1..64件を使う。default gridなし、duplicate拒否。
-Phase 3 Generatorを逐次再利用し、GFA降順だけでrankingする。rankingはdesign qualityではない。
-tie-breakは階高昇順/hash昇順でserialization用。footprint探索・optimizer・実法規・weighted scoreはない。
-Search schema、exact candidate hash、partition/rank/summary/reviewのsemantic再検証を追加する。
-Vercel D02はOPEN / PLATFORM_BLOCKEDを維持する。詳細: docs/search-contract.md。
+Phase 4 Searchの計算契約・ranking semanticsは変更しない。Phase 5 Webは5schemaのoffline Ajv registryで
+JSON syntax / UTF-8 / viewer resource / Search Schemaだけを確認し、Python semantic validationを再実行しない。
+viewer上限8 MiBはVIEWER_LIMITとしてSchema INVALIDと分離する。入力はbrowser memoryのみ、Clearで破棄する。
+summary、ranking/rejection、review warning、zero accepted、rank/reference選択、exterior ringの2D Local XY SVGをread-only表示する。
+順位はGFA比較だけで設計品質・推奨・最適性・法規適合を意味しない。詳細: docs/web-results-contract.md。
+Vercel D02はOPEN / PLATFORM_BLOCKEDを維持する。

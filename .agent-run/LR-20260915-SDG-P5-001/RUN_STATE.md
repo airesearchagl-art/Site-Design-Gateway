@@ -1,7 +1,7 @@
 # Run state
 
-Wave 4 checkpoint. Static UI/accessibility/responsive/privacy contracts and local production browser smoke pass.
-Desktop verified Project sample, local Search fixture, five ranks, selection, review warning, SVG and Clear. A reproduced 390px root overflow was fixed; the page is clipped to the viewport while the candidate table remains independently scrollable.
-Browser logs are clean and the observable page resource inventory did not change after local file selection. Storage/network capabilities are also excluded by source guard tests.
-Mutation, full regression, docs and final independent verification remain pending.
+Wave 5 checkpoint. Documentation, public fixture allowlist and synthetic CI coverage reflect Phase 5; no schema or dependency changed.
+Python 763, Web 45, lint/type, production build, pip check, public boundary157 and diff-check PASS.
+Eight isolated mutations were KILLED by assertion failures after a pristine copied baseline passed; original source hashes were preserved.
+Fresh independent verification, final-head CI and Draft PR remain pending.
 Vercel has not been touched; D02 remains OPEN / PLATFORM_BLOCKED.

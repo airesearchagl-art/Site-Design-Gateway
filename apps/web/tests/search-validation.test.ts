@@ -27,6 +27,24 @@ test("canonical Search Result sample is displayable through the shared schema re
   });
 });
 
+test("zero accepted is a displayable completed Search Result", () => {
+  const value = structuredClone(sample);
+  value.search.floorHeightsM = [32, 40];
+  value.summary = {
+    accepted: 0,
+    evaluated: 2,
+    hasFeasibleCandidate: false,
+    rejected: 2,
+    reviewRequired: true,
+  };
+  value.rankedCandidates = [];
+  (value as unknown as { rejections: Array<{ floorHeightM: number; code: string }> }).rejections = [
+    { floorHeightM: 32, code: "NO_FEASIBLE_MASSING" },
+    { floorHeightM: 40, code: "NO_FEASIBLE_MASSING" },
+  ];
+  assert.equal(validateSearchJson(JSON.stringify(value)).state, "DISPLAYABLE");
+});
+
 test("Search Schema tampering fails without exposing values", () => {
   const marker = "SYNTHETIC_DO_NOT_ECHO";
   const inputs = [
