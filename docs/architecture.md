@@ -1,7 +1,7 @@
 # アーキテクチャ
 
-Current Phase = Phase 4 Search & Ranking Foundation。WebとPythonは同じSDG Project JSON Schemaを
-使う独立したクライアントです。PythonのGeometry/Constraints/Massing/SearchとWebはAPIで接続しません。
+Current Phase = Phase 5 Web Results Viewer Foundation。WebとPythonは同じcanonical schemasを参照する
+独立したclientです。PythonのGeometry/Constraints/Massing/SearchとWebはAPIで接続しません。
 
 ```text
 生成用プロンプト → ユーザーがコピー
@@ -68,7 +68,7 @@ Phase 0ではサービスもBridgeも接続しません。
 
 Phase 0では幾何計算・DXF読込も対象外でした。過去のADRとRun記録は当時の判断として保持します。
 現在も法規計算、自治体固有処理、実案件固有処理、DXF / PDF出力、CAD/BIM連携、Web compute接続は対象外です。
-WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 5、
+WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 6、
 Vault/Notion直接更新は行いません。
 
 ## Phase 3 Massing
@@ -101,3 +101,17 @@ Phase 3 Generatorを逐次再利用し、GFA降順だけでrankingする。ranki
 tie-breakは階高昇順/hash昇順でserialization用。footprint探索・optimizer・実法規・weighted scoreはない。
 Search schema、exact candidate hash、partition/rank/summary/reviewのsemantic再検証を追加する。
 Vercel D02はOPEN / PLATFORM_BLOCKEDを維持する。詳細: docs/search-contract.md。
+
+## Phase 5 Web Results Viewer
+
+```text
+Python BVE Core → explicit local Search Result JSON → browser-only viewer
+```
+
+Web is not compute runtime. Project検証UIを維持し、Search Resultではsyntax / UTF-8 / viewer resource /
+5つのcanonical schemaだけをbrowser内で確認する。8 MiB超はVIEWER_LIMITでありSchema INVALIDではない。
+Pythonのarithmetic、geometry/cap、candidateReference、input binding、ranking semantic validationを再実装しない。
+
+表示はsummary、既存rank/rejection、review state、zero accepted、rank/reference選択とexterior ringの2D Local XY SVG。
+入力はReact stateだけに保持しClearで破棄する。API、upload、persistence、telemetry、編集、download、3Dはない。
+public sampleはcanonical Python bytesを追跡しexact-byte testでbindingする。詳細: docs/web-results-contract.md。

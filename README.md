@@ -3,9 +3,9 @@
 CAD上で一案ずつ試す初期検討から、入力条件・制約・計算根拠・候補比較を明示した
 再現可能な探索へ進めるWeb Gatewayです。計算主体はBVE Core（Buildable Volume Engine）です。
 
-Current Phase = Phase 4 Search & Ranking Foundation。共通JSON Schema、Geometry、Constraintsを維持し、
-検証済み敷地と上限・Human明示階高集合から、Phase 3のconceptual candidatesを逐次生成しGFA降順に並べます。
-Webは従来のプロンプトコピー、合成サンプル・JSON読込、構文・Schema・出典状態確認を提供します。
+Current Phase = Phase 5 Web Results Viewer Foundation。Phase 4までのPython計算契約を維持し、
+ローカルBVE Coreが生成済みのSearch Result JSONをbrowser memoryだけで読み込み、比較表示します。
+Webは従来のProject検証に加え、Search summary、ranking/rejection、candidate選択と2D footprintをread-onlyで提供します。
 
 ## ローカルで開始する
 
@@ -67,7 +67,7 @@ Schema の正本は [`schemas/sdg-project-v0.1.schema.json`](schemas/sdg-project
 
 出典状態は `official_verified`、`user_provided`、`drawing_derived`、`llm_researched`、`assumed`、`unknown`、`review_required` の 7 種です。`VALID` は法規適合や情報の正しさを保証しません。`llm_researched` を `official_verified` へ自動昇格させず、人が根拠を確認します。
 
-選択した JSON はブラウザ内で処理します。Web から Python を呼び出さず、入力をサーバー・ストレージ・ログへ送信しません。公開リポジトリ、CI、レビュー用プレビューには合成データのみを使用してください。
+選択した Project / Search Result JSON はブラウザ内で処理します。Web から Python を呼び出さず、入力をサーバー・ストレージ・ログへ送信しません。Search Resultのviewer上限は8 MiBで、超過はSchema不正と分けて表示します。公開リポジトリ、CI、検証には合成データのみを使用してください。
 
 ## Phase 1 Geometryの開始
 
@@ -101,8 +101,8 @@ synthetic fixtureは両形式とも200 m2、面積差0です。WebにはGeometry
 Phase 1でPython Geometry Foundationを追加しました。検索、本番法規rulepack、認証、
 保存・DB、CAD/BIM連携、最適化、Web compute APIは範囲外です。Run Packageは文書上の契約検討に留めます。
 
-Phase 0〜3は独立レビューとHuman承認後にmerge済みです。今回の出口はPhase 4のDraft PRです。
-作成直後にSTOPし、Ready、merge、Vercel操作、Production、Phase 5へ進みません。
+Phase 0〜4は独立レビューとHuman承認後にmerge済みです。今回の出口はPhase 5のDraft PRです。
+作成直後にSTOPし、Ready、merge、Vercel操作、Production、Phase 6へ進みません。
 過去のADR・Run記録は維持します。
 
 ## Phase 2 Constraint Engine
@@ -174,10 +174,16 @@ Vercel 上の `npm run build` は Web workspace のスクリプトを実行し�
 - [ADR: local XY Geometry基盤](docs/adr/0002-local-xy-geometry-foundation.md)
 - [Constraint出力契約](docs/constraint-contract.md)
 - [ADR: 明示area basisと出典付き計算](docs/adr/0003-constraint-engine-foundation.md)
+- [Massing契約](docs/massing-contract.md)
+- [ADR: baseline massing](docs/adr/0004-baseline-massing-candidate.md)
+- [Search契約](docs/search-contract.md)
+- [ADR: 明示階高Search](docs/adr/0005-explicit-floor-height-search.md)
+- [Web Results契約](docs/web-results-contract.md)
+- [ADR: local-only Search Result viewer](docs/adr/0006-local-only-search-result-viewer.md)
 
 ## Phase 4 Search & Ranking
 
-Current Phase = Phase 4 Search & Ranking Foundation。
+Phase 4 Search & Ranking Foundationの計算契約はPhase 5でも維持する。
 Search axisはfloorHeightだけ。Humanが明示する1..64個の値を逐次評価する。default gridはない。
 数値同値のduplicateは拒否し、Decimal数値昇順でPhase 3 Generatorを各値に一度適用する。
 
@@ -194,3 +200,19 @@ NO_FEASIBLE_MASSING / RESOURCE_LIMITはpoint rejection、共有入力の異常�
 出力先は明示新規fileのみ。Web/3D/保存APIには接続しない。
 SDG-VP-001 BLOCKED_EXTERNAL、D02 OPEN / PLATFORM_BLOCKEDを継続し、Phase 4ではVercelに操作しない。
 [Search契約](docs/search-contract.md)・[ADR 0005](docs/adr/0005-explicit-floor-height-search.md)を参照。
+
+## Phase 5 Web Results Viewer
+
+STEP 03で `Search Result sample` またはローカル `.json` 1件を選択します。sampleの正本は
+`cases/example-urban-office/search-result.json` で、Python CLI pipelineのcanonical bytesとtestで一致させています。
+sampleはevaluated 5 / accepted 5 / rejected 0 / reviewRequired trueです。
+
+WebはProject / Geometry / Constraint / Massing / Searchの5schemaをoffline Ajv registryへ登録し、
+JSON syntax、UTF-8、viewer resource、Search Schemaだけを確認します。Schema PASSはPythonのsemantic validationを
+ブラウザで再実行した意味ではありません。順位、candidate hash、input binding、geometry/cap計算の正本はPython exportです。
+
+表示は既存rankを保つtable、fixed rejection code、zero-accepted完了表示、rank/referenceによるcandidate選択、
+exterior ringだけのConceptual footprint / Local XY SVGです。順位はGFA降順の比較であり、設計品質・推奨・最適性・法規適合を示しません。
+編集・保存・download、3D、API route、Server Action、upload、storage、telemetryはありません。
+JavaScript NumberはPython Decimalの字句上の正本ではありません（D04）。
+[Web Results契約](docs/web-results-contract.md)・[ADR 0006](docs/adr/0006-local-only-search-result-viewer.md)を参照。
