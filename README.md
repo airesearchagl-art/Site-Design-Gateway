@@ -3,8 +3,8 @@
 CAD上で一案ずつ試す初期検討から、入力条件・制約・計算根拠・候補比較を明示した
 再現可能な探索へ進めるWeb Gatewayです。計算主体はBVE Core（Buildable Volume Engine）です。
 
-Current Phase = Phase 3 Massing Candidate Foundation。共通JSON Schema、Geometry、Constraintsを維持し、
-検証済み敷地と上限・明示階高から、敷地内でcapを超えないconceptual candidateを1案生成します。
+Current Phase = Phase 4 Search & Ranking Foundation。共通JSON Schema、Geometry、Constraintsを維持し、
+検証済み敷地と上限・Human明示階高集合から、Phase 3のconceptual candidatesを逐次生成しGFA降順に並べます。
 Webは従来のプロンプトコピー、合成サンプル・JSON読込、構文・Schema・出典状態確認を提供します。
 
 ## ローカルで開始する
@@ -101,8 +101,8 @@ synthetic fixtureは両形式とも200 m2、面積差0です。WebにはGeometry
 Phase 1でPython Geometry Foundationを追加しました。検索、本番法規rulepack、認証、
 保存・DB、CAD/BIM連携、最適化、Web compute APIは範囲外です。Run Packageは文書上の契約検討に留めます。
 
-Phase 0〜2は独立レビューとHuman承認後にmerge済みです。今回の出口はPhase 3のDraft PRです。
-作成直後にSTOPし、Ready、merge、Vercel操作、Production、Phase 4へ進みません。
+Phase 0〜3は独立レビューとHuman承認後にmerge済みです。今回の出口はPhase 4のDraft PRです。
+作成直後にSTOPし、Ready、merge、Vercel操作、Production、Phase 5へ進みません。
 過去のADR・Run記録は維持します。
 
 ## Phase 2 Constraint Engine
@@ -147,7 +147,7 @@ Constraintはprovenanceから再計算し、Geometry hash一致を確認しま�
 actual面積と全cap・包含を最後に検証します。syntheticでは7階・高さ28m・footprint<=160m2・GFA約1120m2です。
 階高省略、利用不能constraint、改変結果、hash不一致、凹敷地・穴付きは拒否します。
 これは **constraint-bounded conceptual massing candidate** です。法規後退・斜線等は未計算で、最適化も行いません。
-Web表示・3D・複数案探索は対象外。CLIの出力は件数/判定だけで、形状は明示新規fileにのみ保存します。
+Phase 3のWeb表示・3Dは対象外。複数階高の評価はPhase 4 Searchが担当する。CLIの出力は件数/判定だけで、形状は明示新規fileにのみ保存します。
 [Massing契約](docs/massing-contract.md)と[ADR 0004](docs/adr/0004-baseline-massing-candidate.md)を参照してください。
 
 ## Vercel のビルド構成
@@ -174,3 +174,23 @@ Vercel 上の `npm run build` は Web workspace のスクリプトを実行し�
 - [ADR: local XY Geometry基盤](docs/adr/0002-local-xy-geometry-foundation.md)
 - [Constraint出力契約](docs/constraint-contract.md)
 - [ADR: 明示area basisと出典付き計算](docs/adr/0003-constraint-engine-foundation.md)
+
+## Phase 4 Search & Ranking
+
+Current Phase = Phase 4 Search & Ranking Foundation。
+Search axisはfloorHeightだけ。Humanが明示する1..64個の値を逐次評価する。default gridはない。
+数値同値のduplicateは拒否し、Decimal数値昇順でPhase 3 Generatorを各値に一度適用する。
+
+```sh
+python -m bve.search --geometry runtime-data/normalized-site.geojson --constraints runtime-data/constraints.json --floor-height-m 4 --floor-height-m 5 --floor-height-m 6 --floor-height-m 7 --floor-height-m 8 --output runtime-data/search.json
+```
+
+唯一の指標はGFA降順 `maximize_gross_floor_area_v0.1`。
+階高昇順とcandidate hash昇順のtie-breakはserializationのためで、設計上の選好ではない。
+rankingは設計品質・推奨・最適性・法的優位を示さない。footprint探索、最適化、score、実法規はない。
+synthetic 4/5/6/7/8mのGFAは1120/960/800/640/480m²。
+NO_FEASIBLE_MASSING / RESOURCE_LIMITはpoint rejection、共有入力の異常はSearch全体FAIL。
+0acceptedも完了結果であり、CLI PASSは実行成功だけを示し、建築可能性の証明ではない。
+出力先は明示新規fileのみ。Web/3D/保存APIには接続しない。
+SDG-VP-001 BLOCKED_EXTERNAL、D02 OPEN / PLATFORM_BLOCKEDを継続し、Phase 4ではVercelに操作しない。
+[Search契約](docs/search-contract.md)・[ADR 0005](docs/adr/0005-explicit-floor-height-search.md)を参照。

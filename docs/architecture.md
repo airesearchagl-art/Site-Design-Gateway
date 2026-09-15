@@ -1,7 +1,7 @@
 # アーキテクチャ
 
-Current Phase = Phase 3 Massing Candidate Foundation。WebとPythonは同じSDG Project JSON Schemaを
-使う独立したクライアントです。PythonのGeometry/Constraints/MassingとWebはAPIで接続しません。
+Current Phase = Phase 4 Search & Ranking Foundation。WebとPythonは同じSDG Project JSON Schemaを
+使う独立したクライアントです。PythonのGeometry/Constraints/Massing/SearchとWebはAPIで接続しません。
 
 ```text
 生成用プロンプト → ユーザーがコピー
@@ -68,7 +68,7 @@ Phase 0ではサービスもBridgeも接続しません。
 
 Phase 0では幾何計算・DXF読込も対象外でした。過去のADRとRun記録は当時の判断として保持します。
 現在も法規計算、自治体固有処理、実案件固有処理、DXF / PDF出力、CAD/BIM連携、Web compute接続は対象外です。
-WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 4、
+WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 5、
 Vault/Notion直接更新は行いません。
 
 ## Phase 3 Massing
@@ -82,7 +82,7 @@ Constraint Result → schema + Phase 2計算経路で再計算 → immutable val
 ```
 
 既存3schemaは維持しCandidate schemaを追加。Phase 1のnormalize/orientとPhase 2の計算・Decimal encoderを共有する。
-floorはGeneratorの整数階離散化。法規丸め・後退・3D・探索・ランキング・Web接続は実装しない。
+floorはGeneratorの整数階離散化。Phase 3は法規丸め・後退・3D・探索・ランキング・Web接続を持たない。
 詳細は[Massing契約](massing-contract.md)と[ADR 0004](adr/0004-baseline-massing-candidate.md)。
 
 旧Preview必須GateはSDG-VP-001 BLOCKED_EXTERNAL、D02 OPEN / PLATFORM_BLOCKED。
@@ -90,3 +90,14 @@ Previewを意図した2経路がProduction分類され両deployment削除済み�
 HumanのPhase 3 transition exception = AUTHORIZED。Phase 3ではVercel操作・再試行をしない。
 
 [公開・非公開データの境界](public-private-data-boundary.md) と [採用判断の ADR](adr/0001-monorepo-and-contract-boundary.md) を併せて参照してください。
+
+## Phase 4 Search
+
+Validated Geometry + Constraints + explicit floor heights → serial Phase 3 calls → accepted/rejected partition
+→ GFA order → semantic checks → explicit Search JSON。
+
+Phase 4 SearchはfloorHeightだけを探索し、Human明示値1..64件を使う。default gridなし、duplicate拒否。
+Phase 3 Generatorを逐次再利用し、GFA降順だけでrankingする。rankingはdesign qualityではない。
+tie-breakは階高昇順/hash昇順でserialization用。footprint探索・optimizer・実法規・weighted scoreはない。
+Search schema、exact candidate hash、partition/rank/summary/reviewのsemantic再検証を追加する。
+Vercel D02はOPEN / PLATFORM_BLOCKEDを維持する。詳細: docs/search-contract.md。

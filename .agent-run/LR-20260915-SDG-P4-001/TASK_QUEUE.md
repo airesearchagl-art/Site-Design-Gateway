@@ -5,5 +5,5 @@
 - [x] Wave 2: input validation / parser reuse
 - [x] Wave 3: serial sweep / point rejections
 - [x] Wave 4: ranking / semantic export / CLI
-- [ ] Wave 5: adversarial / mutation / docs / CI
+- [x] Wave 5: adversarial / mutation / docs / CI
 - [ ] Wave 6: convergence / independent verifier / Draft
