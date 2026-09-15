@@ -17,3 +17,9 @@ Search validation tests cover the canonical shared-schema registry, six contract
 ## Wave 3
 
 The production UI compiles with STEP 03 and explicit EMPTY / LOADING / DISPLAYABLE / INVALID / VIEWER_LIMIT states. Web 38 tests, ESLint/TypeScript and Next production build PASS. React review found no effects, server data flow, nested component definitions or persistence; async file races are cancelled by request identity. Browser interaction and responsive smoke remain pending.
+
+## Wave 4
+
+Static UI/accessibility/responsive/privacy contracts PASS. `npm ci` installed the lockfile set (353 packages, audit 0 vulnerabilities), then production build/start ran on 127.0.0.1:3015. Desktop browser smoke: page and Project sample REVIEW_REQUIRED; local canonical Search fixture DISPLAYABLE; 5 rows with ranks 1..5; Rank 3 selection showed floor height 6 / GFA 800; REVIEW REQUIRED and one accessible SVG visible; Clear returned EMPTY and removed rows/SVG. The final rebuilt page repeated Project/local-file/5-rank/SVG/review/Clear checks with no console error/warn and no added observable page resource URL after file selection.
+
+At 390px requested viewport, controls, 5 rows, initial Rank 1 and SVG remained available. Initial smoke found a root width 936px defect. After CSS repair and rebuild, BODY measured clientWidth=375 / scrollWidth=375 with overflow clipped at the root; the candidate table remained its own clientWidth=250 / scrollWidth=984 horizontal scroller. Visual screenshot showed no root horizontal bar. Browser storage globals are not exposed by the available read-only inspector; source guard tests prove no localStorage/sessionStorage/IndexedDB/Cache/network API call exists in Web source. No screenshot or runtime input was written to the repository.

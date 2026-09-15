@@ -1,5 +1,6 @@
 :root { color-scheme: light; --ink: #183036; --muted: #53666b; --line: #d9e1de; --accent: #176655; }
 * { box-sizing: border-box; }
+html, body { max-width: 100%; overflow-x: clip; }
 body { margin: 0; color: var(--ink); background: #f5f7f3; font-family: Arial, "Noto Sans JP", "Yu Gothic", sans-serif; font-size: 15px; line-height: 1.7; }
 main { max-width: 1200px; margin: auto; padding: 0 40px; }
 a { color: inherit; }
@@ -45,7 +46,7 @@ input::file-selector-button { padding: 7px 12px; margin-right: 8px; border: 1px 
 .valid { color: #155740; background: #e3f1e9; }
 .invalid { color: #9b2329; background: #fce8e8; }
 .review_required { color: #79520d; background: #fff1ce; }
-.table-scroll { overflow-x: auto; }
+.table-scroll { width: 100%; max-width: 100%; min-width: 0; overflow-x: auto; contain: inline-size; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
 caption { text-align: left; font-size: 12px; color: var(--muted); padding: 12px 0; }
 th, td { border-top: 1px solid var(--line); padding: 13px 10px; vertical-align: top; }
