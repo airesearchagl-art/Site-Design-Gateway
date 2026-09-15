@@ -22,4 +22,3 @@ Web用schema copy、API route、Server Action、upload、persistence、telemetry
 ユーザーのSearch Resultは送信・永続化されず、CoreとUIの計算契約は分離される。
 Schema PASSだけではPython semantic validation済みとは証明できず、UIにその限界を明示する。
 JavaScript Numberの表示はPython Decimalの字句忠実性を保証しないためD04として継続管理する。
-

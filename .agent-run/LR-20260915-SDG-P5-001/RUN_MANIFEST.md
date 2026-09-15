@@ -9,4 +9,3 @@ Base: 2abb5c8a8508eacdbf629466c4f9726c85a94f16
 Branch: feat/phase5-web-results-viewer
 Mode: LONG_RUN_ENDURANCE / DAY; EACH_WAVE checkpoints; resume and quality debt enabled.
 Exit: create a Draft PR and stop immediately. Ready, merge, Phase 6 and all Vercel operations are prohibited.
-

@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 import sample from "../../../cases/example-urban-office/search-result.json" with { type: "json" };
 import {
@@ -74,6 +76,17 @@ test("viewer byte and depth limits stay distinct from schema invalid", () => {
   const deeplyNested = validateSearchJson("[".repeat(70) + "0" + "]".repeat(70));
   assert.equal(deeplyNested.state, "VIEWER_LIMIT");
   assert.equal(deeplyNested.schema, "NOT_CHECKED");
+});
+
+test("wide input reaches the node limit under a 128 MiB heap", () => {
+  const probe = fileURLToPath(new URL("search-resource-probe.ts", import.meta.url));
+  const execution = spawnSync(
+    process.execPath,
+    ["--max-old-space-size=128", "--experimental-strip-types", probe],
+    { encoding: "utf8", timeout: 30_000 },
+  );
+  assert.equal(execution.status, 0, execution.stderr);
+  assert.equal(execution.stdout.trim(), "PASS");
 });
 
 test("malformed JSON and non-finite parsing stay invalid with generic diagnostics", () => {

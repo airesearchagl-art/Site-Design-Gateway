@@ -58,4 +58,3 @@ Python CLI pipeline（Project / Geometry / Constraints / Search [4,5,6,7,8]）�
 Python exact-byte testでCoreへ固定する。一般のruntime/private Search Resultは公開Gitへ含めない。
 
 SDG-VP-001はBLOCKED_EXTERNAL、D02はOPEN / PLATFORM_BLOCKED。Phase 5でVercelは操作しない。
-

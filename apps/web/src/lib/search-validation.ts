@@ -77,25 +77,31 @@ function failure(state: "INVALID" | "VIEWER_LIMIT", keyword: string, message: st
 }
 
 function inspectResources(value: unknown): SearchValidationResult | null {
-  const pending: { value: unknown; depth: number }[] = [{ value, depth: 0 }];
   let nodes = 0;
-  while (pending.length > 0) {
-    const item = pending.pop()!;
+
+  function visit(item: unknown, depth: number): SearchValidationResult | null {
     nodes += 1;
-    if (item.depth > MAX_SEARCH_DEPTH || nodes > MAX_SEARCH_NODES) {
+    if (depth > MAX_SEARCH_DEPTH || nodes > MAX_SEARCH_NODES) {
       return failure("VIEWER_LIMIT", "viewerResource", "表示用JSONの入れ子または要素数が上限を超えています。");
     }
-    if (typeof item.value === "string" && !item.value.isWellFormed()) {
+    if (typeof item === "string" && !item.isWellFormed()) {
       return failure("INVALID", "unicode", "JSONに不正なUnicode文字が含まれています。");
     }
-    if (typeof item.value === "number" && !Number.isFinite(item.value)) {
+    if (typeof item === "number" && !Number.isFinite(item)) {
       return failure("INVALID", "number", "数値は有限の値にしてください。");
     }
-    if (item.value !== null && typeof item.value === "object") {
-      for (const child of Object.values(item.value)) pending.push({ value: child, depth: item.depth + 1 });
+    if (item !== null && typeof item === "object") {
+      for (const key in item) {
+        if (!Object.hasOwn(item, key)) continue;
+        const child = (item as Record<string, unknown>)[key];
+        const childFailure = visit(child, depth + 1);
+        if (childFailure) return childFailure;
+      }
     }
+    return null;
   }
-  return null;
+
+  return visit(value, 0);
 }
 
 export function validateSearchJson(text: string): SearchValidationResult {

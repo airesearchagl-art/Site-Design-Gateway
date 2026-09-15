@@ -67,4 +67,3 @@ test("degenerate or unsafe preview bounds return a candidate-only fallback", () 
   assert.deepEqual(footprintPreview({ ...candidate, footprint: [[[1, 1], [1, 1], [1, 1], [1, 1]]] }), { available: false });
   assert.deepEqual(footprintPreview({ ...candidate, footprint: [[[0, 0], [Infinity, 0], [1, 1], [0, 0]]] }), { available: false });
 });
-

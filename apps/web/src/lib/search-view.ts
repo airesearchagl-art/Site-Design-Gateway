@@ -94,4 +94,3 @@ export function footprintPreview(candidate: CandidateView): FootprintPreview {
     points: ring.map(([x, y]) => `${x},${-y}`).join(" "),
   };
 }
-

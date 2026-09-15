@@ -35,4 +35,3 @@ def test_search_result_fixture_matches_complete_cli_pipeline(tmp_path, capsys):
 
     assert search.read_bytes() == (CASE / "search-result.json").read_bytes()
     assert capsys.readouterr().err == ""
-
