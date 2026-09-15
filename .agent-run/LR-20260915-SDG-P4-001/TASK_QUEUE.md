@@ -1,7 +1,7 @@
 # Task queue
 
 - [x] Wave 0: fresh gate / packet / run
-- [ ] Wave 1: contract / schema / ADR
+- [x] Wave 1: contract / schema / ADR
 - [ ] Wave 2: input validation / parser reuse
 - [ ] Wave 3: serial sweep / point rejections
 - [ ] Wave 4: ranking / semantic export / CLI
