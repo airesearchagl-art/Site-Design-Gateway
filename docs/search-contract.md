@@ -1,6 +1,6 @@
 # Phase 4 Search & Ranking contract
 
-Current Phase = Phase 4 Search & Ranking Foundation。
+Phase 4で確立した計算契約をPhase 7でも維持する。
 探索軸はfloorHeightMだけ。Humanが明示した有限値を逐次評価する。
 `floor_height_sweep_v0.1`は各値についてPhase 3の
 `max_footprint_stack_v0.1` / `convex_homothetic_footprint_v0.1`を一度呼ぶ。
@@ -64,3 +64,16 @@ Vercelは操作しない。SDG-VP-001 BLOCKED_EXTERNAL、D02 OPEN / PLATFORM_BLO
 
 Phase 5 Web Results Viewerはこのcanonical出力をbrowser-onlyでconsumeする。
 authoritative semantic validationは引き続きPython exportの責務であり、Webは再実行しない。
+
+## Phase 7 Search Result v0.2
+
+新規canonical outputはschemaVersion 0.2、`urn:sdg:search-result:0.2`。
+v0.1 schemaはlegacyとして不変。v0.2はv0.1の共通構造を$refし、root必須constraintContextを追加する。
+areaBasisはConstraint Result schemaの同property、constraintCapsはMassing Candidate schemaの同propertyを参照する。
+同一概念のschema copyを作らない。
+
+exportはauthoritative Constraint Resultのcanonical bytesを再取得し、そのSHA-256と
+inputReferences.constraintsが一致することを検証する。areaBasis全体（provenance・符号・nullを含む）と
+3 capを照合し、全candidateのcapもrootと照合する。zero acceptedもcontext必須。
+Project/Geometry/Constraint/Massingの計算、candidate hash、rank/tie-break契約は変更しない。
+public fixtureは同じsynthetic CLI pipelineからv0.2を再生成し、exact-byte testを維持する。

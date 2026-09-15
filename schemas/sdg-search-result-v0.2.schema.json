@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:search-result:0.2",
+  "title": "SDG search result with authoritative constraint context v0.2",
+  "description": "Descriptive context, not legal verification. Python export binds context to canonical Constraint Result bytes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "inputReferences", "constraintContext", "search", "summary", "rankedCandidates", "rejections"],
+  "properties": {
+    "schemaVersion": {"const": "0.2"},
+    "inputReferences": {"$ref": "urn:sdg:search-result:0.1#/properties/inputReferences"},
+    "constraintContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["areaBasis", "constraintCaps"],
+      "properties": {
+        "areaBasis": {"$ref": "urn:sdg:constraint-result:0.1#/properties/areaBasis"},
+        "constraintCaps": {"$ref": "urn:sdg:massing-candidate:0.1#/properties/constraintCaps"}
+      }
+    },
+    "search": {"$ref": "urn:sdg:search-result:0.1#/properties/search"},
+    "summary": {"$ref": "urn:sdg:search-result:0.1#/properties/summary"},
+    "rankedCandidates": {"$ref": "urn:sdg:search-result:0.1#/properties/rankedCandidates"},
+    "rejections": {"$ref": "urn:sdg:search-result:0.1#/properties/rejections"}
+  }
+}

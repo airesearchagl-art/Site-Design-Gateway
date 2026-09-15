@@ -1,4 +1,4 @@
-import type { RankedCandidateDocument, SearchResultDocument } from "./search-validation.ts";
+import type { ConstraintCaps, ConstraintContext, RankedCandidateDocument, SearchResultDocument } from "./search-validation.ts";
 
 export type CandidateSelection = { rank: number; candidateReference: string };
 
@@ -9,9 +9,12 @@ export type CandidateView = CandidateSelection & {
   footprintAreaM2: number;
   grossFloorAreaM2: number;
   footprint: number[][][];
+  constraintCaps: ConstraintCaps;
 };
 
 export type SearchViewModel = {
+  schemaVersion: SearchResultDocument["schemaVersion"];
+  constraintContext?: ConstraintContext;
   summary: SearchResultDocument["summary"];
   strategy: string;
   ranking: string;
@@ -33,11 +36,14 @@ function candidateView(entry: RankedCandidateDocument): CandidateView {
     footprintAreaM2: entry.candidate.candidate.footprintAreaM2,
     grossFloorAreaM2: entry.grossFloorAreaM2,
     footprint: entry.candidate.candidate.footprint.coordinates,
+    constraintCaps: entry.candidate.constraintCaps,
   };
 }
 
 export function toSearchViewModel(document: SearchResultDocument): SearchViewModel {
   return {
+    schemaVersion: document.schemaVersion,
+    constraintContext: document.constraintContext,
     summary: document.summary,
     strategy: document.search.strategy,
     ranking: document.search.ranking,

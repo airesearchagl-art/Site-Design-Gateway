@@ -53,7 +53,7 @@ test("zero accepted is a displayable completed Search Result", () => {
 test("Search Schema tampering fails without exposing values", () => {
   const marker = "SYNTHETIC_DO_NOT_ECHO";
   const inputs = [
-    changed((value) => { value.schemaVersion = "0.2" as "0.1"; }),
+    changed((value) => { value.schemaVersion = "unsupported"; }),
     changed((value) => { delete (value as Partial<typeof value>).summary; }),
     changed((value) => { delete (value.rankedCandidates[0].candidate as Partial<typeof value.rankedCandidates[0]["candidate"]>).candidate; }),
     changed((value) => { delete (value.rankedCandidates[0] as Partial<typeof value.rankedCandidates[0]>).rank; }),

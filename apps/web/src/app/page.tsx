@@ -54,14 +54,14 @@ export default function Home() {
     <main>
       <header className="topbar">
         <Link className="brand" href="/" aria-label="Site Design Gateway ホーム"><span className="mark" aria-hidden="true">SDG</span> Site Design Gateway</Link>
-        <span className="phase">PHASE 5 / RESULTS VIEWER</span>
+        <span className="phase">PHASE 7 / RESULTS INTERPRETATION</span>
       </header>
 
       <section className="intro" aria-labelledby="intro-title">
         <p className="eyebrow">条件から、次の検討へ。</p>
         <h1 id="intro-title">Site Design Gateway</h1>
         <p className="lead">建築初期検討の入力条件と、ローカルBVE Coreの探索結果を、確かめられる形に。</p>
-        <p className="note">Project JSONの検証を維持し、Phase 5では生成済みSearch Resultのread-only表示を追加します。Webで計算や法規確認は行いません。</p>
+        <p className="note">生成済みSearch Resultの計算基準・制約上限・候補の値を比較表示します。法規適合の確認は行いません。</p>
       </section>
 
       <div className="workflow">

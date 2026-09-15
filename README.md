@@ -3,7 +3,7 @@
 CAD上で一案ずつ試す初期検討から、入力条件・制約・計算根拠・候補比較を明示した
 再現可能な探索へ進めるWeb Gatewayです。計算主体はBVE Core（Buildable Volume Engine）です。
 
-Current Phase = Phase 5 Web Results Viewer Foundation。Phase 4までのPython計算契約を維持し、
+Current Phase = Phase 7 Results Interpretation UX Foundation。既存のPython計算契約を維持し、
 ローカルBVE Coreが生成済みのSearch Result JSONをbrowser memoryだけで読み込み、比較表示します。
 Webは従来のProject検証に加え、Search summary、ranking/rejection、candidate選択と2D footprintをread-onlyで提供します。
 
@@ -101,8 +101,8 @@ synthetic fixtureは両形式とも200 m2、面積差0です。WebにはGeometry
 Phase 1でPython Geometry Foundationを追加しました。検索、本番法規rulepack、認証、
 保存・DB、CAD/BIM連携、最適化、Web compute APIは範囲外です。Run Packageは文書上の契約検討に留めます。
 
-Phase 0〜4は独立レビューとHuman承認後にmerge済みです。今回の出口はPhase 5のDraft PRです。
-作成直後にSTOPし、Ready、merge、Vercel操作、Production、Phase 6へ進みません。
+今回の出口はPhase 7のDraft PRです。
+作成直後にSTOPし、Ready、merge、Vercel操作、Production、Phase 8へ進みません。
 過去のADR・Run記録は維持します。
 
 ## Phase 2 Constraint Engine
@@ -207,7 +207,7 @@ STEP 03で `Search Result sample` またはローカル `.json` 1件を選択し
 `cases/example-urban-office/search-result.json` で、Python CLI pipelineのcanonical bytesとtestで一致させています。
 sampleはevaluated 5 / accepted 5 / rejected 0 / reviewRequired trueです。
 
-WebはProject / Geometry / Constraint / Massing / Searchの5schemaをoffline Ajv registryへ登録し、
+WebはProject / Geometry / Constraint / Massing / Search v0.1・v0.2の6schemaをoffline Ajv registryへ登録し、
 JSON syntax、UTF-8、viewer resource、Search Schemaだけを確認します。Schema PASSはPythonのsemantic validationを
 ブラウザで再実行した意味ではありません。順位、candidate hash、input binding、geometry/cap計算の正本はPython exportです。
 
@@ -216,3 +216,19 @@ exterior ringだけのConceptual footprint / Local XY SVGです。順位はGFA�
 編集・保存・download、3D、API route、Server Action、upload、storage、telemetryはありません。
 JavaScript NumberはPython Decimalの字句上の正本ではありません（D04）。
 [Web Results契約](docs/web-results-contract.md)・[ADR 0006](docs/adr/0006-local-only-search-result-viewer.md)を参照。
+
+## Phase 7 Results Interpretation
+
+Pythonの新規canonical出力とpublic sampleはSearch Result **v0.2**です。
+`constraintContext`は同一canonical Constraint Result由来のareaBasisと3つのcapを保持し、
+Python exportがexact copy、constraint hash、candidate/root cap一致を検証します。既存v0.1 schemaは変更しません。
+
+Viewerは**v0.1もサポート**し、legacyではarea basisを推測せずcontext unavailableと表示します。
+v0.2ではSelected / Basis / Declared / Geometry / signed Differenceを表示し、zero acceptedでもcontextを保ちます。
+候補のActual / Cap / Remaining / Usageは単純な表示用差分・比率で、支配的法規制約や法規適合を判定しません。
+
+順位はGFA降順、正本GFAが等しいときは階高昇順、最後にcandidateReference辞書順です。
+Webは正本のrankを保持し、再sortやNumberによるTIED判定をしません。
+m・m²は最大小数3桁、割合は小数1桁、明示en-USで表示します。丸め表示でもcanonical JSONは不変です。
+**D04 OPEN**：JavaScript Numberの表示改善はlossless Decimal/数値字句の保証ではありません。
+privacy/resource契約と8 MiB・depth64・250,000 nodes・parse前preflightは維持します。

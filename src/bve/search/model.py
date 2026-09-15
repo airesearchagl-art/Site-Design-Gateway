@@ -41,10 +41,16 @@ class SearchResult:
         return self.constraints.result.review_required
 
     def to_dict(self) -> dict:
-        return {"schemaVersion": "0.1",
+        constraints = self.constraints.result
+        return {"schemaVersion": "0.2",
                 "inputReferences": {"project": self.constraints.result.project_reference,
                                     "geometry": self.site.source_reference,
                                     "constraints": self.constraints.reference},
+                "constraintContext": {
+                    "areaBasis": constraints.to_dict()["areaBasis"],
+                    "constraintCaps": {"maxFootprintAreaM2": constraints.building_coverage.value,
+                                       "maxTotalFloorAreaM2": constraints.floor_area_ratio.value,
+                                       "maxHeightM": constraints.height.value}},
                 "search": {"strategy": "floor_height_sweep_v0.1",
                            "ranking": "maximize_gross_floor_area_v0.1",
                            "floorHeightsM": list(self.floor_heights_m), "floorHeightStatus": "user_provided"},
