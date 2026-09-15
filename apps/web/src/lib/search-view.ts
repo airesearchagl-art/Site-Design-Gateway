@@ -12,9 +12,8 @@ export type CandidateView = CandidateSelection & {
   constraintCaps: ConstraintCaps;
 };
 
-export type SearchViewModel = {
-  schemaVersion: SearchResultDocument["schemaVersion"];
-  constraintContext?: ConstraintContext;
+export type SearchViewModel = ({ schemaVersion: "0.1"; constraintContext?: never }
+  | { schemaVersion: "0.2"; constraintContext: ConstraintContext }) & {
   summary: SearchResultDocument["summary"];
   strategy: string;
   ranking: string;
@@ -41,9 +40,11 @@ function candidateView(entry: RankedCandidateDocument): CandidateView {
 }
 
 export function toSearchViewModel(document: SearchResultDocument): SearchViewModel {
+  const version = document.schemaVersion === "0.2"
+    ? { schemaVersion: document.schemaVersion, constraintContext: document.constraintContext }
+    : { schemaVersion: document.schemaVersion };
   return {
-    schemaVersion: document.schemaVersion,
-    constraintContext: document.constraintContext,
+    ...version,
     summary: document.summary,
     strategy: document.search.strategy,
     ranking: document.search.ranking,

@@ -13,4 +13,69 @@ Only executed checks are PASS. Raw logs, runtime synthetic variants and exact pa
 - Initial new-test issues (Decimal integer validation in the test, and different test input
   serialization versus CLI fixture input bytes) were corrected without changing production semantics.
 
-Full regression, mutations, browser verification and delivery are pending.
+## Final local gates
+
+- Python full suite: **779 PASS** (763 unchanged baseline + 16 context cases), 21.56 seconds.
+  Command: `python -m pytest -p no:cacheprovider` with an ignored synthetic temporary directory.
+- Web full suite: **69 PASS** (57 baseline + 12), fail/skip/cancel/todo 0.
+- `npm run lint` (ESLint and TypeScript), `npm run build`, `pip check`, `git diff --check`: PASS.
+- `npm run check:boundary`: PASS, 171 tracked/public-candidate files at implementation checkpoint.
+- Dedicated `node --max-old-space-size=128 --experimental-strip-types`
+  `apps/web/tests/search-resource-probe.ts` cases **wide4 / wide6 / wide8 / deep6: 4/4 PASS**.
+- Original five schemas, Project/Geometry/Constraint/Massing implementations, Search engine ranking,
+  dependency manifests and lockfile are unchanged from the authorized base.
+- Recursive privacy source scan including caches/CacheStorage: PASS. No new dependency.
+
+## Isolated mutations
+
+All mutations used separate Git-archive copies of implementation checkpoint
+`0215d0eab788a099f2003d643b853c255e72a95f`; Python imports were bound to each copy's src.
+Unmutated controls passed: Python context suite 16, Web interpretation suite 12, privacy guard suite 1.
+Every mutation exited 1 through the named assertion (Python DID NOT RAISE or Node ERR_ASSERTION),
+not a syntax, import or compile error. Production source remained untouched.
+
+| Mutation | Change | Target that killed it |
+| --- | --- | --- |
+| M-P7-01 | Remove areaBasis exact-copy guard | area_basis_semantic_tamper (4 cases) |
+| M-P7-02 | Remove root cap exact-copy guard | root_cap_semantic_tamper_even_without_candidates (3 cases) |
+| M-P7-03 | Remove candidate/root cap guard | candidate_root_cap_consistency_contract |
+| M-P7-04 | Hardcode declared basis label | P7-WEB-03 |
+| M-P7-05 | Sort locally by JS GFA | P7-WEB-08 |
+| M-P7-06 | Remove actual usage disclaimer element | P7-WEB-06 |
+| M-P7-07 | Bypass number formatting with String(value) | P7-WEB-09 |
+| M-P7-08 | Remove caches and CacheStorage scan guards | privacy guard explicitly covers every prohibited browser capability |
+
+Result: **8/8 KILLED**. M-P7-03 tests the context boundary independently because the retained
+canonical candidate-byte comparison provides an additional export-level defense.
+Final review strengthened the View Model's version-discriminated type (v0.2 context required).
+Its final source passed lint/Web/build; M-P7-05 was repeated on an isolated final-source copy:
+unmutated control PASS, mutated targeted assertion KILLED.
+
+## Local production browser
+
+Chrome, loopback Next production server, public synthetic inputs only:
+
+- Project sample: Schema PASS / REVIEW_REQUIRED and existing source-status table unchanged.
+- Search v0.2 sample: DISPLAYABLE; basis/caps, three ranking rules, review warning and Local XY SVG visible.
+- Ranks 1 through 5 selected through real UI controls. GFA usage updated to
+  93.3%, 80.0%, 66.7%, 53.3%, 40.0%; remaining 80, 240, 400, 560, 720 respectively.
+  Footprint and Height cards updated from each selected candidate; disclaimer and rounding note visible.
+- Viewport 390 x 844: documentElement client/scroll width **375/375**, body **375/375**
+  (15px browser vertical scrollbar). Candidate wrapper **250/984**, overflow-x auto;
+  horizontal scrolling remains internal to the table.
+- Exact prior public v0.1 fixture selected via file chooser: DISPLAYABLE,
+  legacy context unavailable, candidate cap/usage retained without inferred basis.
+- CLI-generated v0.2 zero accepted: DISPLAYABLE, summary 1/0/1, basis and all three caps retained,
+  usage unavailable, fixed NO_FEASIBLE_MASSING rejection visible.
+- Clear: EMPTY, context panel count 0, candidate controls 0, SVG count 0, file input empty.
+- App console errors **0**. One browser-extension Sentry initialization error was observed separately;
+  its source was chrome-extension, not the application.
+- Final production rebuild was reloaded and v0.2 context, Rank 5 usage and Clear rechecked.
+  Temporary viewport override reset; test tab and loopback server closed.
+
+## Boundary / delivery seal
+
+Exact packet SHA-256 rechecked against RUN_MANIFEST. Snapshot, raw logs, mutation copies,
+and runtime synthetic variants remain Git ignored. Phase 6 private workspace was not read.
+Delivery follows the committed local-gate seal: final clean check, feature-branch push,
+Draft PR creation, then immediate STOP. Exact delivered head and PR are recorded in the completion report.
