@@ -18,3 +18,9 @@ DXF readerのdrawing_derivedは形式からの導出を示すだけで、実在�
 `python scripts/generate_synthetic_geometry.py` で、同じ頂点定数から両fixtureを再生成できます。
 固定DXF metadataを使用し、ユーザー名・パス・実時刻を含めません。テストは再生成bytesとの一致、
 Polygon同値、面積差0、出力schemaとCLI非開示を検証します。
+
+## Phase 5 synthetic Search Result
+
+`search-result.json` は、この合成ProjectとGeometryからconstraintsを生成し、明示階高
+`[4,5,6,7,8]` をPhase 4 Searchへ渡したcanonical bytesです。Web Results Viewerのsample専用で、
+実案件runtime outputではありません。Python integration testが同じCLI pipelineを再実行し、exact bytes一致を検証します。

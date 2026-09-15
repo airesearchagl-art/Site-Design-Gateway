@@ -1,8 +1,6 @@
 # Run state
 
-Wave 0 started from the exact merged Phase 4 base with a clean worktree.
-The exact local packet snapshot is ignored and its SHA-256 matches RUN_MANIFEST.
-Phase 5 scope is a read-only, browser-memory-only consumer of canonical Search Result JSON.
-No implementation or verification claims have been made yet.
+Wave 1 checkpoint. The Web Results contract and ADR bind a read-only, browser-memory-only consumer to the five shared schemas while keeping semantic validation in Python.
+The tracked public synthetic Search Result was produced by the complete CLI pipeline at exact bytes; its cross-language gate passes.
+Web implementation and browser verification remain pending.
 Vercel has not been touched; D02 remains OPEN / PLATFORM_BLOCKED.
-

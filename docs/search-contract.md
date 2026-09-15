@@ -61,3 +61,6 @@ synthetic [4,5,6,7,8]は5acceptedでGFA [1120,960,800,640,480]。
 これらは既存の匿名synthetic条件の結果で、実案件データではない。
 
 Vercelは操作しない。SDG-VP-001 BLOCKED_EXTERNAL、D02 OPEN / PLATFORM_BLOCKEDを継続する。
+
+Phase 5 Web Results Viewerはこのcanonical出力をbrowser-onlyでconsumeする。
+authoritative semantic validationは引き続きPython exportの責務であり、Webは再実行しない。
