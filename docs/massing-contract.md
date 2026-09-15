@@ -1,6 +1,7 @@
 # Massing Candidate v0.1
 
 Current Phase = Phase 3 Massing Candidate Foundation。
+本書はPhase 3時点の契約・Gateを保持する。Phase 4はconsumerとして再利用し、現行Searchは[Search契約](search-contract.md)を参照する。
 成果は **constraint-bounded conceptual massing candidate** を1案だけ生成するPython基盤。
 道路・壁面後退、斜線、日影、天空率、地区計画等は扱わず、法規適合・建築可能性・最適性を保証しない。
 

@@ -24,9 +24,9 @@ CLI はローカルファイルを検証します。案件名や入力全文を�
 
 ignore 設定だけで公開可否を判断せず、コミット前に対象ファイルと差分を確認します。秘密情報・個人情報・入力全文の混入、データ破損が見つかった場合は共有を止めて報告します。認証や権限の変更、非公開情報の別経路への移送で解消しません。
 
-Current Phase = Phase 3 Massing Candidate Foundation。Vault / Notion への書込は禁止です。
+Current Phase = Phase 4 Search & Ranking Foundation。Vault / Notion への書込は禁止です。
 公開 Git への反映は feature branch と Draft PR まで。Draft作成後STOPし、Ready、merge、
-Vercel操作、Production、Phase 4には進みません。最終報告にDocumentation Sync Triggerを返します。
+Vercel操作、Production、Phase 5には進みません。最終報告にDocumentation Sync Triggerを返します。
 
 Geometry fixtureはゼロから作った `cases/example-urban-office/site.geojson` と `site.dxf`
 だけを許可します。一般のDXF/GeoJSON原本・出力は公開しません。Python CLIの出力先は明示し、
@@ -41,4 +41,7 @@ Massing outputもruntimeでありGitへ追加しない。形状・階高・cap�
 CLIにはfloors/reviewRequiredまたは固定codeだけを表示する。4mのsynthetic階高は架空設計値。
 旧Preview必須GateはSDG-VP-001 BLOCKED_EXTERNAL / D02 OPEN・PLATFORM_BLOCKEDとして保持する。
 2件の意図しないProduction分類は両方削除、Git切断後にHumanのPhase 3例外遷移が承認された。
-Phase 3ではVercelを操作しない。認証・権限変更やNotion/Vault更新を行わない。
+Phase 4ではVercelを操作しない。認証・権限変更やNotion/Vault更新を行わない。
+Search Resultもruntime出力でGitへ追加しない。4/5/6/7/8mは匿名syntheticの架空階高だけ。
+CLIにはevaluated/accepted/rejected/reviewRequiredまたは固定codeだけを表示する。
+candidate形状・hash・順位・rejection詳細は明示新規fileだけに出力し、CI artifactへ保存しない。
