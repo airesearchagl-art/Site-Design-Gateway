@@ -25,7 +25,8 @@ def _constant(_):
     raise JSONInputError("INVALID_JSON")
 
 
-def decode_json(payload: bytes | str, *, max_bytes: int) -> tuple[bytes, object]:
+def decode_json(payload: bytes | str, *, max_bytes: int, max_digits: int = MAX_DIGITS,
+                max_exponent: int = MAX_EXPONENT) -> tuple[bytes, object]:
     if type(payload) not in (bytes, str):
         raise JSONInputError("INVALID_JSON")
     try:
@@ -48,8 +49,8 @@ def decode_json(payload: bytes | str, *, max_bytes: int) -> tuple[bytes, object]
             elif type(value) is str:
                 value.encode("utf-8")
             elif type(value) is Decimal:
-                if (not value.is_finite() or len(value.as_tuple().digits) > MAX_DIGITS
-                        or abs(value.as_tuple().exponent) > MAX_EXPONENT):
+                if (not value.is_finite() or len(value.as_tuple().digits) > max_digits
+                        or abs(value.as_tuple().exponent) > max_exponent):
                     raise JSONInputError("NUMERIC_RANGE")
         return raw, data
     except JSONInputError:

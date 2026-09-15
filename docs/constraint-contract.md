@@ -1,6 +1,6 @@
 # Constraint Result v0.1
 
-Current Phase = Phase 2 Constraint Engine Foundation。入力済みの面積・BCR・FAR・heightを
+Phase 2で導入、Current Phase = Phase 3 Massing Candidate Foundation。入力済みの面積・BCR・FAR・heightを
 決定論的に変換する独立Python API/CLI。法規確認、行政確認、建築可能性証明ではない。
 Project/Geometry v0.1を改版せず、出力だけを`sdg-constraint-result-v0.1.schema.json`で定義する。
 
@@ -101,4 +101,16 @@ Python APIはValidatedProjectと検証済みSiteGeometryを受ける。geometry 
 
 Web接続、formula DSL、自治体rulepack、形状生成は範囲外。既存Web/Geometry検証を維持する。
 Vercel deployはこのRunでは行わない。
-Next Gate: **Vercel Preview Smoke — REQUIRED BEFORE PHASE 3**（Phase 2 merge後の別Run）。
+旧Preview必須条件はHumanのPhase 3 transition exception = AUTHORIZEDで解除。
+SDG-VP-001 BLOCKED_EXTERNAL / D02 OPEN・PLATFORM_BLOCKEDを維持する。Preview PASSではない。
+
+## Phase 3 output consumer
+
+`load_constraint_result(bytes | str)` は `ValidatedConstraintResult` を返す。
+schema、finite数値、state/value、provenance、area basis/差分/選択値、固定ID、全reviewRequired、参照を検証する。
+元の計算APIと共通の経路でprovenanceから再計算し、派生値だけが正しく見えるJSONも受理しない。
+派生値を含む出力用に4 MiB、depth32、数値係数8192桁・指数絶対値8192を上限とする。
+元Project/normalized Geometryの入力上限は変更しない。計算contextのInexact等はNUMERIC_RANGE。
+参照hashは既存encoderによるcanonical結果bytesから生成し、入力JSONの空白には依存しない。
+整合的に全provenanceを書き換えた場合の元Project真正性は、この結果fileだけでは証明できない。
+Massingはさらに渡されたGeometryのexact hash・面積・statusとbindingする。

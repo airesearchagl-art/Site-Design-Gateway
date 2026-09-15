@@ -2,7 +2,7 @@ name: Synthetic validation
 
 on:
   push:
-    branches: [feat/phase0-bootstrap, feat/phase1-geometry-foundation, feat/phase2-constraint-engine]
+    branches: [feat/phase0-bootstrap, feat/phase1-geometry-foundation, feat/phase2-constraint-engine, feat/phase3-massing-candidate-foundation]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   python:
-    name: Python schema and geometry (synthetic only)
+    name: Python schema, geometry, constraints and massing (synthetic only)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -38,6 +38,13 @@ jobs:
           python -m bve.geometry cases/example-urban-office/site.geojson --format geojson --output "$geometry_file"
           python -m bve.constraints --project cases/example-urban-office/project.json --geometry "$geometry_file" --area-basis declared_project_area
           python -m bve.constraints --project cases/example-urban-office/project.json --geometry "$geometry_file" --area-basis geometry_area
+      - name: Validate synthetic massing (summary only; temporary inputs)
+        run: |
+          geometry_file="$RUNNER_TEMP/sdg-massing-site-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.geojson"
+          constraint_file="$RUNNER_TEMP/sdg-massing-caps-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.json"
+          python -m bve.geometry cases/example-urban-office/site.geojson --format geojson --output "$geometry_file"
+          python -m bve.constraints --project cases/example-urban-office/project.json --geometry "$geometry_file" --area-basis declared_project_area --output "$constraint_file"
+          python -m bve.massing --geometry "$geometry_file" --constraints "$constraint_file" --floor-height-m 4
 
   web:
     name: Web and public boundary (synthetic only)
