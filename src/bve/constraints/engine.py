@@ -42,11 +42,11 @@ def _compute_result(project_reference: str, geometry_reference: str, area: AreaS
                          floor_area_cap(area.basis_area_m2, far_condition.value))
             far = Constraint("UNAVAILABLE" if far_value is None else "COMPUTED",
                              "floor_area_cap_v0.1", far_value, (selected, far_source))
-        elif schema_version in ("0.2", "0.3"):
+        elif schema_version in ("0.2", "0.3", "0.4"):
             far = compute_far_stack(area.basis_area_m2, selected, project_reference, far_condition, additional_caps)
         else:
             raise ConstraintError(Code.INVALID_ARGUMENTS)
-        if schema_version == "0.3":
+        if schema_version in ("0.3", "0.4"):
             height = compute_height_stack(project_reference, height_condition, additional_height_caps)
         elif height_condition is None:
             height = Constraint("ABSENT", "height_cap_v0.1", None, ())

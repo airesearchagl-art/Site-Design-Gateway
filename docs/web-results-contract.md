@@ -1,6 +1,6 @@
 # Web Results Viewer / Phase 11 scalar height contract
 
-Current Phase = Phase 11 Explicit Height Cap Stack / Effective Height Foundation。Phase 5 privacy/resource・Phase 7表示境界を維持する。
+Current Phase = Phase 12 Explicit Buildable Area Geometry / Footprint Domain Foundation。Phase 5 privacy/resource・Phase 7表示境界を維持する。
 
 Web は、ローカル BVE Core が canonical export した Search Result JSON をユーザーが選択し、
 ブラウザ内だけで形式確認・比較表示する read-only consumer である。
@@ -153,3 +153,17 @@ Webでmin / sort / tie / spatial / legal inferenceを行わない。en-US丸め�
 
 ABSENT/UNAVAILABLEを数値に置き換えない。既知0は0mと表示する。Clearで両stackと全state/inputを破棄する。
 既存preflight/8MiB/128MiB/privacy・非同期Clear境界は維持する。
+
+## Phase 12 supplied footprint domain
+
+[Buildable Area契約](buildable-area-contract.md)が詳細正本。Project0.4 / Buildable Area Geometry0.1 /
+Constraint0.4 / Massing Candidate0.2 / Search0.5 / Run Package0.4を明示dispatchする。
+旧Package0.1〜0.3は固定5ファイル、0.4だけbuildable-area.geojsonを加えた固定6ファイル。
+明示convex/no-hole polygonのsite完全包含、status一致、source/site/artifact hashを検証する。
+BCR/FARは敷地面積基準のまま。scalar calculation IDs、legacy bytes、rankingは維持する。
+既存homothetic shrinkをsupplied domainへ適用し、最終footprintはdomainとsiteの両方でcoversを要求。
+後退・斜線・法規からgeometryを生成せず、修復も行わず、法規適合を主張しない。
+Pythonがsemantic authority。Browserは21schema、hash/reference/statusと5/6-file matrixを確認し、
+authoritative spatialContextの表示のみ。containmentを再計算しない。buildable上限4MiB、全file size先行、
+actual buffer再確認、Clearの遅延handoff禁止、memory-only入力を維持。D04 OPEN。
+Documentation Sync Trigger: yes — Phase 12 major spatial geometry / Massing domain contract。

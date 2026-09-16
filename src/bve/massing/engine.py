@@ -11,6 +11,8 @@ from shapely.errors import GEOSException
 
 from bve.constraints import ValidatedConstraintResult
 from bve.geometry import SiteGeometry
+from bve.spatial import ValidatedBuildableArea, SpatialError
+from bve.spatial.errors import Code as SpatialCode
 from bve.geometry.normalization import MAX_POSITIONS, canonical_polygon
 
 from .errors import Code, MassingError
@@ -53,6 +55,19 @@ def _validate_inputs(site_geometry, constraint_result, floor_height_m):
     if any(item.state != "COMPUTED" for item in (result.building_coverage, result.floor_area_ratio, result.height)):
         raise MassingError(Code.REQUIRED_CONSTRAINT_UNAVAILABLE)
     return height, result
+
+
+def _validate_domain(site, constraints, buildable_area):
+    if constraints.result.schema_version == "0.4":
+        if buildable_area is None:
+            raise SpatialError(SpatialCode.BUILDABLE_AREA_REQUIRED)
+        if type(buildable_area) is not ValidatedBuildableArea:
+            raise SpatialError(SpatialCode.INVALID_ARGUMENTS)
+        buildable_area.validate_binding(site, constraints.result.project_reference)
+        return buildable_area.polygon
+    if buildable_area is not None:
+        raise SpatialError(SpatialCode.INVALID_ARGUMENTS)
+    return site.polygon
 
 
 def _require_supported_site(polygon: Polygon) -> None:
@@ -127,6 +142,9 @@ def _floor_count(result, actual: Decimal, floor_height: Decimal) -> int:
 def _validate_candidate(candidate: MassingCandidate) -> None:
     height, result = _validate_inputs(candidate.site, candidate.constraints, candidate.floor_height_m)
     _require_supported_site(candidate.site.polygon)
+    domain = _validate_domain(candidate.site, candidate.constraints, candidate.buildable_area)
+    if candidate.buildable_area is not None and not domain.covers(candidate.footprint):
+        raise MassingError(Code.GEOMETRY_GENERATION_FAILED)
     actual = _check_footprint(candidate.site.polygon, candidate.footprint, candidate.target_footprint_area_m2)
     # Check each final cap explicitly, even though target selection also bounds
     # the generated area. These checks protect export and future internal changes.
@@ -136,26 +154,32 @@ def _validate_candidate(candidate: MassingCandidate) -> None:
         raise MassingError(Code.GEOMETRY_GENERATION_FAILED)
     expected_target = min(Decimal(str(candidate.site.area_m2)), result.building_coverage.value,
                           result.floor_area_ratio.value)
+    if candidate.buildable_area is not None:
+        expected_target = min(expected_target, Decimal(str(candidate.buildable_area.area_m2)))
     if (candidate.target_footprint_area_m2 != expected_target or type(candidate.floor_count) is not int
             or candidate.floor_count != _floor_count(result, actual, height)):
         raise MassingError(Code.GEOMETRY_GENERATION_FAILED)
 
 
-def generate_massing_candidate(site_geometry, constraint_result, *, floor_height_m=None) -> MassingCandidate:
+def generate_massing_candidate(site_geometry, constraint_result, *, floor_height_m=None,
+                               buildable_area=None) -> MassingCandidate:
     """Return one convex baseline stack; floor height is always explicit."""
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", RuntimeWarning)
             floor_height, result = _validate_inputs(site_geometry, constraint_result, floor_height_m)
             _require_supported_site(site_geometry.polygon)
+            domain = _validate_domain(site_geometry, constraint_result, buildable_area)
             target = min(Decimal(str(site_geometry.area_m2)), result.building_coverage.value,
                          result.floor_area_ratio.value)
+            if buildable_area is not None:
+                target = min(target, Decimal(str(buildable_area.area_m2)))
             if target <= 0 or result.floor_area_ratio.value <= 0 or result.height.value <= 0:
                 raise MassingError(Code.NO_MASSING_CAPACITY)
-            footprint = _generate_footprint(site_geometry.polygon, target)
+            footprint = _generate_footprint(domain, target)
             actual = Decimal(str(footprint.area))
             floors = _floor_count(result, actual, floor_height)
-            candidate = MassingCandidate(site_geometry, constraint_result, footprint, target, floors, floor_height)
+            candidate = MassingCandidate(site_geometry, constraint_result, footprint, target, floors, floor_height, buildable_area)
             _validate_candidate(candidate)
             return candidate
     except DecimalException:

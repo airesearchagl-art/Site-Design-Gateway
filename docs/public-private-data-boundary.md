@@ -24,9 +24,9 @@ CLI はローカルファイルを検証します。案件名や入力全文を�
 
 ignore 設定だけで公開可否を判断せず、コミット前に対象ファイルと差分を確認します。秘密情報・個人情報・入力全文の混入、データ破損が見つかった場合は共有を止めて報告します。認証や権限の変更、非公開情報の別経路への移送で解消しません。
 
-Current Phase = Phase 11 Explicit Height Cap Stack / Effective Height Foundation。Vault / Notion への書込は禁止です。
+Current Phase = Phase 12 Explicit Buildable Area Geometry / Footprint Domain Foundation。Vault / Notion への書込は禁止です。
 公開 Git への反映は feature branch と Draft PR まで。Draft作成後STOPし、Ready、merge、
-Vercel操作、Production、Phase 12には進みません。最終報告にDocumentation Sync Triggerを返します。
+Vercel操作、Production、Phase 13には進みません。最終報告にDocumentation Sync Triggerを返します。
 
 Geometry fixtureはゼロから作った `cases/example-urban-office/site.geojson` と `site.dxf`
 だけを許可します。一般のDXF/GeoJSON原本・出力は公開しません。Python CLIの出力先は明示し、
@@ -82,3 +82,11 @@ runtime package、browser証跡、mutation copy、exact task packetはGit除外�
 実高さ・住所・高度地区・実CAD/PDF・Case001やprivate workspaceを参照しない。
 元Project照合APIはcallerが渡した既存入力をmemoryで確認し、ConstraintへProject全文を複製しない。
 Python/Webとも入力値や個人pathをlogに追加しない。runtime packagesと監査証跡はGit除外。
+
+
+## Phase 12 spatial inputs
+
+追加許可fixtureはexample-urban-office/project-buildable-area.jsonとbuildable-area.geojsonの完全syntheticのみ。
+既存fixtureは変更しない。98m²のrectangleは公開テスト用の架空値。実buildable polygon、境界、後退線、道路線、
+法規、Case001、private CAD/PDF/Run Packageを読まない・転記しない。runtime artifacts・監査画像・mutation copyはGit除外。
+canonical hashesに原本名・pathを付記しない。Vercel NOT TOUCHED。D02 / D04 OPEN。

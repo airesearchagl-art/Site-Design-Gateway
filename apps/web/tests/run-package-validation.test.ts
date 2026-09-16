@@ -319,9 +319,9 @@ test("manifest schema version and package version remain fixed", async () => {
   assert.equal((await validateRunPackage(files(bytes))).state, "INVALID");
 });
 
-test("shared registry imports fifteen canonical schemas including the eleven legacy contracts", () => {
+test("shared registry imports twenty-one canonical schemas including the fifteen legacy contracts", () => {
   const source = readFileSync(new URL("../src/lib/schema-registry.ts", import.meta.url), "utf8");
-  assert.equal((source.match(/schemas\/sdg-/g) ?? []).length, 15);
+  assert.equal((source.match(/schemas\/sdg-/g) ?? []).length, 21);
   assert.ok(source.includes("sdg-run-manifest-v0.1.schema.json"));
   assert.ok(!source.includes("compileAsync"));
 });

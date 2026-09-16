@@ -25,6 +25,7 @@ private-data/
 !cases/example-urban-office/site.dxf
 *.geojson
 !cases/example-urban-office/site.geojson
+!cases/example-urban-office/buildable-area.geojson
 *.dwg
 *.rvt
 *.ifc

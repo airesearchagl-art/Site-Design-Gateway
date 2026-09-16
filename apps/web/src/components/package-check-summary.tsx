@@ -8,7 +8,7 @@ export function PackageCheckSummary({ result }: { result: PackageValidationResul
         <strong>Package integrity PASS</strong>
         <dl className="package-facts">
           <div><dt>Package version</dt><dd>{result.packageVersion}</dd></div>
-          <div><dt>Artifacts</dt><dd>{result.artifactCount} + manifest（5ファイル）</dd></div>
+          <div><dt>Artifacts</dt><dd>{result.artifactCount} + manifest（{result.artifactCount + 1}ファイル）</dd></div>
           <div><dt>Browser check</dt><dd>DISPLAYABLE</dd></div>
         </dl>
         <p>Package integrity and shared-schema checks passed in this browser.</p>

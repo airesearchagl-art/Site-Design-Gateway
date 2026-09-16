@@ -2,7 +2,7 @@ name: Synthetic validation
 
 on:
   push:
-    branches: [feat/phase0-bootstrap, feat/phase1-geometry-foundation, feat/phase2-constraint-engine, feat/phase3-massing-candidate-foundation, feat/phase4-search-ranking-foundation, feat/phase5-web-results-viewer, feat/phase7-results-interpretation, feat/phase8-local-run-package, feat/phase9-run-package-viewer, feat/phase10-far-constraint-stack, feat/phase11-height-constraint-stack]
+    branches: [feat/phase0-bootstrap, feat/phase1-geometry-foundation, feat/phase2-constraint-engine, feat/phase3-massing-candidate-foundation, feat/phase4-search-ranking-foundation, feat/phase5-web-results-viewer, feat/phase7-results-interpretation, feat/phase8-local-run-package, feat/phase9-run-package-viewer, feat/phase10-far-constraint-stack, feat/phase11-height-constraint-stack, feat/phase12-buildable-area-domain]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -65,6 +65,12 @@ jobs:
         run: |
           package="$RUNNER_TEMP/sdg-height-stack-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           python -m bve.run create --project cases/example-urban-office/project-height-stack.json --geometry cases/example-urban-office/site.geojson --format geojson --area-basis declared_project_area --floor-height-m 4 --floor-height-m 5 --floor-height-m 6 --floor-height-m 7 --floor-height-m 8 --output "$package"
+          python -m bve.run verify --package "$package"
+
+      - name: Supplied buildable area Package v0.4 create and verify (synthetic only; no upload)
+        run: |
+          package="$RUNNER_TEMP/sdg-buildable-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python -m bve.run create --project cases/example-urban-office/project-buildable-area.json --geometry cases/example-urban-office/site.geojson --format geojson --buildable-geometry cases/example-urban-office/buildable-area.geojson --buildable-format geojson --area-basis declared_project_area --floor-height-m 4 --floor-height-m 5 --floor-height-m 6 --floor-height-m 7 --floor-height-m 8 --output "$package"
           python -m bve.run verify --package "$package"
 
   web:

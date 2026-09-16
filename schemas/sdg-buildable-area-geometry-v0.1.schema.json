@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:buildable-area-geometry:0.1",
+  "title": "SDG supplied buildable area geometry v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "type",
+    "geometry",
+    "properties"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.1"
+    },
+    "type": {
+      "const": "Feature"
+    },
+    "geometry": {
+      "$ref": "urn:sdg:site-geometry:0.1#/properties/geometry",
+      "properties": {
+        "coordinates": {
+          "maxItems": 1,
+          "items": {
+            "maxItems": 100000
+          }
+        }
+      }
+    },
+    "properties": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unit",
+        "coordinateSystem",
+        "areaM2",
+        "bounds",
+        "sourceFormat",
+        "sourceUnit",
+        "sourceStatus",
+        "sourceReference",
+        "warnings",
+        "valid",
+        "role",
+        "siteReference"
+      ],
+      "properties": {
+        "unit": {
+          "$ref": "urn:sdg:site-geometry:0.1#/properties/properties/properties/unit"
+        },
+        "coordinateSystem": {
+          "$ref": "urn:sdg:site-geometry:0.1#/properties/properties/properties/coordinateSystem"
+        },
+        "areaM2": {
+          "$ref": "urn:sdg:site-geometry:0.1#/properties/properties/properties/areaM2"
+        },
+        "bounds": {
+          "$ref": "urn:sdg:site-geometry:0.1#/properties/properties/properties/bounds"
+        },
+        "sourceFormat": {
+          "$ref": "urn:sdg:site-geometry:0.1#/properties/properties/properties/sourceFormat"
+        },
+        "sourceUnit": {
+          "$ref": "urn:sdg:site-geometry:0.1#/properties/properties/properties/sourceUnit"
+        },
+        "sourceStatus": {
+          "$ref": "urn:sdg:site-geometry:0.1#/properties/properties/properties/sourceStatus"
+        },
+        "sourceReference": {
+          "$ref": "urn:sdg:site-geometry:0.1#/properties/properties/properties/sourceReference"
+        },
+        "warnings": {
+          "$ref": "urn:sdg:site-geometry:0.1#/properties/properties/properties/warnings"
+        },
+        "valid": {
+          "$ref": "urn:sdg:site-geometry:0.1#/properties/properties/properties/valid"
+        },
+        "role": {
+          "const": "explicit_buildable_area"
+        },
+        "siteReference": {
+          "$ref": "urn:sdg:constraint-result:0.1#/$defs/reference"
+        }
+      }
+    }
+  }
+}

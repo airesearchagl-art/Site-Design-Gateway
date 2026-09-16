@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:constraint-result:0.4",
+  "title": "SDG Constraint Result v0.4 Project binding",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "inputReferences",
+    "areaBasis",
+    "constraints",
+    "reviewRequired"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.4"
+    },
+    "inputReferences": {
+      "$ref": "urn:sdg:constraint-result:0.3#/properties/inputReferences"
+    },
+    "areaBasis": {
+      "$ref": "urn:sdg:constraint-result:0.3#/properties/areaBasis"
+    },
+    "constraints": {
+      "$ref": "urn:sdg:constraint-result:0.3#/properties/constraints"
+    },
+    "reviewRequired": {
+      "$ref": "urn:sdg:constraint-result:0.3#/properties/reviewRequired"
+    }
+  }
+}

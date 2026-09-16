@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:run-manifest:0.4",
+  "title": "SDG Run Manifest v0.4 six fixed files",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "packageVersion",
+    "configuration",
+    "artifacts"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.4"
+    },
+    "packageVersion": {
+      "const": "sdg-run-package-v0.4"
+    },
+    "configuration": {
+      "$ref": "urn:sdg:run-manifest:0.1#/properties/configuration"
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project",
+        "geometry",
+        "constraints",
+        "search",
+        "buildableArea"
+      ],
+      "properties": {
+        "project": {
+          "$ref": "urn:sdg:run-manifest:0.1#/$defs/project"
+        },
+        "geometry": {
+          "$ref": "urn:sdg:run-manifest:0.1#/$defs/geometry"
+        },
+        "constraints": {
+          "$ref": "urn:sdg:run-manifest:0.1#/$defs/constraints"
+        },
+        "search": {
+          "$ref": "urn:sdg:run-manifest:0.1#/$defs/search"
+        },
+        "buildableArea": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "reference"
+          ],
+          "properties": {
+            "path": {
+              "const": "buildable-area.geojson"
+            },
+            "reference": {
+              "$ref": "urn:sdg:run-manifest:0.1#/$defs/reference"
+            }
+          }
+        }
+      }
+    }
+  }
+}

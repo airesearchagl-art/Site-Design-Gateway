@@ -31,6 +31,10 @@ def main(argv: list[str] | None = None) -> int:
     create.add_argument("--floor-height-m", required=True, action="append")
     create.add_argument("--layer", action=_Once)
     create.add_argument("--unit", choices=("m", "mm"), action=_Once)
+    create.add_argument("--buildable-geometry", type=Path, action=_Once)
+    create.add_argument("--buildable-format", choices=("geojson", "dxf"), action=_Once)
+    create.add_argument("--buildable-layer", action=_Once)
+    create.add_argument("--buildable-unit", choices=("m", "mm"), action=_Once)
     verify = sub.add_parser("verify", allow_abbrev=False)
     verify.add_argument("--package", required=True, type=Path, action=_Once)
     try:
@@ -40,7 +44,9 @@ def main(argv: list[str] | None = None) -> int:
         else:
             summary = create_package(project=args.project, geometry=args.geometry, format=args.format,
                                      area_basis=args.area_basis, floor_heights_m=args.floor_height_m,
-                                     output=args.output, layer=args.layer, unit=args.unit)
+                                     output=args.output, layer=args.layer, unit=args.unit,
+                                     buildable_geometry=args.buildable_geometry, buildable_format=args.buildable_format,
+                                     buildable_layer=args.buildable_layer, buildable_unit=args.buildable_unit)
     except RunError as error:
         print(f"FAIL stage={error.stage.value} code={error.code.value}")
         return 1

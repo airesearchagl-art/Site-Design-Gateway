@@ -39,7 +39,7 @@ def _recompute(data: dict) -> ConstraintResult:
         additional = tuple(AdditionalFarCap(entry["id"], entry["kind"], Condition(**entry["condition"]))
                            for entry in stack[1:])
     additional_height = ()
-    if data["schemaVersion"] == "0.3":
+    if data["schemaVersion"] in ("0.3", "0.4"):
         stack = constraints["height"]["capStack"]
         ids = [entry["id"] for entry in stack]
         if len(ids) != len(set(ids)):
@@ -68,10 +68,10 @@ class ValidatedConstraintResult:
         except JSONInputError as error:
             raise ConstraintError(Code(str(error))) from None
         version = data.get("schemaVersion") if type(data) is dict else None
-        if version not in ("0.1", "0.2", "0.3"):
+        if version not in ("0.1", "0.2", "0.3", "0.4"):
             raise ConstraintError(Code.CONSTRAINT_SCHEMA_INVALID)
         try:
-            validator = schema_validator({"0.1":"constraints", "0.2":"constraints_v2", "0.3":"constraints_v3"}[version])
+            validator = schema_validator({"0.1":"constraints", "0.2":"constraints_v2", "0.3":"constraints_v3", "0.4":"constraints_v4"}[version])
         except Exception:
             raise ConstraintError(Code.SCHEMA_UNAVAILABLE) from None
         try:
@@ -112,6 +112,6 @@ def load_constraint_result(payload: bytes | str, *, project: ValidatedProject | 
     """Check internal consistency; optionally also bind every source to the original Project.
 
     Without Project, self-consistent changes to source metadata cannot be authenticated.
-    Run Package v0.3 always supplies its validated Project.
+    Run Package v0.3/v0.4 always supplies its validated Project.
     """
     return ValidatedConstraintResult(payload, project=project)

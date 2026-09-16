@@ -8,19 +8,23 @@ from bve.geometry import load_normalized_geometry, read_dxf, read_geojson
 from bve.geometry.export import json_bytes, normalized_feature
 from bve.geometry.geojson import MAX_INPUT_BYTES as GEOMETRY_LIMIT
 from bve.search import search_massing_candidates
+from bve.spatial import read_buildable_area, buildable_bytes, SpatialError
+from bve.spatial.errors import Code as SpatialCode
 from bve.search.export import search_bytes
 from bve.validation import MAX_INPUT_BYTES as PROJECT_LIMIT
 
 from .errors import Code, RunError, Stage, at_stage
 from .filesystem import publish_new, read_regular, require_absent, write_new
 from .manifest import manifest_bytes
-from .model import ARTIFACTS, RunSummary, package_version_for_project
+from .model import ARTIFACT_SETS, RunSummary, package_version_for_project
 from .verification import verify_package
 
 
 def create_package(*, project: Path, geometry: Path, format: str, area_basis: str,
                    floor_heights_m, output: Path, layer: str | None = None,
-                   unit: str | None = None) -> RunSummary:
+                   unit: str | None = None, buildable_geometry: Path | None = None,
+                   buildable_format: str | None = None, buildable_layer: str | None = None,
+                   buildable_unit: str | None = None) -> RunSummary:
     with at_stage(Stage.ARGUMENTS):
         if format not in ("geojson", "dxf") or (format == "geojson" and (layer is not None or unit is not None)):
             raise RunError(Stage.ARGUMENTS, Code.INVALID_ARGUMENTS)
@@ -35,6 +39,15 @@ def create_package(*, project: Path, geometry: Path, format: str, area_basis: st
         raw_project = project_bytes(read_regular(Path(project), PROJECT_LIMIT, Stage.PROJECT))
         validated_project = load_project(raw_project)
         package_version = package_version_for_project(validated_project.schema_version)
+    with at_stage(Stage.ARGUMENTS):
+        if validated_project.schema_version == "0.4":
+            if buildable_geometry is None or buildable_format is None:
+                raise SpatialError(SpatialCode.BUILDABLE_AREA_REQUIRED)
+            if (buildable_format not in ("geojson", "dxf") or
+                    (buildable_format == "geojson" and (buildable_layer is not None or buildable_unit is not None))):
+                raise RunError(Stage.ARGUMENTS, Code.INVALID_ARGUMENTS)
+        elif any(value is not None for value in (buildable_geometry, buildable_format, buildable_layer, buildable_unit)):
+            raise RunError(Stage.ARGUMENTS, Code.INVALID_ARGUMENTS)
     with at_stage(Stage.GEOMETRY):
         raw_geometry = read_regular(Path(geometry), GEOMETRY_LIMIT, Stage.GEOMETRY)
         site = (read_geojson(raw_geometry) if format == "geojson" else
@@ -42,13 +55,21 @@ def create_package(*, project: Path, geometry: Path, format: str, area_basis: st
         normalized = json_bytes(normalized_feature(site))
         # All downstream references bind the packaged normalized bytes.
         site = load_normalized_geometry(normalized)
+    buildable = None
+    if validated_project.schema_version == "0.4":
+        with at_stage(Stage.SPATIAL):
+            buildable = read_buildable_area(read_regular(Path(buildable_geometry), GEOMETRY_LIMIT, Stage.SPATIAL),
+                format=buildable_format, site=site, project=validated_project,
+                layer=buildable_layer, unit=buildable_unit)
     with at_stage(Stage.CONSTRAINTS):
         caps = result_bytes(compute_constraints(validated_project, site, area_basis=area_basis))
-        validated_caps = load_constraint_result(caps, project=validated_project if validated_project.schema_version == "0.3" else None)
+        validated_caps = load_constraint_result(caps, project=validated_project if validated_project.schema_version in ("0.3", "0.4") else None)
     with at_stage(Stage.SEARCH):
-        result = search_massing_candidates(site, validated_caps, floor_heights_m=floor_heights_m)
+        result = search_massing_candidates(site, validated_caps, floor_heights_m=floor_heights_m, buildable_area=buildable)
         search = search_bytes(result)
     artifacts = {"project": raw_project, "geometry": normalized, "constraints": caps, "search": search}
+    if buildable is not None:
+        artifacts["buildableArea"] = buildable_bytes(buildable)
     with at_stage(Stage.MANIFEST):
         manifest = manifest_bytes(area_basis, result.floor_heights_m, artifacts, package_version=package_version)
     with at_stage(Stage.WRITE):
@@ -56,7 +77,7 @@ def create_package(*, project: Path, geometry: Path, format: str, area_basis: st
     try:
         temporary = Path(staging.name)
         with at_stage(Stage.WRITE):
-            for kind, name in ARTIFACTS.items():
+            for kind, name in ARTIFACT_SETS[package_version].items():
                 write_new(temporary / name, artifacts[kind])
             write_new(temporary / "manifest.json", manifest)
         summary = verify_package(temporary)

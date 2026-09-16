@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { AreaBasisPanel, ConstraintUsagePanel } from "./search-interpretation";
 import { PackageCheckSummary } from "./package-check-summary";
+import { BuildableAreaPanel } from "./buildable-area-panel.tsx";
 import { HeightStackPanel } from "./height-stack-panel.tsx";
 import { FarStackPanel } from "./far-stack-panel";
 import { validateRunPackage, type PackageValidationResult } from "../lib/run-package-validation.ts";
@@ -47,7 +48,7 @@ export function SearchResultViewer() {
     [result],
   );
   const selected = model && selection ? findCandidate(model, selection) : undefined;
-  const preview = selected ? footprintPreview(selected) : { available: false as const };
+  const preview = selected ? footprintPreview(selected, model?.schemaVersion === "0.5" ? model.spatialContext.buildableArea.geometry.coordinates : undefined) : { available: false as const };
   const state = loading ? "LOADING" : result?.state ?? packageResult?.state ?? "EMPTY";
 
   function resetPackage() {
@@ -133,15 +134,15 @@ export function SearchResultViewer() {
       <div className="package-intake" data-package-state={packageLoading ? "LOADING" : packageResult?.state ?? "EMPTY"}>
         <h3>SDG Run Package</h3>
         <p className="small" id="package-help">folder直下のmanifest.json / project.json / site.geojson / constraints.json / search-result.jsonを選択します。
-          folder選択に対応しないブラウザでは5ファイル同時選択を使えます。送信・保存なし。ZIPは対象外です。</p>
+          v0.4はbuildable-area.geojsonを加えた6ファイルです。folder選択に対応しないブラウザでは複数ファイル同時選択を使えます。送信・保存なし。ZIPは対象外です。</p>
         <div className="package-controls">
           <button type="button" className="primary" onClick={() => directoryInput.current?.click()}>SDG Run Packageを選択</button>
           <input ref={directoryInput} id="run-package-folder" type="file" multiple {...{ webkitdirectory: "" }} hidden
             aria-label="SDG Run Package folder" aria-describedby="package-help"
             onChange={(event) => { const files = Array.from(event.target.files ?? []); event.target.value = ""; void selectPackage(files); }} />
-          <button type="button" onClick={() => packageInput.current?.click()}>5ファイル同時選択</button>
+          <button type="button" onClick={() => packageInput.current?.click()}>5 / 6ファイル同時選択</button>
           <input ref={packageInput} id="run-package-files" type="file" multiple hidden
-            aria-label="Run Packageの5ファイル" aria-describedby="package-help"
+            aria-label="Run Packageの5 / 6ファイル" aria-describedby="package-help"
             onChange={(event) => { const files = Array.from(event.target.files ?? []); event.target.value = ""; void selectPackage(files); }} />
         </div>
         {packageLoading ? <p role="status">Packageをブラウザ内で確認中…</p> : null}
@@ -213,7 +214,8 @@ export function SearchResultViewer() {
 
             <AreaBasisPanel model={model} />
             <FarStackPanel model={model} />
-          <HeightStackPanel model={model} />
+            <HeightStackPanel model={model} />
+            <BuildableAreaPanel model={model} />
 
             <div className="ranking-warning" role="note">
               <strong>順位の読み方</strong>
@@ -260,11 +262,15 @@ export function SearchResultViewer() {
                   <h3 id="footprint-title">Conceptual footprint · Local XY</h3>
                   <p>Rank {selected.rank} · floor height {formatMeasure(selected.floorHeightM)} m · GFA {formatMeasure(selected.grossFloorAreaM2)} m²</p>
                   <p className="small">exterior ringのみを表示。形状の修復・補間・後退・3D化は行いません。</p>
+                  {model.schemaVersion === "0.5" ? <p className="footprint-legend small">
+                    <span>Dashed outline: Supplied buildable area</span><span>Filled shape: Candidate footprint</span>
+                  </p> : null}
                 </div>
                 <div className="footprint-frame">
                   {preview.available ? (
                     <svg viewBox={preview.viewBox} role="img" aria-label={`Rank ${selected.rank} conceptual footprint, Local XY`} preserveAspectRatio="xMidYMid meet">
-                      <polygon points={preview.points} />
+                      {preview.buildablePoints ? <polygon className="buildable-outline" points={preview.buildablePoints} /> : null}
+                      <polygon className="candidate-footprint" points={preview.points} />
                     </svg>
                   ) : <p className="preview-unavailable">Footprint preview unavailable</p>}
                 </div>

@@ -6,11 +6,13 @@ import {
 } from "./search-validation.ts";
 
 export const PACKAGE_FILES = ["manifest.json", "project.json", "site.geojson", "constraints.json", "search-result.json"] as const;
-export type PackageFilename = typeof PACKAGE_FILES[number];
+export const PACKAGE_FILES_V4 = [...PACKAGE_FILES, "buildable-area.geojson"] as const;
+export type PackageFilename = typeof PACKAGE_FILES_V4[number];
 export const PACKAGE_LIMITS: Readonly<Record<PackageFilename, number>> = Object.freeze({
   "manifest.json": 256 * 1024,
   "project.json": 256 * 1024,
   "site.geojson": 4 * 1024 * 1024,
+  "buildable-area.geojson": 4 * 1024 * 1024,
   "constraints.json": 4 * 1024 * 1024,
   "search-result.json": MAX_SEARCH_BYTES,
 });
@@ -18,9 +20,12 @@ const ARTIFACTS = [
   ["project", "project.json"], ["geometry", "site.geojson"],
   ["constraints", "constraints.json"], ["search", "search-result.json"],
 ] as const;
-type ArtifactKind = typeof ARTIFACTS[number][0];
-type PackageVersion = "sdg-run-package-v0.1" | "sdg-run-package-v0.2" | "sdg-run-package-v0.3";
+const ARTIFACTS_V4 = [...ARTIFACTS, ["buildableArea", "buildable-area.geojson"]] as const;
+type ArtifactKind = typeof ARTIFACTS_V4[number][0];
+type PackageVersion = "sdg-run-package-v0.1" | "sdg-run-package-v0.2" | "sdg-run-package-v0.3" | "sdg-run-package-v0.4";
 const packageValidators = {
+  "sdg-run-package-v0.4": { project: sharedValidators.projectV4, geometry: sharedValidators.geometry,
+    constraints: sharedValidators.constraintsV4, search: sharedValidators.searchV5, manifest: sharedValidators.manifestV4 },
   "sdg-run-package-v0.3": { project: sharedValidators.projectV3, geometry: sharedValidators.geometry,
     constraints: sharedValidators.constraintsV3, search: sharedValidators.searchV4, manifest: sharedValidators.manifestV3 },
   "sdg-run-package-v0.1": { project: sharedValidators.project, geometry: sharedValidators.geometry,
@@ -38,8 +43,8 @@ type ConstraintLinks = { inputReferences: { project: string; geometry: string };
 type DisplayableSearch = Extract<SearchValidationResult, { state: "DISPLAYABLE" }>;
 
 const messages = {
-  fileSet: "指定された5ファイルだけを、重複なく選択してください。隠しファイルも追加できません。",
-  relativePath: "同じfolderの直下にある5ファイルを選択してください。入れ子や複数rootは受け付けません。",
+  fileSet: "versionに対応する5 / 6ファイルだけを、重複なく選択してください。隠しファイルも追加できません。",
+  relativePath: "同じfolderの直下にある5 / 6ファイルを選択してください。入れ子や複数rootは受け付けません。",
   maxBytes: "このファイルはブラウザの読込上限を超えています。",
   viewerResource: "JSONの入れ子または要素数がブラウザの上限を超えています。",
   read: "ファイルを読み込めませんでした。",
@@ -56,7 +61,7 @@ const messages = {
 export type PackageIssueCode = keyof typeof messages;
 export type PackageIssue = { file: PackageFilename | "package"; code: PackageIssueCode; message: string };
 export type PackageValidationResult =
-  | { state: "DISPLAYABLE"; packageVersion: PackageVersion; artifactCount: 4; issues: []; search: DisplayableSearch }
+  | { state: "DISPLAYABLE"; packageVersion: PackageVersion; artifactCount: 4 | 5; issues: []; search: DisplayableSearch }
   | { state: "INVALID" | "VIEWER_LIMIT"; issues: [PackageIssue] };
 type Failure = Exclude<PackageValidationResult, { state: "DISPLAYABLE" }>;
 
@@ -66,11 +71,11 @@ function failure(code: PackageIssueCode, file: PackageIssue["file"] = "package",
 
 function selectedFileMap(files: readonly SelectedPackageFile[]): Map<PackageFilename, SelectedPackageFile> | Failure {
   const selected = new Map<PackageFilename, SelectedPackageFile>();
-  if (files.length !== PACKAGE_FILES.length) return failure("fileSet");
+  if (files.length !== PACKAGE_FILES.length && files.length !== PACKAGE_FILES_V4.length) return failure("fileSet");
   let root: string | undefined;
   const directoryMode = files.some((file) => Boolean(file.webkitRelativePath));
   for (const file of files) {
-    if (!PACKAGE_FILES.includes(file.name as PackageFilename) || selected.has(file.name as PackageFilename)) {
+    if (!PACKAGE_FILES_V4.includes(file.name as PackageFilename) || selected.has(file.name as PackageFilename)) {
       return failure("fileSet");
     }
     if (directoryMode) {
@@ -83,6 +88,7 @@ function selectedFileMap(files: readonly SelectedPackageFile[]): Map<PackageFile
     }
     selected.set(file.name as PackageFilename, file);
   }
+  if (!selected.has("manifest.json")) return failure("fileSet");
   return selected;
 }
 
@@ -132,8 +138,8 @@ export async function validateRunPackage(
     const selected = selectedFileMap(files);
     if (!(selected instanceof Map)) return selected;
     // Preflight every file before reading even the manifest.
-    for (const name of PACKAGE_FILES) {
-      const size = selected.get(name)!.size;
+    for (const [name, file] of selected) {
+      const size = file.size;
       if (!Number.isSafeInteger(size) || size < 0) return failure("read", name);
       if (size > PACKAGE_LIMITS[name]) return failure("maxBytes", name, "VIEWER_LIMIT");
     }
@@ -143,13 +149,18 @@ export async function validateRunPackage(
     if ("state" in parsed) return parsed;
     const version = parsed.value !== null && typeof parsed.value === "object" && "packageVersion" in parsed.value
       ? parsed.value.packageVersion : undefined;
-    if (version !== "sdg-run-package-v0.1" && version !== "sdg-run-package-v0.2" && version !== "sdg-run-package-v0.3") return failure("schema", "manifest.json");
+    if (version !== "sdg-run-package-v0.1" && version !== "sdg-run-package-v0.2" && version !== "sdg-run-package-v0.3" && version !== "sdg-run-package-v0.4") return failure("schema", "manifest.json");
     const validators = packageValidators[version];
     if (!validators.manifest(parsed.value)) return failure("schema", "manifest.json");
     const manifest = parsed.value as Manifest;
+    const expectedFiles = version === "sdg-run-package-v0.4" ? PACKAGE_FILES_V4 : PACKAGE_FILES;
+    if (selected.size !== expectedFiles.length || expectedFiles.some((name) => !selected.has(name))) return failure("fileSet");
+    const artifacts = version === "sdg-run-package-v0.4" ? ARTIFACTS_V4 : ARTIFACTS;
+    let projectSpatialStatus: string | undefined;
+    let buildable: { properties: { siteReference: string; sourceStatus: string; sourceReference: string } } | undefined;
     let constraints: ConstraintLinks | undefined;
     let search: DisplayableSearch | undefined;
-    for (const [kind, name] of ARTIFACTS) {
+    for (const [kind, name] of artifacts) {
       // Fixed names only: never interpret the manifest path as a traversal target.
       const input = await read(selected.get(name)!, name, signal);
       if ("state" in input) return input;
@@ -164,8 +175,13 @@ export async function validateRunPackage(
       } else {
         const artifact = parseArtifact(input.text, name);
         if ("state" in artifact) return artifact;
-        if (!validators[kind](artifact.value)) return failure("schema", name);
+        const validate = kind === "buildableArea" ? sharedValidators.buildable : validators[kind];
+        if (!validate(artifact.value)) return failure("schema", name);
         if (kind === "project" && (!uniqueFarCapIds(artifact.value) || !uniqueHeightCapIds(artifact.value))) return failure("schema", name);
+        if (kind === "project" && version === "sdg-run-package-v0.4") {
+          projectSpatialStatus = (artifact.value as { spatialConstraints: { buildableArea: { status: string } } }).spatialConstraints.buildableArea.status;
+        }
+        if (kind === "buildableArea") buildable = artifact.value as typeof buildable;
         if (kind === "constraints") constraints = artifact.value as ConstraintLinks;
       }
       let hash: string;
@@ -185,13 +201,25 @@ export async function validateRunPackage(
     if (search.value.inputReferences.project !== refs.project.reference
         || search.value.inputReferences.geometry !== refs.geometry.reference
         || search.value.inputReferences.constraints !== refs.constraints.reference) return failure("referenceMismatch", "search-result.json");
+    if (version === "sdg-run-package-v0.4") {
+      if (!buildable || search.value.schemaVersion !== "0.5") return failure("referenceMismatch");
+      const spatial = search.value.spatialContext.buildableArea;
+      if (buildable.properties.siteReference !== refs.geometry.reference) return failure("referenceMismatch", "buildable-area.geojson");
+      if (projectSpatialStatus !== buildable.properties.sourceStatus) return failure("referenceMismatch", "buildable-area.geojson");
+      if (search.value.inputReferences.buildableArea !== refs.buildableArea.reference
+          || spatial.artifactReference !== refs.buildableArea.reference || spatial.siteReference !== refs.geometry.reference
+          || spatial.sourceReference !== buildable.properties.sourceReference || spatial.sourceStatus !== buildable.properties.sourceStatus
+          || search.value.rankedCandidates.some((entry) => entry.candidate.inputReferences.buildableArea !== refs.buildableArea.reference)) {
+        return failure("referenceMismatch", "search-result.json");
+      }
+    }
     if (manifest.configuration.areaBasis !== constraints.areaBasis.selectedBasis) return failure("configurationMismatch");
     const heights = search.value.search.floorHeightsM;
     if (manifest.configuration.floorHeightsM.length !== heights.length
         || !manifest.configuration.floorHeightsM.every((height, index) => height === heights[index])) {
       return failure("configurationMismatch");
     }
-    return { state: "DISPLAYABLE", packageVersion: manifest.packageVersion, artifactCount: 4, issues: [], search };
+    return { state: "DISPLAYABLE", packageVersion: manifest.packageVersion, artifactCount: version === "sdg-run-package-v0.4" ? 5 : 4, issues: [], search };
   } catch {
     return failure("read");
   }

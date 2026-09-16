@@ -7,12 +7,12 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { PACKAGE_FILES, type PackageFilename, type SelectedPackageFile } from "../src/lib/run-package-validation.ts";
+import { PACKAGE_FILES, PACKAGE_FILES_V4, type PackageFilename, type SelectedPackageFile } from "../src/lib/run-package-validation.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 export type PackageBytes = Record<PackageFilename, Uint8Array<ArrayBuffer>>;
 export const artifactNames = ["project.json", "site.geojson", "constraints.json", "search-result.json"] as const;
-const kind = { "project.json": "project", "site.geojson": "geometry", "constraints.json": "constraints", "search-result.json": "search" } as const;
+const kind = { "project.json": "project", "site.geojson": "geometry", "constraints.json": "constraints", "search-result.json": "search", "buildable-area.geojson": "buildableArea" } as const;
 
 export function canonicalPackage(heights: string[], projectValue?: unknown): PackageBytes {
   const temporary = mkdtempSync(join(tmpdir(), "sdg-p9-synthetic-"));
@@ -20,12 +20,14 @@ export function canonicalPackage(heights: string[], projectValue?: unknown): Pac
   try {
     const projectInput = projectValue === undefined ? "cases/example-urban-office/project.json" : join(temporary, "synthetic-project.json");
     if (projectValue !== undefined) writeFileSync(projectInput, JSON.stringify(projectValue));
+    const spatial = (projectValue as { schemaVersion?: string } | undefined)?.schemaVersion === "0.4";
     const python = process.env.SDG_TEST_PYTHON ?? (process.platform === "win32" ? join(ROOT, ".venv/Scripts/python.exe") : "python");
     execFileSync(python, ["-m", "bve.run", "create", "--project", projectInput,
       "--geometry", "cases/example-urban-office/site.geojson", "--format", "geojson", "--area-basis", "declared_project_area",
-      ...heights.flatMap((height) => ["--floor-height-m", height]), "--output", output],
+      ...heights.flatMap((height) => ["--floor-height-m", height]), "--output", output,
+      ...(spatial ? ["--buildable-geometry", "cases/example-urban-office/buildable-area.geojson", "--buildable-format", "geojson"] : [])],
     { cwd: ROOT, env: { ...process.env, PYTHONPATH: join(ROOT, "src"), PYTHONDONTWRITEBYTECODE: "1" }, stdio: "pipe", timeout: 30_000 });
-    return Object.fromEntries(PACKAGE_FILES.map((name) => [name, new Uint8Array(readFileSync(join(output, name)))])) as PackageBytes;
+    return Object.fromEntries((spatial ? PACKAGE_FILES_V4 : PACKAGE_FILES).map((name) => [name, new Uint8Array(readFileSync(join(output, name)))])) as PackageBytes;
   } catch {
     throw new Error("Public synthetic package preparation failed.");
   } finally {
@@ -41,7 +43,7 @@ const canonical = canonicalPackage(["4", "5", "6", "7", "8"]);
 const zero = canonicalPackage(["32", "40"]);
 export function packageBytes(zeroAccepted = false): PackageBytes { return structuredClone(zeroAccepted ? zero : canonical); }
 export function files(bytes: PackageBytes, root?: string): SelectedPackageFile[] {
-  return PACKAGE_FILES.map((name) => {
+  return (Object.keys(bytes) as PackageFilename[]).map((name) => {
     const file = new File([bytes[name]], name);
     if (root !== undefined) Object.defineProperty(file, "webkitRelativePath", { value: `${root}/${name}` });
     return file;
@@ -52,7 +54,7 @@ export function setDocument(bytes: PackageBytes, name: PackageFilename, value: u
   bytes[name] = new TextEncoder().encode(JSON.stringify(value));
 }
 export function sha(bytes: Uint8Array): string { return "sha256:" + createHash("sha256").update(bytes).digest("hex"); }
-export function rehash(bytes: PackageBytes, name: typeof artifactNames[number], rebindSearch = false) {
+export function rehash(bytes: PackageBytes, name: keyof typeof kind, rebindSearch = false) {
   const manifest = document(bytes, "manifest.json");
   manifest.artifacts[kind[name]].reference = sha(bytes[name]);
   if (name === "constraints.json" && rebindSearch) {

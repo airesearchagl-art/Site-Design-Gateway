@@ -78,3 +78,17 @@ Previewを意図した独立2経路がProduction分類され、両deploymentは�
 直前のclosure確認はGit Integration DISCONNECTED、deployments0、latestDeployment null、live false、domains0。
 HumanのPhase 3 transition exception = AUTHORIZED。このPhaseでVercelを操作・再検証しない。
 Draft PR作成後STOP。Ready/merge/Phase 4/Productionは禁止。Documentation Sync Trigger = yes。
+
+## Phase 12 supplied footprint domain
+
+[Buildable Area契約](buildable-area-contract.md)が詳細正本。Project0.4 / Buildable Area Geometry0.1 /
+Constraint0.4 / Massing Candidate0.2 / Search0.5 / Run Package0.4を明示dispatchする。
+旧Package0.1〜0.3は固定5ファイル、0.4だけbuildable-area.geojsonを加えた固定6ファイル。
+明示convex/no-hole polygonのsite完全包含、status一致、source/site/artifact hashを検証する。
+BCR/FARは敷地面積基準のまま。scalar calculation IDs、legacy bytes、rankingは維持する。
+既存homothetic shrinkをsupplied domainへ適用し、最終footprintはdomainとsiteの両方でcoversを要求。
+後退・斜線・法規からgeometryを生成せず、修復も行わず、法規適合を主張しない。
+Pythonがsemantic authority。Browserは21schema、hash/reference/statusと5/6-file matrixを確認し、
+authoritative spatialContextの表示のみ。containmentを再計算しない。buildable上限4MiB、全file size先行、
+actual buffer再確認、Clearの遅延handoff禁止、memory-only入力を維持。D04 OPEN。
+Documentation Sync Trigger: yes — Phase 12 major spatial geometry / Massing domain contract。

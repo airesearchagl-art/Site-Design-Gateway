@@ -6,12 +6,14 @@ from bve.constraints import ConstraintError
 from bve.geometry import GeometryError
 from bve.massing import MassingError
 from bve.search import SearchError
+from bve.spatial import SpatialError
 
 
 class Stage(StrEnum):
     ARGUMENTS = "arguments"
     PROJECT = "project"
     GEOMETRY = "geometry"
+    SPATIAL = "spatial"
     CONSTRAINTS = "constraints"
     SEARCH = "search"
     MANIFEST = "manifest"
@@ -57,7 +59,7 @@ def at_stage(stage: Stage):
         yield
     except RunError:
         raise
-    except (GeometryError, ConstraintError, MassingError, SearchError) as error:
+    except (GeometryError, ConstraintError, MassingError, SearchError, SpatialError) as error:
         raise RunError(stage, error.code) from None
     except (OSError, ValueError):
         raise RunError(stage, Code.IO_ERROR) from None

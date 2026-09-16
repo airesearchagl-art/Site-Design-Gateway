@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:search-result:0.5",
+  "title": "SDG Search Result v0.5 authoritative spatial context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "inputReferences",
+    "constraintContext",
+    "spatialContext",
+    "search",
+    "summary",
+    "rejections",
+    "rankedCandidates"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.5"
+    },
+    "inputReferences": {
+      "$ref": "urn:sdg:massing-candidate:0.2#/properties/inputReferences"
+    },
+    "constraintContext": {
+      "$ref": "urn:sdg:search-result:0.4#/properties/constraintContext"
+    },
+    "spatialContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "buildableArea"
+      ],
+      "properties": {
+        "buildableArea": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "role",
+            "siteReference",
+            "sourceReference",
+            "sourceStatus",
+            "areaM2",
+            "artifactReference",
+            "reviewRequired",
+            "geometry"
+          ],
+          "properties": {
+            "role": {
+              "$ref": "urn:sdg:buildable-area-geometry:0.1#/properties/properties/properties/role"
+            },
+            "siteReference": {
+              "$ref": "urn:sdg:buildable-area-geometry:0.1#/properties/properties/properties/siteReference"
+            },
+            "sourceReference": {
+              "$ref": "urn:sdg:buildable-area-geometry:0.1#/properties/properties/properties/sourceReference"
+            },
+            "sourceStatus": {
+              "$ref": "urn:sdg:buildable-area-geometry:0.1#/properties/properties/properties/sourceStatus"
+            },
+            "areaM2": {
+              "$ref": "urn:sdg:buildable-area-geometry:0.1#/properties/properties/properties/areaM2"
+            },
+            "artifactReference": {
+              "$ref": "urn:sdg:constraint-result:0.1#/$defs/reference"
+            },
+            "reviewRequired": {
+              "type": "boolean"
+            },
+            "geometry": {
+              "$ref": "urn:sdg:buildable-area-geometry:0.1#/properties/geometry"
+            }
+          }
+        }
+      }
+    },
+    "search": {
+      "$ref": "urn:sdg:search-result:0.1#/properties/search"
+    },
+    "summary": {
+      "$ref": "urn:sdg:search-result:0.1#/properties/summary"
+    },
+    "rejections": {
+      "$ref": "urn:sdg:search-result:0.1#/properties/rejections"
+    },
+    "rankedCandidates": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "rank",
+          "candidateReference",
+          "grossFloorAreaM2",
+          "candidate"
+        ],
+        "properties": {
+          "rank": {
+            "$ref": "urn:sdg:search-result:0.1#/properties/rankedCandidates/items/properties/rank"
+          },
+          "candidateReference": {
+            "$ref": "urn:sdg:search-result:0.1#/properties/rankedCandidates/items/properties/candidateReference"
+          },
+          "grossFloorAreaM2": {
+            "$ref": "urn:sdg:search-result:0.1#/properties/rankedCandidates/items/properties/grossFloorAreaM2"
+          },
+          "candidate": {
+            "$ref": "urn:sdg:massing-candidate:0.2"
+          }
+        }
+      }
+    }
+  }
+}

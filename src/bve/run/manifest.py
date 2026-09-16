@@ -8,7 +8,7 @@ from bve.constraints.reader import MAX_RESULT_DIGITS, MAX_RESULT_EXPONENT
 from bve.search.inputs import canonical_heights
 
 from .errors import Code, RunError, Stage
-from .model import ARTIFACTS, PACKAGE_VERSION, PACKAGE_VERSION_V2, PACKAGE_VERSION_V3
+from .model import ARTIFACT_SETS, PACKAGE_VERSION, PACKAGE_VERSION_V2, PACKAGE_VERSION_V3, PACKAGE_VERSION_V4
 
 MAX_MANIFEST_BYTES = 256 * 1024
 
@@ -28,10 +28,10 @@ def decode(payload: bytes, limit: int):
 
 def validate_manifest(data: dict) -> None:
     version = data.get("packageVersion") if type(data) is dict else None
-    if version not in (PACKAGE_VERSION, PACKAGE_VERSION_V2, PACKAGE_VERSION_V3):
+    if version not in (PACKAGE_VERSION, PACKAGE_VERSION_V2, PACKAGE_VERSION_V3, PACKAGE_VERSION_V4):
         raise RunError(Stage.MANIFEST, Code.MANIFEST_SCHEMA_INVALID)
     try:
-        validator = schema_validator({PACKAGE_VERSION:"run", PACKAGE_VERSION_V2:"run_v2", PACKAGE_VERSION_V3:"run_v3"}[version])
+        validator = schema_validator({PACKAGE_VERSION:"run", PACKAGE_VERSION_V2:"run_v2", PACKAGE_VERSION_V3:"run_v3", PACKAGE_VERSION_V4:"run_v4"}[version])
     except Exception:
         raise RunError(Stage.MANIFEST, Code.SCHEMA_UNAVAILABLE) from None
     if not validator.is_valid(data):
@@ -43,14 +43,14 @@ def validate_manifest(data: dict) -> None:
 
 def manifest_bytes(area_basis: str, floor_heights: tuple, artifacts: dict[str, bytes], *,
                    package_version: str = PACKAGE_VERSION) -> bytes:
-    if set(artifacts) != set(ARTIFACTS):
-        raise RunError(Stage.MANIFEST, Code.FILE_SET_MISMATCH)
-    if package_version not in (PACKAGE_VERSION, PACKAGE_VERSION_V2, PACKAGE_VERSION_V3):
+    if package_version not in (PACKAGE_VERSION, PACKAGE_VERSION_V2, PACKAGE_VERSION_V3, PACKAGE_VERSION_V4):
         raise RunError(Stage.MANIFEST, Code.MANIFEST_SCHEMA_INVALID)
-    data = {"schemaVersion": {PACKAGE_VERSION:"0.1", PACKAGE_VERSION_V2:"0.2", PACKAGE_VERSION_V3:"0.3"}[package_version], "packageVersion": package_version,
+    if set(artifacts) != set(ARTIFACT_SETS[package_version]):
+        raise RunError(Stage.MANIFEST, Code.FILE_SET_MISMATCH)
+    data = {"schemaVersion": {PACKAGE_VERSION:"0.1", PACKAGE_VERSION_V2:"0.2", PACKAGE_VERSION_V3:"0.3", PACKAGE_VERSION_V4:"0.4"}[package_version], "packageVersion": package_version,
             "configuration": {"areaBasis": area_basis, "floorHeightsM": list(floor_heights)},
             "artifacts": {kind: {"path": filename, "reference": reference(artifacts[kind])}
-                          for kind, filename in ARTIFACTS.items()}}
+                          for kind, filename in ARTIFACT_SETS[package_version].items()}}
     validate_manifest(data)
     raw = canonical_json_bytes(data)
     if len(raw) > MAX_MANIFEST_BYTES:
