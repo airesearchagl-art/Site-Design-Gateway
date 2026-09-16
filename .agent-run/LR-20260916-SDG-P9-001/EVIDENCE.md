@@ -38,3 +38,23 @@ previous Phase 8 outputs. Initial helper syntax error was repaired before any PA
 - localStorage/sessionStorage/IndexedDB/CacheStorage all 0 at initial, selected, cleared and final stages.
   Service-worker registrations 0. App console/runtime errors 0.
 - Raw reports/harness/screenshots remain ignored; no CI artifact upload.
+
+## Isolated mutation verification
+
+Source checkpoint: 825df7bc51dbf4d9ee87efb59b4fa122ee3f4b33. Separate git-archive copy for each mutation.
+Every control PASS; modified source syntax checks PASS; every mutant exits on ERR_ASSERTION.
+Compile/import/preparation failures are explicitly excluded. No mutation touched the working source.
+
+| Mutation | Removed guard | Targeted test | Assertion failures | Result |
+| --- | --- | --- | --- | --- |
+| M-P9-01 | Artifact hash comparison | P9-WEB-12, all four artifacts | 4 | KILLED |
+| M-P9-02 | Fixed count/whitelist/duplicate checks | P9-WEB-03 extra file | 1 | KILLED |
+| M-P9-03 | Size preflight before any read | P9-WEB-20..24 | 5 | KILLED |
+| M-P9-04 | Constraint project/geometry references | P9-WEB-13..14 | 2 | KILLED |
+| M-P9-05 | Search constraints reference | P9-WEB-17 | 1 | KILLED |
+| M-P9-06 | Area basis configuration binding | P9-WEB-18 | 1 | KILLED |
+| M-P9-07 | Python authoritative-verifier disclaimer | UI authority assertion | 1 | KILLED |
+| M-P9-08 | caches and CacheStorage privacy scan entries | Privacy guard-presence assertion | 1 | KILLED |
+
+Local production server stopped after the audit. Final documentation-only seal is followed by feature push,
+exact-head branch CI and Draft PR. Creating the Draft PR is the final action: no Ready, merge or post-creation work.
