@@ -2,7 +2,7 @@ import { FAR_LEGAL_NOTICE, FAR_MINIMUM_NOTICE, farStackDisplay } from "../lib/fa
 import type { SearchViewModel } from "../lib/search-view.ts";
 
 export function FarStackPanel({ model }: { model: SearchViewModel }) {
-  if (model.schemaVersion !== "0.3" && model.schemaVersion !== "0.4") {
+  if (model.schemaVersion !== "0.3" && model.schemaVersion !== "0.4" && model.schemaVersion !== "0.5") {
     return <section className="far-stack" aria-labelledby="far-stack-title">
       <h3 id="far-stack-title">FAR cap stack</h3><p>Unavailable in this Search Result version</p>
     </section>;

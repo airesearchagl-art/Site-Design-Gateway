@@ -16,15 +16,28 @@ import constraintSchemaV3 from "../../../../schemas/sdg-constraint-result-v0.3.s
 import searchSchemaV4 from "../../../../schemas/sdg-search-result-v0.4.schema.json" with { type: "json" };
 import manifestSchemaV3 from "../../../../schemas/sdg-run-manifest-v0.3.schema.json" with { type: "json" };
 
+import projectSchemaV4 from "../../../../schemas/sdg-project-v0.4.schema.json" with { type: "json" };
+import buildableSchema from "../../../../schemas/sdg-buildable-area-geometry-v0.1.schema.json" with { type: "json" };
+import constraintSchemaV4 from "../../../../schemas/sdg-constraint-result-v0.4.schema.json" with { type: "json" };
+import massingSchemaV2 from "../../../../schemas/sdg-massing-candidate-v0.2.schema.json" with { type: "json" };
+import searchSchemaV5 from "../../../../schemas/sdg-search-result-v0.5.schema.json" with { type: "json" };
+import manifestSchemaV4 from "../../../../schemas/sdg-run-manifest-v0.4.schema.json" with { type: "json" };
+
 // Existing composition inherits object types through $ref/allOf. Preserve the
 // established strict options and register canonical files offline, without copies.
 const ajv = new Ajv2020({ allErrors: true, strict: true, strictTypes: false, strictTuples: false });
 for (const schema of [projectSchema, geometrySchema, constraintSchema, massingSchema, searchSchema, searchSchemaV2, manifestSchema,
-  projectSchemaV2, constraintSchemaV2, searchSchemaV3, manifestSchemaV2, projectSchemaV3, constraintSchemaV3, searchSchemaV4, manifestSchemaV3]) {
+  projectSchemaV2, constraintSchemaV2, searchSchemaV3, manifestSchemaV2, projectSchemaV3, constraintSchemaV3, searchSchemaV4, manifestSchemaV3, projectSchemaV4, buildableSchema, constraintSchemaV4, massingSchemaV2, searchSchemaV5, manifestSchemaV4]) {
   ajv.addSchema(schema);
 }
 
 export const sharedValidators = {
+  projectV4: ajv.getSchema(projectSchemaV4.$id)!,
+  buildable: ajv.getSchema(buildableSchema.$id)!,
+  constraintsV4: ajv.getSchema(constraintSchemaV4.$id)!,
+  massingV2: ajv.getSchema(massingSchemaV2.$id)!,
+  searchV5: ajv.getSchema(searchSchemaV5.$id)!,
+  manifestV4: ajv.getSchema(manifestSchemaV4.$id)!,
   project: ajv.getSchema(projectSchema.$id)!,
   geometry: ajv.getSchema(geometrySchema.$id)!,
   constraints: ajv.getSchema(constraintSchema.$id)!,
@@ -52,7 +65,7 @@ export function uniqueFarCapIds(value: unknown): boolean {
 /** Structural uniqueness within the separate height stack, after schema validation. */
 export function uniqueHeightCapIds(value: unknown): boolean {
   const project = value as { schemaVersion: string; zoning: { additionalHeightCaps?: { id: string }[] } };
-  if (project.schemaVersion !== "0.3") return true;
+  if (project.schemaVersion !== "0.3" && project.schemaVersion !== "0.4") return true;
   const ids = project.zoning.additionalHeightCaps!.map((entry) => entry.id);
   return ids.length === new Set(ids).size;
 }

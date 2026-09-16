@@ -86,9 +86,9 @@ def validate_project(project: object) -> ValidationResult:
         version = project.get("schemaVersion") if type(project) is dict else None
         if version == "0.1":
             validator = _validator()
-        elif version in ("0.2", "0.3"):
+        elif version in ("0.2", "0.3", "0.4"):
             from ._schemas import schema_validator
-            validator = schema_validator({"0.2": "project_v2", "0.3": "project_v3"}[version])
+            validator = schema_validator({"0.2": "project_v2", "0.3": "project_v3", "0.4": "project_v4"}[version])
         else:
             return _failure("schema_invalid")
     except (OSError, ValueError, SchemaError):

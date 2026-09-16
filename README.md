@@ -3,8 +3,8 @@
 CAD上で一案ずつ試す初期検討から、入力条件・制約・計算根拠・候補比較を明示した
 再現可能な探索へ進めるWeb Gatewayです。計算主体はBVE Core（Buildable Volume Engine）です。
 
-Current Phase = Phase 11 Explicit Height Cap Stack / Effective Height Foundation。明示されたFAR・scalar height上限をPython Decimalで合成し、
-version別のRun Packageの5ファイルをbrowser memoryだけで検証して、FAR・高さの出典と候補を表示します。
+Current Phase = Phase 12 Explicit Buildable Area Geometry / Footprint Domain Foundation。明示されたpolygonを安全に受け取り、候補footprintの生成領域に使います。
+BCR/FARの敷地面積基準とscalar height契約を維持し、5/6ファイルのversion別Run Packageをbrowser memoryだけで検証・表示します。
 Webは従来のProject検証に加え、Search summary、ranking/rejection、candidate選択と2D footprintをread-onlyで提供します。
 
 ## ローカルで開始する
@@ -105,8 +105,8 @@ synthetic fixtureは両形式とも200 m2、面積差0です。WebにはGeometry
 Phase 1でPython Geometry Foundationを追加しました。検索、本番法規rulepack、認証、
 保存・DB、CAD/BIM連携、最適化、Web compute APIは範囲外です。Run Packageは文書上の契約検討に留めます。
 
-今回の出口はPhase 11のDraft PRです。
-作成直後にSTOPし、Ready、merge、Vercel操作、Production、Phase 12へ進みません。
+今回の出口はPhase 12のDraft PRです。
+作成直後にSTOPし、Ready、merge、Vercel操作、Production、Phase 13へ進みません。
 過去のADR・Run記録は維持します。
 
 ## Phase 2 Constraint Engine
@@ -315,3 +315,17 @@ python -m bve.run verify --package runtime-data/height-run
 親directoryは事前に作成し、出力先は未使用としてください。synthetic base31m / additional24mからeffective24mを生成します。
 WebはSearch0.4 / Package0.3の高さ・FAR contextを表示し、legacy各versionも維持します。
 [高さstack契約とversion matrix](docs/height-stack-contract.md)を参照してください。Pythonがsemantic authority、D04 OPEN。
+
+## Phase 12 supplied footprint domain
+
+[Buildable Area契約](docs/buildable-area-contract.md)が詳細正本。Project0.4 / Buildable Area Geometry0.1 /
+Constraint0.4 / Massing Candidate0.2 / Search0.5 / Run Package0.4を明示dispatchする。
+旧Package0.1〜0.3は固定5ファイル、0.4だけbuildable-area.geojsonを加えた固定6ファイル。
+明示convex/no-hole polygonのsite完全包含、status一致、source/site/artifact hashを検証する。
+BCR/FARは敷地面積基準のまま。scalar calculation IDs、legacy bytes、rankingは維持する。
+既存homothetic shrinkをsupplied domainへ適用し、最終footprintはdomainとsiteの両方でcoversを要求。
+後退・斜線・法規からgeometryを生成せず、修復も行わず、法規適合を主張しない。
+Pythonがsemantic authority。Browserは21schema、hash/reference/statusと5/6-file matrixを確認し、
+authoritative spatialContextの表示のみ。containmentを再計算しない。buildable上限4MiB、全file size先行、
+actual buffer再確認、Clearの遅延handoff禁止、memory-only入力を維持。D04 OPEN。
+Documentation Sync Trigger: yes — Phase 12 major spatial geometry / Massing domain contract。

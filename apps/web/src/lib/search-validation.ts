@@ -5,7 +5,7 @@ export const MAX_SEARCH_BYTES = 8 * 1024 * 1024;
 export const MAX_SEARCH_DEPTH = 64;
 export const MAX_SEARCH_NODES = 250_000;
 
-const validators = { "0.1": sharedValidators.searchLegacy, "0.2": sharedValidators.search, "0.3": sharedValidators.searchV3, "0.4": sharedValidators.searchV4 };
+const validators = { "0.1": sharedValidators.searchLegacy, "0.2": sharedValidators.search, "0.3": sharedValidators.searchV3, "0.4": sharedValidators.searchV4, "0.5": sharedValidators.searchV5 };
 
 export type SearchIssue = {
   path: string;
@@ -52,10 +52,18 @@ export type HeightContext = {
 };
 export type HeightConstraintContext = FarConstraintContext & { height: HeightContext };
 
+export type SpatialContext = { buildableArea: {
+  role: "explicit_buildable_area"; artifactReference: string; siteReference: string; sourceReference: string;
+  sourceStatus: string; areaM2: number; reviewRequired: boolean;
+  geometry: { type: "Polygon"; coordinates: number[][][] };
+} };
+
 export type SearchResultDocument = ({ schemaVersion: "0.1"; constraintContext?: never }
   | { schemaVersion: "0.2"; constraintContext: ConstraintContext }
   | { schemaVersion: "0.3"; constraintContext: FarConstraintContext }
-  | { schemaVersion: "0.4"; constraintContext: HeightConstraintContext }) & {
+  | { schemaVersion: "0.4"; constraintContext: HeightConstraintContext }
+  | { schemaVersion: "0.5"; constraintContext: HeightConstraintContext; spatialContext: SpatialContext;
+      inputReferences: { buildableArea: string } }) & {
   inputReferences: { project: string; geometry: string; constraints: string };
   search: {
     strategy: "floor_height_sweep_v0.1";
@@ -79,6 +87,7 @@ export type RankedCandidateDocument = {
   candidateReference: string;
   grossFloorAreaM2: number;
   candidate: {
+    inputReferences: { project: string; geometry: string; constraints: string; buildableArea?: string };
     constraintCaps: ConstraintCaps;
     generator: { floorHeightM: number };
     candidate: {
@@ -153,7 +162,7 @@ export function validateSearchJson(text: string): SearchValidationResult {
   if (resourceFailure) return resourceFailure;
   const version = value !== null && typeof value === "object" && "schemaVersion" in value
     ? value.schemaVersion : undefined;
-  if (version !== "0.1" && version !== "0.2" && version !== "0.3" && version !== "0.4") {
+  if (version !== "0.1" && version !== "0.2" && version !== "0.3" && version !== "0.4" && version !== "0.5") {
     return failure("INVALID", "schemaVersion", "Search Result Schemaに適合しません。");
   }
   const validateSearchSchema = validators[version];

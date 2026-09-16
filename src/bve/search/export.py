@@ -31,9 +31,9 @@ def _validate_context(data: dict, authoritative: dict) -> None:
             "maxTotalFloorAreaM2": constraints["floorAreaRatio"]["maxTotalFloorAreaM2"],
             "maxHeightM": constraints["height"]["maxHeightM"]}
     _require(_encode(context["constraintCaps"]) == _encode(caps))
-    if authoritative["schemaVersion"] in ("0.2", "0.3"):
+    if authoritative["schemaVersion"] in ("0.2", "0.3", "0.4"):
         _require(_encode(context["floorAreaRatio"]) == _encode(constraints["floorAreaRatio"]))
-    if authoritative["schemaVersion"] == "0.3":
+    if authoritative["schemaVersion"] in ("0.3", "0.4"):
         _require(_encode(context["height"]) == _encode(constraints["height"]))
     for entry in data["rankedCandidates"]:
         _require(_encode(entry["candidate"]["constraintCaps"]) == _encode(context["constraintCaps"]))
@@ -43,14 +43,17 @@ def _validate_result(result: SearchResult, data: dict) -> None:
     heights = result.floor_heights_m
     _require(type(heights) is tuple and all(type(h) is Decimal for h in heights))
     _require(canonical_heights(heights) == heights)
-    _validate_shared(result.site, result.constraints, heights[0])
+    _validate_shared(result.site, result.constraints, heights[0], result.buildable_area)
     canonical_constraints = result_bytes(result.constraints.result)
     _require(result.constraints.reference == "sha256:" + sha256(canonical_constraints).hexdigest())
     authoritative = json.loads(canonical_constraints, parse_float=Decimal, parse_int=Decimal)
     _validate_context(data, authoritative)
     refs = {"project": result.constraints.result.project_reference, "geometry": result.site.source_reference,
             "constraints": result.constraints.reference}
-    review = result.constraints.result.review_required
+    if result.buildable_area is not None:
+        refs["buildableArea"] = result.buildable_area.reference
+        _require(_encode(data["spatialContext"]) == _encode(result.buildable_area.spatial_context()))
+    review = result.review_required
     _require(type(result.ranked_candidates) is tuple and type(result.rejections) is tuple)
     seen_heights, seen_refs, expected_entries = [], set(), []
     previous = None
@@ -58,6 +61,7 @@ def _validate_result(result: SearchResult, data: dict) -> None:
         _require(type(entry) is RankedCandidate and type(entry.rank) is int and entry.rank == rank)
         candidate = entry.candidate
         _require(candidate.site is result.site and candidate.constraints is result.constraints)
+        _require(candidate.buildable_area is result.buildable_area)
         canonical = candidate_bytes(candidate)  # Reuses all Phase 3 cap and containment guards.
         reference = "sha256:" + sha256(canonical).hexdigest()
         if reference in seen_refs:
@@ -96,6 +100,8 @@ def _validate_result(result: SearchResult, data: dict) -> None:
                             "rejected": rejected_count, "hasFeasibleCandidate": accepted_count > 0,
                             "reviewRequired": review},
                 "rankedCandidates": expected_entries, "rejections": expected_rejections}
+    if result.buildable_area is not None:
+        expected["spatialContext"] = data["spatialContext"]  # Exact-copy bound above.
     # Compare the actual serialized model too: schema alone cannot bind metadata.
     _require(_encode(data) == _encode(expected))
 
@@ -104,7 +110,7 @@ def search_bytes(result: SearchResult) -> bytes:
     if type(result) is not SearchResult:
         raise SearchError(Code.INVALID_ARGUMENTS)
     try:
-        validator = schema_validator({"0.2": "search", "0.3": "search_v3", "0.4": "search_v4"}[result.schema_version])
+        validator = schema_validator({"0.2": "search", "0.3": "search_v3", "0.4": "search_v4", "0.5": "search_v5"}[result.schema_version])
     except Exception:
         raise SearchError(Code.SCHEMA_UNAVAILABLE) from None
     try:

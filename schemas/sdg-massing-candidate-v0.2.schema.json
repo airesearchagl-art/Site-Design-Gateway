@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:massing-candidate:0.2",
+  "title": "SDG explicit footprint domain candidate v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "inputReferences",
+    "generator",
+    "constraintCaps",
+    "candidate"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.2"
+    },
+    "inputReferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "project",
+        "geometry",
+        "buildableArea",
+        "constraints"
+      ],
+      "properties": {
+        "project": {
+          "$ref": "urn:sdg:constraint-result:0.1#/$defs/reference"
+        },
+        "geometry": {
+          "$ref": "urn:sdg:constraint-result:0.1#/$defs/reference"
+        },
+        "buildableArea": {
+          "$ref": "urn:sdg:constraint-result:0.1#/$defs/reference"
+        },
+        "constraints": {
+          "$ref": "urn:sdg:constraint-result:0.1#/$defs/reference"
+        }
+      }
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "strategy",
+        "footprintMethod",
+        "floorHeightM",
+        "floorHeightStatus"
+      ],
+      "properties": {
+        "strategy": {
+          "const": "max_footprint_stack_v0.2"
+        },
+        "footprintMethod": {
+          "const": "convex_homothetic_buildable_area_v0.1"
+        },
+        "floorHeightM": {
+          "$ref": "urn:sdg:massing-candidate:0.1#/properties/generator/properties/floorHeightM"
+        },
+        "floorHeightStatus": {
+          "$ref": "urn:sdg:massing-candidate:0.1#/properties/generator/properties/floorHeightStatus"
+        }
+      }
+    },
+    "constraintCaps": {
+      "$ref": "urn:sdg:massing-candidate:0.1#/properties/constraintCaps"
+    },
+    "candidate": {
+      "$ref": "urn:sdg:massing-candidate:0.1#/properties/candidate"
+    }
+  }
+}

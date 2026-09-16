@@ -17,7 +17,7 @@ function sourceFiles(directory: string): string[] {
 }
 
 test("current phase header and all viewer states are explicit", () => {
-  assert.ok(page.includes("PHASE 11 / EXPLICIT HEIGHT CAPS"));
+  assert.ok(page.includes("PHASE 12 / SUPPLIED FOOTPRINT DOMAIN"));
   for (const state of ["EMPTY", "LOADING", "DISPLAYABLE", "INVALID", "VIEWER_LIMIT"]) {
     assert.ok(component.includes(state), `missing viewer state ${state}`);
   }

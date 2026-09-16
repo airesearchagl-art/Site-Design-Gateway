@@ -47,6 +47,7 @@ class ValidatedProject:
     schema_version: str
     additional_far_caps: tuple[AdditionalFarCap, ...]
     additional_height_caps: tuple[AdditionalHeightCap, ...]
+    buildable_area_status: SourceStatus | None
 
     def __init__(self, payload: bytes | str):
         try:
@@ -54,10 +55,10 @@ class ValidatedProject:
         except JSONInputError as error:
             raise ConstraintError(Code(str(error))) from None
         version = data.get("schemaVersion") if type(data) is dict else None
-        if version not in ("0.1", "0.2", "0.3"):
+        if version not in ("0.1", "0.2", "0.3", "0.4"):
             raise ConstraintError(Code.PROJECT_SCHEMA_INVALID)
         try:
-            validator = schema_validator({"0.1":"project", "0.2":"project_v2", "0.3":"project_v3"}[version])
+            validator = schema_validator({"0.1":"project", "0.2":"project_v2", "0.3":"project_v3", "0.4":"project_v4"}[version])
         except Exception:
             raise ConstraintError(Code.SCHEMA_UNAVAILABLE) from None
         if not validator.is_valid(data):
@@ -72,7 +73,7 @@ class ValidatedProject:
         object.__setattr__(self, "far", Condition(**zoning["floorAreaRatio"]))
         object.__setattr__(self, "height", Condition(**zoning["heightLimit"]) if "heightLimit" in zoning else None)
         additional = ()
-        if version in ("0.2", "0.3"):
+        if version in ("0.2", "0.3", "0.4"):
             from .export import canonical_json_bytes
             raw = canonical_json_bytes(data)
             additional = tuple(AdditionalFarCap(entry["id"], entry["kind"],
@@ -80,8 +81,9 @@ class ValidatedProject:
                                for entry in zoning["additionalFloorAreaRatioCaps"])
         additional_height = tuple(AdditionalHeightCap(entry["id"], entry["kind"],
                                   Condition(entry["value"], entry["unit"], entry["status"]))
-                                  for entry in zoning["additionalHeightCaps"]) if version == "0.3" else ()
+                                  for entry in zoning["additionalHeightCaps"]) if version in ("0.3", "0.4") else ()
         object.__setattr__(self, "additional_height_caps", additional_height)
+        object.__setattr__(self, "buildable_area_status", data["spatialConstraints"]["buildableArea"]["status"] if version == "0.4" else None)
         object.__setattr__(self, "schema_version", version)
         object.__setattr__(self, "additional_far_caps", additional)
         object.__setattr__(self, "reference", "sha256:" + sha256(raw).hexdigest())

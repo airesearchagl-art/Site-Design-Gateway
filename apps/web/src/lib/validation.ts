@@ -58,8 +58,8 @@ export function validateJson(text: string): ValidationResult {
     }
   }
   const version = value !== null && typeof value === "object" && "schemaVersion" in value ? value.schemaVersion : undefined;
-  if (version !== "0.1" && version !== "0.2" && version !== "0.3") return invalid("対応するProject schemaVersionを指定してください。");
-  const validate = { "0.1": sharedValidators.project, "0.2": sharedValidators.projectV2, "0.3": sharedValidators.projectV3 }[version];
+  if (version !== "0.1" && version !== "0.2" && version !== "0.3" && version !== "0.4") return invalid("対応するProject schemaVersionを指定してください。");
+  const validate = { "0.1": sharedValidators.project, "0.2": sharedValidators.projectV2, "0.3": sharedValidators.projectV3, "0.4": sharedValidators.projectV4 }[version];
   if (!validate(value)) {
     return {
       schema: "FAIL",
@@ -74,11 +74,15 @@ export function validateJson(text: string): ValidationResult {
   if (!uniqueFarCapIds(value)) return invalid("Additional FAR capのIDが重複しています。");
   if (!uniqueHeightCapIds(value)) return invalid("Additional height capのIDが重複しています。");
   const sources = collectSources(value);
+  const spatialStatus = version === "0.4"
+    ? (value as { spatialConstraints: { buildableArea: { status: string } } }).spatialConstraints.buildableArea.status
+    : undefined;
+  const spatialReview = spatialStatus !== undefined && (needsReview.has(spatialStatus) || spatialStatus === "llm_researched");
   return {
     schema: "PASS",
-    outcome: sources.some((source) => needsReview.has(source.status) || (version !== "0.1" && source.status === "llm_researched"
+    outcome: spatialReview || sources.some((source) => needsReview.has(source.status) || (version !== "0.1" && source.status === "llm_researched"
       && (source.path === "/zoning/floorAreaRatio" || source.path.startsWith("/zoning/additionalFloorAreaRatioCaps/")
-        || (version === "0.3" && (source.path === "/zoning/heightLimit" || source.path.startsWith("/zoning/additionalHeightCaps/")))))) ? "REVIEW_REQUIRED" : "VALID",
+        || ((version === "0.3" || version === "0.4") && (source.path === "/zoning/heightLimit" || source.path.startsWith("/zoning/additionalHeightCaps/")))))) ? "REVIEW_REQUIRED" : "VALID",
     issues: [],
     sources,
   };

@@ -12,17 +12,18 @@ from bve.geometry import load_normalized_geometry
 from bve.geometry.export import json_bytes, normalized_feature
 from bve.geometry.geojson import MAX_INPUT_BYTES as GEOMETRY_LIMIT
 from bve.search import search_massing_candidates
+from bve.spatial import load_buildable_area
 from bve.search.export import search_bytes
 from bve.validation import MAX_INPUT_BYTES as PROJECT_LIMIT
 
 from .errors import Code, RunError, Stage, at_stage
 from .filesystem import is_link, read_regular
 from .manifest import MAX_MANIFEST_BYTES, decode, reference, validate_manifest
-from .model import ARTIFACTS, FILE_SET, PACKAGE_VERSION, PACKAGE_VERSION_V2, PACKAGE_VERSION_V3, VERSION_MATRIX, RunSummary
+from .model import ARTIFACT_SETS, FILE_SETS, PACKAGE_VERSION, PACKAGE_VERSION_V2, PACKAGE_VERSION_V3, PACKAGE_VERSION_V4, VERSION_MATRIX, RunSummary
 
 MAX_SEARCH_BYTES = 256 * 1024 * 1024
 LIMITS = {"project": PROJECT_LIMIT, "geometry": GEOMETRY_LIMIT,
-          "constraints": MAX_RESULT_BYTES, "search": MAX_SEARCH_BYTES}
+          "constraints": MAX_RESULT_BYTES, "search": MAX_SEARCH_BYTES, "buildableArea": GEOMETRY_LIMIT}
 
 
 def check_hashes(manifest: dict, artifacts: dict[str, bytes]) -> None:
@@ -35,7 +36,8 @@ def check_references(manifest: dict, constraints: dict, search: dict) -> None:
     refs = {kind: entry["reference"] for kind, entry in manifest["artifacts"].items()}
     if constraints["inputReferences"] != {kind: refs[kind] for kind in ("project", "geometry")}:
         raise RunError(Stage.VERIFY, Code.REFERENCE_MISMATCH)
-    if search["inputReferences"] != {kind: refs[kind] for kind in ("project", "geometry", "constraints")}:
+    search_kinds = ("project", "geometry", "constraints", "buildableArea") if manifest["packageVersion"] == PACKAGE_VERSION_V4 else ("project", "geometry", "constraints")
+    if search["inputReferences"] != {kind: refs[kind] for kind in search_kinds}:
         raise RunError(Stage.VERIFY, Code.REFERENCE_MISMATCH)
 
 
@@ -53,16 +55,19 @@ def verify_package(package: Path) -> RunSummary:
         info = package.lstat()
         if is_link(info) or not stat.S_ISDIR(info.st_mode):
             raise RunError(Stage.VERIFY, Code.NOT_PACKAGE_DIRECTORY)
-        if {p.name for p in package.iterdir()} != FILE_SET:
+        filenames = {p.name for p in package.iterdir()}
+        if "manifest.json" not in filenames:
             raise RunError(Stage.VERIFY, Code.FILE_SET_MISMATCH)
         raw_manifest = read_regular(package / "manifest.json", MAX_MANIFEST_BYTES, Stage.VERIFY)
         manifest = decode(raw_manifest, MAX_MANIFEST_BYTES)
         validate_manifest(manifest)
+        if filenames != FILE_SETS[manifest["packageVersion"]]:
+            raise RunError(Stage.VERIFY, Code.FILE_SET_MISMATCH)
         if canonical_json_bytes(manifest) != raw_manifest:
             raise RunError(Stage.VERIFY, Code.NONCANONICAL_ARTIFACT)
         # Read only constant names; untrusted manifest paths are never traversed.
         artifacts = {kind: read_regular(package / name, LIMITS[kind], Stage.VERIFY)
-                     for kind, name in ARTIFACTS.items()}
+                     for kind, name in ARTIFACT_SETS[manifest["packageVersion"]].items()}
         check_hashes(manifest, artifacts)
         check_versions(manifest["packageVersion"], artifacts)
         if project_bytes(artifacts["project"]) != artifacts["project"]:
@@ -76,8 +81,10 @@ def verify_package(package: Path) -> RunSummary:
         canonical_geometry["properties"]["sourceReference"] = geometry_data["properties"]["sourceReference"]
         if json_bytes(canonical_geometry) != artifacts["geometry"]:
             raise RunError(Stage.VERIFY, Code.NONCANONICAL_ARTIFACT)
+        buildable = (load_buildable_area(artifacts["buildableArea"], site=site, project=project)
+                     if manifest["packageVersion"] == PACKAGE_VERSION_V4 else None)
         constraints = load_constraint_result(artifacts["constraints"],
-                                             project=project if manifest["packageVersion"] == PACKAGE_VERSION_V3 else None)
+                                             project=project if manifest["packageVersion"] in (PACKAGE_VERSION_V3, PACKAGE_VERSION_V4) else None)
         if result_bytes(constraints.result) != artifacts["constraints"]:
             raise RunError(Stage.VERIFY, Code.NONCANONICAL_ARTIFACT)
         search_data = decode(artifacts["search"], MAX_SEARCH_BYTES)
@@ -86,7 +93,7 @@ def verify_package(package: Path) -> RunSummary:
         # for the schema's rank/count integer types, without rounding decimals.
         del search_data
         search_data = json.loads(artifacts["search"], parse_float=Decimal)
-        search_schema = {PACKAGE_VERSION:"search", PACKAGE_VERSION_V2:"search_v3", PACKAGE_VERSION_V3:"search_v4"}[manifest["packageVersion"]]
+        search_schema = {PACKAGE_VERSION:"search", PACKAGE_VERSION_V2:"search_v3", PACKAGE_VERSION_V3:"search_v4", PACKAGE_VERSION_V4:"search_v5"}[manifest["packageVersion"]]
         if not schema_validator(search_schema).is_valid(search_data):
             raise RunError(Stage.VERIFY, Code.ARTIFACT_SCHEMA_INVALID)
         check_references(manifest, constraints.result.to_dict(), search_data)
@@ -99,7 +106,7 @@ def verify_package(package: Path) -> RunSummary:
             raise RunError(Stage.VERIFY, Code.ARTIFACT_SEMANTIC_MISMATCH)
         # No serialized Search loader exists. Replay the public engine and its
         # semantic exporter, including every rejection, then compare exact bytes.
-        expected = search_massing_candidates(site, constraints, floor_heights_m=config["floorHeightsM"])
+        expected = search_massing_candidates(site, constraints, floor_heights_m=config["floorHeightsM"], buildable_area=buildable)
         if search_bytes(expected) != artifacts["search"]:
             raise RunError(Stage.VERIFY, Code.ARTIFACT_SEMANTIC_MISMATCH)
         return RunSummary(expected.review_required, len(expected.floor_heights_m),

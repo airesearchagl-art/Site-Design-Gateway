@@ -17,7 +17,7 @@ def candidate_bytes(candidate: MassingCandidate) -> bytes:
     if type(candidate) is not MassingCandidate:
         raise MassingError(Code.INVALID_ARGUMENTS)
     try:
-        validator = schema_validator("massing")
+        validator = schema_validator("massing_v2" if candidate.constraints.result.schema_version == "0.4" else "massing")
     except Exception:
         raise MassingError(Code.SCHEMA_UNAVAILABLE) from None
     try:

@@ -40,3 +40,9 @@ Phase 6 private workspaceからの転記はありません。
 project-height-stack.jsonはProject0.3の完全synthetic。FAR600/400%、base height31m / additional24m。
 実engineではeffective FAR400%、effective height24m。階高4/5/6/7/8mのGFAは800/640/640/480/480m²。
 道路幅員・地区計画・斜線係数は入力しない。旧Project0.1/0.2 fixturesは保持する。
+
+
+Phase 12追加: project-buildable-area.json（Project0.4）とbuildable-area.geojson（raw explicit local XY/m/drawing_derived）。
+両方完全synthetic。既存200m²敷地内の98m² rectangleで、法的建築可能範囲ではない。
+Run createが別のnormalized buildable-area.geojsonをruntime packageへ生成する。public fixtureはraw入力であり出力ではない。
+BCR80%/FAR400%/height24mの既存条件を継承し、areaBasis200m²を維持。既存fixtureは不変。

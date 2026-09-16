@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:project:0.4",
+  "title": "SDG Project v0.4 supplied footprint domain",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "project",
+    "site",
+    "zoning",
+    "spatialConstraints"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.4"
+    },
+    "project": {
+      "$ref": "urn:sdg:project:0.3#/properties/project"
+    },
+    "site": {
+      "$ref": "urn:sdg:project:0.3#/properties/site"
+    },
+    "zoning": {
+      "$ref": "urn:sdg:project:0.3#/properties/zoning"
+    },
+    "spatialConstraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "buildableArea"
+      ],
+      "properties": {
+        "buildableArea": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "status"
+          ],
+          "properties": {
+            "kind": {
+              "const": "explicit_buildable_area"
+            },
+            "status": {
+              "$ref": "urn:sdg:project:0.1#/$defs/status"
+            }
+          }
+        }
+      }
+    }
+  }
+}

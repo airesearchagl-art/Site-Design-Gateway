@@ -25,7 +25,7 @@ def _constant(_: str) -> None:
     raise ValueError
 
 
-def read_geojson(payload: bytes | str) -> SiteGeometry:
+def read_geojson(payload: bytes | str, *, require_source_status: bool = False) -> SiteGeometry:
     """Read bytes or UTF-8 text; never retain arbitrary metadata or file paths."""
     if type(payload) not in (bytes, str):
         raise GeometryError(Code.INVALID_JSON)
@@ -79,6 +79,8 @@ def read_geojson(payload: bytes | str) -> SiteGeometry:
     if coordinate_system != "local_xy":
         raise GeometryError(Code.UNSUPPORTED_CRS)
     unit = require_unit(metadata.get("unit"))
+    if require_source_status and "sourceStatus" not in metadata:
+        raise GeometryError(Code.INVALID_METADATA)
     status = metadata.get("sourceStatus", "user_provided")
     if status not in get_args(SourceStatus):
         raise GeometryError(Code.INVALID_METADATA)

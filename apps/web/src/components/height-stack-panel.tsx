@@ -2,7 +2,7 @@ import { HEIGHT_LEGAL_NOTICE, HEIGHT_MINIMUM_NOTICE, heightStackDisplay } from "
 import type { SearchViewModel } from "../lib/search-view.ts";
 
 export function HeightStackPanel({ model }: { model: SearchViewModel }) {
-  if (model.schemaVersion !== "0.4") {
+  if (model.schemaVersion !== "0.4" && model.schemaVersion !== "0.5") {
     return <section className="height-stack" aria-labelledby="height-stack-title">
       <h3 id="height-stack-title">Height cap stack</h3><p>Unavailable in this Search Result version</p>
     </section>;

@@ -1,13 +1,13 @@
 # Project instructions
 
 目的は建築初期検討の入力条件と出典状態を明示するWeb Gatewayの最小基盤。
-計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 11 Explicit Height Cap Stack / Effective Height Foundation。
-Phase 0〜10を維持し、明示scalar height capsの合成とversion別のRun Package / Viewerを追加する。
+計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 12 Explicit Buildable Area Geometry / Footprint Domain Foundation。
+Phase 0〜11を維持し、明示buildable areaの包含・出典照合とversion別のRun Package / Viewerを追加する。
 
 - Next.js / TypeScriptはProject検証とSearch Resultの形式確認・read-only表示、PythonはProject検証・Geometry・Constraints・Massing・Search計算とsemantic exportを担当する。
 - 単位を暗黙変換しない。面積はm2、比率はpercent、高さはmをschemaで明示する。
   検証成功は法規適合や建築可能性の証明ではない。
-- 既存11schemaを維持する。WebはPhase 11の新4schemaを加えた15schemaをoffline参照し、直接Searchはv0.1/v0.2/v0.3/v0.4を受け入れる。
+- 既存15schemaを維持する。WebはPhase 12の新6schemaを加えた21schemaをoffline参照し、直接Searchはv0.1/v0.2/v0.3/v0.4/v0.5を受け入れる。
   追加のschemaVersion変更は互換性判断を伴うためHuman Gateとする。
 - 日本語で簡潔に結果と未確認事項を報告する。UI内へ運用上の実装手順を混ぜない。
 - Runtime dataをpublic fixtureに転用しない。開発・CI・ブラウザ検証もsyntheticのみ。
@@ -26,7 +26,7 @@ Massingは凸・穴なし敷地、固定homothetic footprintと同形整数階st
 Constraint Resultはschemaと再計算で検証し、Geometry referenceを一致させる。階高の既定値は禁止。
 actual areaを丸めずcapと包含を再確認する。法規適合・後退・最適性を主張しない。
 WebからPythonを呼ばない。floorHeight以外の探索、3D、本番rulepacks、Bridge、API、保存基盤は対象外。
-Draft PR作成後STOP。Ready、merge、Vercel操作、Production、Phase 12、Vault/Notion直接更新は禁止。
+Draft PR作成後STOP。Ready、merge、Vercel操作、Production、Phase 13、Vault/Notion直接更新は禁止。
 旧Preview必須GateはSDG-VP-001 BLOCKED_EXTERNAL、D02 OPEN / PLATFORM_BLOCKEDとして切り離された。
 意図しないProduction分類2件は削除済み。Git切断確認後、HumanのPhase 3 transition exception = AUTHORIZED。
 このPhaseではVercelを再検証せず、別Runで原因と安全経路をfresh auditする。
@@ -67,3 +67,17 @@ Phase 11: docs/height-stack-contract.mdに従う。明示scalar heightsだけ、
 全numericならDecimal min、全tie IDはbase first / 入力順。未知はfail closed、空はABSENT、0mは既知zero。
 Project照合APIはPackage0.3で必須、単体readerは内部整合性。Webはexport済み値だけを表示する。
 FARと全legacy契約・出力bytesは維持する。斜線・spatial plane変換・legal governing判断は追加しない。
+
+## Phase 12 supplied footprint domain
+
+[Buildable Area契約](buildable-area-contract.md)が詳細正本。Project0.4 / Buildable Area Geometry0.1 /
+Constraint0.4 / Massing Candidate0.2 / Search0.5 / Run Package0.4を明示dispatchする。
+旧Package0.1〜0.3は固定5ファイル、0.4だけbuildable-area.geojsonを加えた固定6ファイル。
+明示convex/no-hole polygonのsite完全包含、status一致、source/site/artifact hashを検証する。
+BCR/FARは敷地面積基準のまま。scalar calculation IDs、legacy bytes、rankingは維持する。
+既存homothetic shrinkをsupplied domainへ適用し、最終footprintはdomainとsiteの両方でcoversを要求。
+後退・斜線・法規からgeometryを生成せず、修復も行わず、法規適合を主張しない。
+Pythonがsemantic authority。Browserは21schema、hash/reference/statusと5/6-file matrixを確認し、
+authoritative spatialContextの表示のみ。containmentを再計算しない。buildable上限4MiB、全file size先行、
+actual buffer再確認、Clearの遅延handoff禁止、memory-only入力を維持。D04 OPEN。
+Documentation Sync Trigger: yes — Phase 12 major spatial geometry / Massing domain contract。

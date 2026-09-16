@@ -9,7 +9,7 @@ const css = readFileSync(new URL("../src/app/globals.css", import.meta.url), "ut
 test("folder progressive enhancement and standard five-file fallback are both available", () => {
   assert.ok(viewer.includes("SDG Run Packageを選択"));
   assert.ok(viewer.includes('webkitdirectory: ""'));
-  assert.ok(viewer.includes("5ファイル同時選択"));
+  assert.ok(viewer.includes("5 / 6ファイル同時選択"));
   assert.match(viewer, /id="run-package-files" type="file" multiple/);
   assert.ok(viewer.includes("Array.from(event.target.files ?? [])"));
 });

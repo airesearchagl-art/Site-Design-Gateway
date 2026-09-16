@@ -1,4 +1,4 @@
-import type { ConstraintCaps, ConstraintContext, FarConstraintContext, HeightConstraintContext, RankedCandidateDocument, SearchResultDocument } from "./search-validation.ts";
+import type { SpatialContext, ConstraintCaps, ConstraintContext, FarConstraintContext, HeightConstraintContext, RankedCandidateDocument, SearchResultDocument } from "./search-validation.ts";
 
 export type CandidateSelection = { rank: number; candidateReference: string };
 
@@ -15,7 +15,8 @@ export type CandidateView = CandidateSelection & {
 export type SearchViewModel = ({ schemaVersion: "0.1"; constraintContext?: never }
   | { schemaVersion: "0.2"; constraintContext: ConstraintContext }
   | { schemaVersion: "0.3"; constraintContext: FarConstraintContext }
-  | { schemaVersion: "0.4"; constraintContext: HeightConstraintContext }) & {
+  | { schemaVersion: "0.4"; constraintContext: HeightConstraintContext }
+  | { schemaVersion: "0.5"; constraintContext: HeightConstraintContext; spatialContext: SpatialContext }) & {
   summary: SearchResultDocument["summary"];
   strategy: string;
   ranking: string;
@@ -24,7 +25,7 @@ export type SearchViewModel = ({ schemaVersion: "0.1"; constraintContext?: never
 };
 
 export type FootprintPreview =
-  | { available: true; viewBox: string; points: string }
+  | { available: true; viewBox: string; points: string; buildablePoints?: string }
   | { available: false };
 
 function candidateView(entry: RankedCandidateDocument): CandidateView {
@@ -45,7 +46,8 @@ export function toSearchViewModel(document: SearchResultDocument): SearchViewMod
   const version = document.schemaVersion === "0.1" ? { schemaVersion: document.schemaVersion }
     : document.schemaVersion === "0.2" ? { schemaVersion: document.schemaVersion, constraintContext: document.constraintContext }
     : document.schemaVersion === "0.3" ? { schemaVersion: document.schemaVersion, constraintContext: document.constraintContext }
-    : { schemaVersion: document.schemaVersion, constraintContext: document.constraintContext };
+    : document.schemaVersion === "0.4" ? { schemaVersion: document.schemaVersion, constraintContext: document.constraintContext }
+    : { schemaVersion: document.schemaVersion, constraintContext: document.constraintContext, spatialContext: document.spatialContext };
   return {
     ...version,
     summary: document.summary,
@@ -71,21 +73,25 @@ export function shortenReference(reference: string): string {
   return `${reference.slice(0, 15)}…${reference.slice(-8)}`;
 }
 
-export function footprintPreview(candidate: CandidateView): FootprintPreview {
+export function footprintPreview(candidate: CandidateView, buildableCoordinates?: number[][][]): FootprintPreview {
   const ring = candidate.footprint[0];
   if (!ring || ring.length < 4) return { available: false };
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
   let maxY = -Infinity;
-  for (const point of ring) {
-    if (point.length !== 2 || !Number.isFinite(point[0]) || !Number.isFinite(point[1])) {
-      return { available: false };
+  const buildableRing = buildableCoordinates?.[0];
+  if (buildableCoordinates && (!buildableRing || buildableRing.length < 4)) return { available: false };
+  for (const outline of [ring, ...(buildableRing ? [buildableRing] : [])]) {
+    for (const point of outline) {
+      if (point.length !== 2 || !Number.isFinite(point[0]) || !Number.isFinite(point[1])) {
+        return { available: false };
+      }
+      minX = Math.min(minX, point[0]);
+      minY = Math.min(minY, point[1]);
+      maxX = Math.max(maxX, point[0]);
+      maxY = Math.max(maxY, point[1]);
     }
-    minX = Math.min(minX, point[0]);
-    minY = Math.min(minY, point[1]);
-    maxX = Math.max(maxX, point[0]);
-    maxY = Math.max(maxY, point[1]);
   }
   const width = maxX - minX;
   const height = maxY - minY;
@@ -102,5 +108,6 @@ export function footprintPreview(candidate: CandidateView): FootprintPreview {
     available: true,
     viewBox: `${viewX} ${viewY} ${viewWidth} ${viewHeight}`,
     points: ring.map(([x, y]) => `${x},${-y}`).join(" "),
+    ...(buildableRing ? { buildablePoints: buildableRing.map(([x, y]) => `${x},${-y}`).join(" ") } : {}),
   };
 }

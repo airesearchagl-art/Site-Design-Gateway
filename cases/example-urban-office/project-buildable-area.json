@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "0.4",
+  "project": {
+    "id": "example-urban-office",
+    "name": "Example Urban Office",
+    "intendedUses": [
+      "office",
+      "retail"
+    ]
+  },
+  "site": {
+    "area": {
+      "value": 200,
+      "unit": "m2",
+      "status": "user_provided"
+    }
+  },
+  "zoning": {
+    "buildingCoverageRatio": {
+      "value": 80,
+      "unit": "percent",
+      "status": "assumed"
+    },
+    "floorAreaRatio": {
+      "value": 600,
+      "unit": "percent",
+      "status": "llm_researched"
+    },
+    "heightLimit": {
+      "value": 31,
+      "unit": "m",
+      "status": "assumed"
+    },
+    "additionalFloorAreaRatioCaps": [
+      {
+        "id": "road-width-cap",
+        "kind": "road_width_derived",
+        "value": 400,
+        "unit": "percent",
+        "status": "user_provided"
+      }
+    ],
+    "additionalHeightCaps": [
+      {
+        "id": "explicit-height-cap",
+        "kind": "absolute_height_explicit",
+        "value": 24,
+        "unit": "m",
+        "status": "user_provided"
+      }
+    ]
+  },
+  "spatialConstraints": {
+    "buildableArea": {
+      "kind": "explicit_buildable_area",
+      "status": "drawing_derived"
+    }
+  }
+}
