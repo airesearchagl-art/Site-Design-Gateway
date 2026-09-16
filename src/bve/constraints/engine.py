@@ -5,7 +5,8 @@ from bve.geometry import SiteGeometry
 
 from .arithmetic import area_difference, coverage_area_cap, floor_area_cap, height_cap
 from .errors import Code, ConstraintError
-from .inputs import AreaSelection, Condition, ValidatedProject, select_area
+from .inputs import AdditionalFarCap, AreaSelection, Condition, ValidatedProject, select_area
+from .far_stack import compute_far_stack
 from .model import Constraint, ConstraintResult, Provenance
 
 
@@ -14,13 +15,15 @@ def compute_constraints(project: ValidatedProject, geometry: SiteGeometry, *,
     area = select_area(project, geometry, area_basis)
     return _compute_result(project.reference, geometry.source_reference, area, project.area,
                            Condition(area.geometry_area_m2, "m2", geometry.source_status),
-                           project.coverage, project.far, project.height)
+                           project.coverage, project.far, project.height,
+                           schema_version=project.schema_version, additional_caps=project.additional_far_caps)
 
 
 def _compute_result(project_reference: str, geometry_reference: str, area: AreaSelection,
                     declared_condition: Condition, actual_condition: Condition,
                     coverage_condition: Condition, far_condition: Condition,
-                    height_condition: Condition | None) -> ConstraintResult:
+                    height_condition: Condition | None, *, schema_version: str = "0.1",
+                    additional_caps: tuple[AdditionalFarCap, ...] = ()) -> ConstraintResult:
     """Shared calculation path; callers validate conditions before entry."""
     declared = Provenance("site.area", project_reference, declared_condition)
     actual = Provenance("geometry.areaM2", geometry_reference, actual_condition)
@@ -30,12 +33,17 @@ def _compute_result(project_reference: str, geometry_reference: str, area: AreaS
     try:
         coverage_value = (None if coverage_condition.value is None else
                           coverage_area_cap(area.basis_area_m2, coverage_condition.value))
-        far_value = (None if far_condition.value is None else
-                    floor_area_cap(area.basis_area_m2, far_condition.value))
         coverage = Constraint("UNAVAILABLE" if coverage_value is None else "COMPUTED",
                               "coverage_area_cap_v0.1", coverage_value, (selected, coverage_source))
-        far = Constraint("UNAVAILABLE" if far_value is None else "COMPUTED",
-                         "floor_area_cap_v0.1", far_value, (selected, far_source))
+        if schema_version == "0.1":
+            far_value = (None if far_condition.value is None else
+                         floor_area_cap(area.basis_area_m2, far_condition.value))
+            far = Constraint("UNAVAILABLE" if far_value is None else "COMPUTED",
+                             "floor_area_cap_v0.1", far_value, (selected, far_source))
+        elif schema_version == "0.2":
+            far = compute_far_stack(area.basis_area_m2, selected, project_reference, far_condition, additional_caps)
+        else:
+            raise ConstraintError(Code.INVALID_ARGUMENTS)
         if height_condition is None:
             height = Constraint("ABSENT", "height_cap_v0.1", None, ())
         else:
@@ -46,4 +54,4 @@ def _compute_result(project_reference: str, geometry_reference: str, area: AreaS
     except DecimalException:
         raise ConstraintError(Code.NUMERIC_RANGE) from None
     return ConstraintResult(project_reference, geometry_reference, area, difference,
-                            (declared, actual), coverage, far, height)
+                            (declared, actual), coverage, far, height, schema_version)

@@ -58,8 +58,10 @@ def result_bytes(result: ConstraintResult) -> bytes:
     if type(result) is not ConstraintResult:
         raise ConstraintError(Code.INVALID_ARGUMENTS)
     data = result.to_dict()
+    if result.schema_version not in ("0.1", "0.2"):
+        raise ConstraintError(Code.OUTPUT_SCHEMA_INVALID)
     try:
-        validator = schema_validator("constraints")
+        validator = schema_validator("constraints" if result.schema_version == "0.1" else "constraints_v2")
     except Exception:
         raise ConstraintError(Code.SCHEMA_UNAVAILABLE) from None
     try:

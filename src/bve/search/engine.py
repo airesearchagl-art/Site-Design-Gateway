@@ -21,6 +21,10 @@ def _validate_shared(site, constraints, height) -> None:
 
 def _sweep(site, constraints, heights):
     _validate_shared(site, constraints, heights[0])
+    if constraints.result.schema_version == "0.2" and constraints.result.floor_area_ratio.value == 0:
+        # A known zero FAR has no feasible positive candidate. Keep Phase 3 and
+        # legacy fatal-error behavior unchanged; use the existing rejection code.
+        return (), tuple(Rejection(height, "NO_FEASIBLE_MASSING") for height in heights)
     accepted, rejected, references = [], [], set()
     for height in heights:
         try:

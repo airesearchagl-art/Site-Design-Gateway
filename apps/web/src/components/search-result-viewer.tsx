@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { AreaBasisPanel, ConstraintUsagePanel } from "./search-interpretation";
 import { PackageCheckSummary } from "./package-check-summary";
+import { FarStackPanel } from "./far-stack-panel";
 import { validateRunPackage, type PackageValidationResult } from "../lib/run-package-validation.ts";
 import { formatMeasure, RANKING_RULES, ROUNDING_NOTICE } from "../lib/search-display.ts";
 import searchSample from "../../../../cases/example-urban-office/search-result.json" with { type: "json" };
@@ -210,6 +211,7 @@ export function SearchResultViewer() {
             </dl>
 
             <AreaBasisPanel model={model} />
+            <FarStackPanel model={model} />
 
             <div className="ranking-warning" role="note">
               <strong>順位の読み方</strong>

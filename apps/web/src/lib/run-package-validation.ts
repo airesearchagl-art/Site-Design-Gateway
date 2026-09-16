@@ -1,4 +1,4 @@
-import { sharedValidators } from "./schema-registry.ts";
+import { sharedValidators, uniqueFarCapIds } from "./schema-registry.ts";
 import { searchTextWithinResources } from "./search-resource-preflight.ts";
 import {
   inspectResources, MAX_SEARCH_BYTES, MAX_SEARCH_DEPTH, MAX_SEARCH_NODES,
@@ -19,8 +19,16 @@ const ARTIFACTS = [
   ["constraints", "constraints.json"], ["search", "search-result.json"],
 ] as const;
 type ArtifactKind = typeof ARTIFACTS[number][0];
+type PackageVersion = "sdg-run-package-v0.1" | "sdg-run-package-v0.2";
+const packageValidators = {
+  "sdg-run-package-v0.1": { project: sharedValidators.project, geometry: sharedValidators.geometry,
+    constraints: sharedValidators.constraints, search: sharedValidators.search, manifest: sharedValidators.manifest },
+  "sdg-run-package-v0.2": { project: sharedValidators.projectV2, geometry: sharedValidators.geometry,
+    constraints: sharedValidators.constraintsV2, search: sharedValidators.searchV3, manifest: sharedValidators.manifestV2 },
+};
 export type SelectedPackageFile = Pick<File, "name" | "size" | "arrayBuffer"> & { webkitRelativePath?: string };
 type Manifest = {
+  packageVersion: PackageVersion;
   configuration: { areaBasis: "declared_project_area" | "geometry_area"; floorHeightsM: number[] };
   artifacts: Record<ArtifactKind, { path: string; reference: string }>;
 };
@@ -46,7 +54,7 @@ const messages = {
 export type PackageIssueCode = keyof typeof messages;
 export type PackageIssue = { file: PackageFilename | "package"; code: PackageIssueCode; message: string };
 export type PackageValidationResult =
-  | { state: "DISPLAYABLE"; packageVersion: "sdg-run-package-v0.1"; artifactCount: 4; issues: []; search: DisplayableSearch }
+  | { state: "DISPLAYABLE"; packageVersion: PackageVersion; artifactCount: 4; issues: []; search: DisplayableSearch }
   | { state: "INVALID" | "VIEWER_LIMIT"; issues: [PackageIssue] };
 type Failure = Exclude<PackageValidationResult, { state: "DISPLAYABLE" }>;
 
@@ -131,7 +139,11 @@ export async function validateRunPackage(
     if ("state" in manifestInput) return manifestInput;
     const parsed = parseArtifact(manifestInput.text, "manifest.json");
     if ("state" in parsed) return parsed;
-    if (!sharedValidators.manifest(parsed.value)) return failure("schema", "manifest.json");
+    const version = parsed.value !== null && typeof parsed.value === "object" && "packageVersion" in parsed.value
+      ? parsed.value.packageVersion : undefined;
+    if (version !== "sdg-run-package-v0.1" && version !== "sdg-run-package-v0.2") return failure("schema", "manifest.json");
+    const validators = packageValidators[version];
+    if (!validators.manifest(parsed.value)) return failure("schema", "manifest.json");
     const manifest = parsed.value as Manifest;
     let constraints: ConstraintLinks | undefined;
     let search: DisplayableSearch | undefined;
@@ -145,12 +157,13 @@ export async function validateRunPackage(
         if (result.state !== "DISPLAYABLE") {
           return result.state === "VIEWER_LIMIT" ? failure("viewerResource", name, "VIEWER_LIMIT") : failure("schema", name);
         }
-        if (!sharedValidators.search(result.value)) return failure("schema", name);
+        if (!validators.search(result.value)) return failure("schema", name);
         search = result;
       } else {
         const artifact = parseArtifact(input.text, name);
         if ("state" in artifact) return artifact;
-        if (!sharedValidators[kind](artifact.value)) return failure("schema", name);
+        if (!validators[kind](artifact.value)) return failure("schema", name);
+        if (kind === "project" && !uniqueFarCapIds(artifact.value)) return failure("schema", name);
         if (kind === "constraints") constraints = artifact.value as ConstraintLinks;
       }
       let hash: string;
@@ -176,7 +189,7 @@ export async function validateRunPackage(
         || !manifest.configuration.floorHeightsM.every((height, index) => height === heights[index])) {
       return failure("configurationMismatch");
     }
-    return { state: "DISPLAYABLE", packageVersion: "sdg-run-package-v0.1", artifactCount: 4, issues: [], search };
+    return { state: "DISPLAYABLE", packageVersion: manifest.packageVersion, artifactCount: 4, issues: [], search };
   } catch {
     return failure("read");
   }

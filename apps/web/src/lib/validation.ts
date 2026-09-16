@@ -1,8 +1,6 @@
-import Ajv2020 from "ajv/dist/2020.js";
-import schema from "../../../../schemas/sdg-project-v0.1.schema.json" with { type: "json" };
+import { sharedValidators, uniqueFarCapIds } from "./schema-registry.ts";
 
 export const MAX_JSON_BYTES = 256 * 1024;
-const validate = new Ajv2020({ allErrors: true, strict: true }).compile(schema);
 const needsReview = new Set(["assumed", "unknown", "review_required"]);
 
 export type SourceStatus = {
@@ -59,6 +57,9 @@ export function validateJson(text: string): ValidationResult {
       for (const child of Object.values(item.value)) pending.push({ value: child, depth: item.depth + 1 });
     }
   }
+  const version = value !== null && typeof value === "object" && "schemaVersion" in value ? value.schemaVersion : undefined;
+  if (version !== "0.1" && version !== "0.2") return invalid("対応するProject schemaVersionを指定してください。");
+  const validate = version === "0.1" ? sharedValidators.project : sharedValidators.projectV2;
   if (!validate(value)) {
     return {
       schema: "FAIL",
@@ -70,10 +71,12 @@ export function validateJson(text: string): ValidationResult {
       sources: [],
     };
   }
+  if (!uniqueFarCapIds(value)) return invalid("Additional FAR capのIDが重複しています。");
   const sources = collectSources(value);
   return {
     schema: "PASS",
-    outcome: sources.some((source) => needsReview.has(source.status)) ? "REVIEW_REQUIRED" : "VALID",
+    outcome: sources.some((source) => needsReview.has(source.status) || (version === "0.2" && source.status === "llm_researched"
+      && (source.path === "/zoning/floorAreaRatio" || source.path.startsWith("/zoning/additionalFloorAreaRatioCaps/")))) ? "REVIEW_REQUIRED" : "VALID",
     issues: [],
     sources,
   };

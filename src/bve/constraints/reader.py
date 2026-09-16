@@ -9,7 +9,7 @@ from bve._schemas import schema_validator
 from .engine import _compute_result
 from .errors import Code, ConstraintError
 from .export import result_bytes
-from .inputs import AreaSelection, Condition
+from .inputs import AdditionalFarCap, AreaSelection, Condition
 from .model import ConstraintResult
 
 MAX_RESULT_BYTES = 4 * 1024 * 1024
@@ -27,11 +27,22 @@ def _recompute(data: dict) -> ConstraintResult:
         raise ConstraintError(Code.CONSTRAINT_SEMANTIC_MISMATCH)
     selection = AreaSelection(area["selectedBasis"], declared.value, actual.value, selected.value)
     coverage = Condition(**constraints["buildingCoverage"]["provenance"][1]["condition"])
-    far = Condition(**constraints["floorAreaRatio"]["provenance"][1]["condition"])
+    additional = ()
+    if data["schemaVersion"] == "0.1":
+        far = Condition(**constraints["floorAreaRatio"]["provenance"][1]["condition"])
+    else:
+        stack = constraints["floorAreaRatio"]["capStack"]
+        ids = [entry["id"] for entry in stack]
+        if len(ids) != len(set(ids)):
+            raise ConstraintError(Code.CONSTRAINT_SEMANTIC_MISMATCH)
+        far = Condition(**stack[0]["condition"])
+        additional = tuple(AdditionalFarCap(entry["id"], entry["kind"], Condition(**entry["condition"]))
+                           for entry in stack[1:])
     height_source = constraints["height"]["provenance"]
     height = Condition(**height_source[0]["condition"]) if height_source else None
     return _compute_result(refs["project"], refs["geometry"], selection,
-                           declared, actual, coverage, far, height)
+                           declared, actual, coverage, far, height,
+                           schema_version=data["schemaVersion"], additional_caps=additional)
 
 
 @dataclass(frozen=True, init=False)
@@ -45,8 +56,11 @@ class ValidatedConstraintResult:
                                   max_digits=MAX_RESULT_DIGITS, max_exponent=MAX_RESULT_EXPONENT)
         except JSONInputError as error:
             raise ConstraintError(Code(str(error))) from None
+        version = data.get("schemaVersion") if type(data) is dict else None
+        if version not in ("0.1", "0.2"):
+            raise ConstraintError(Code.CONSTRAINT_SCHEMA_INVALID)
         try:
-            validator = schema_validator("constraints")
+            validator = schema_validator("constraints" if version == "0.1" else "constraints_v2")
         except Exception:
             raise ConstraintError(Code.SCHEMA_UNAVAILABLE) from None
         try:

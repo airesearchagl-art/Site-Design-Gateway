@@ -14,7 +14,7 @@ from bve.validation import MAX_INPUT_BYTES as PROJECT_LIMIT
 from .errors import Code, RunError, Stage, at_stage
 from .filesystem import publish_new, read_regular, require_absent, write_new
 from .manifest import manifest_bytes
-from .model import ARTIFACTS, RunSummary
+from .model import ARTIFACTS, RunSummary, package_version_for_project
 from .verification import verify_package
 
 
@@ -34,6 +34,7 @@ def create_package(*, project: Path, geometry: Path, format: str, area_basis: st
     with at_stage(Stage.PROJECT):
         raw_project = project_bytes(read_regular(Path(project), PROJECT_LIMIT, Stage.PROJECT))
         validated_project = load_project(raw_project)
+        package_version = package_version_for_project(validated_project.schema_version)
     with at_stage(Stage.GEOMETRY):
         raw_geometry = read_regular(Path(geometry), GEOMETRY_LIMIT, Stage.GEOMETRY)
         site = (read_geojson(raw_geometry) if format == "geojson" else
@@ -49,7 +50,7 @@ def create_package(*, project: Path, geometry: Path, format: str, area_basis: st
         search = search_bytes(result)
     artifacts = {"project": raw_project, "geometry": normalized, "constraints": caps, "search": search}
     with at_stage(Stage.MANIFEST):
-        manifest = manifest_bytes(area_basis, result.floor_heights_m, artifacts)
+        manifest = manifest_bytes(area_basis, result.floor_heights_m, artifacts, package_version=package_version)
     with at_stage(Stage.WRITE):
         staging = tempfile.TemporaryDirectory(prefix=".sdg-run-", dir=parent)
     try:

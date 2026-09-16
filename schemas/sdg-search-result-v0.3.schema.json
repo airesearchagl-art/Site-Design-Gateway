@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:search-result:0.3",
+  "title": "SDG search result v0.3 with authoritative FAR stack",
+  "description": "Read-only authoritative constraint context. No legal rule identification or browser recomputation.",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "inputReferences", "constraintContext", "search", "summary", "rankedCandidates", "rejections"],
+  "properties": {
+    "schemaVersion": {"const": "0.3"},
+    "inputReferences": {"$ref": "urn:sdg:search-result:0.1#/properties/inputReferences"},
+    "constraintContext": {
+      "type": "object", "additionalProperties": false,
+      "required": ["areaBasis", "constraintCaps", "floorAreaRatio"],
+      "properties": {
+        "areaBasis": {"$ref": "urn:sdg:constraint-result:0.2#/properties/areaBasis"},
+        "constraintCaps": {"$ref": "urn:sdg:constraint-result:0.2#/$defs/contextCaps"},
+        "floorAreaRatio": {"$ref": "urn:sdg:constraint-result:0.2#/$defs/floorAreaRatio"}
+      }
+    },
+    "search": {"$ref": "urn:sdg:search-result:0.1#/properties/search"},
+    "summary": {"$ref": "urn:sdg:search-result:0.1#/properties/summary"},
+    "rankedCandidates": {"$ref": "urn:sdg:search-result:0.1#/properties/rankedCandidates"},
+    "rejections": {"$ref": "urn:sdg:search-result:0.1#/properties/rejections"}
+  }
+}

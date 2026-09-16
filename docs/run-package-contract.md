@@ -1,4 +1,4 @@
-# SDG Run Package v0.1
+# SDG Run Package v0.1 / v0.2
 
 Phase 8はlocal orchestration / packagingだけを追加する。Geometry / Constraints / Massing / Searchの
 計算・単位・status・ranking・rejection契約は変更しない。追加dependencyなし。Webから実行しない。
@@ -22,7 +22,7 @@ SDG_Run/
 
 v0.1はstrict fixed file set。追加file/directory、OSの隠しmetadata、missing、symlink、Windows reparse pointを拒否する。
 artifact数は4（manifestは別）。manifestの自己hashは持たない。CSV、個別candidate、画像、report、DXF出力はない。
-canonical packageを圧縮・uploadする機構やWeb直接読込UIは追加しない。
+canonical packageを圧縮・uploadする機構はない。Phase 9以降はbrowser-onlyの直接読込UIを提供する。
 
 ## Canonical bytesと参照
 
@@ -95,3 +95,17 @@ CIはrunner tempへGeoJSON/DXF packageをcreate/verifyし、artifact uploadを�
 
 法規適合、設計品質、最適性、governing判定は追加しない。Vercel NOT TOUCHED。
 SDG-VP-001 BLOCKED_EXTERNAL、D02 OPEN / PLATFORM_BLOCKED、VMVP-001 PASS WITH TARGET ANOMALY、D04 OPENを継承。
+
+## Phase 10 version matrix
+
+| Package | Project | Geometry | Constraint | Search | Manifest |
+| --- | --- | --- | --- | --- | --- |
+| sdg-run-package-v0.1 | 0.1 | 0.1 | 0.1 | 0.2 | 0.1 |
+| sdg-run-package-v0.2 | 0.2 | 0.1 | 0.2 | 0.3 | 0.2 |
+
+createはbounded Project parse後のversionでexplicit dispatch、verifyはmanifest packageVersionでdispatchする。
+混在をARTIFACT_VERSION_MISMATCHで拒否し、unknown versionも拒否する。自動変換/default-to-latestはない。
+v0.2も固定5ファイル、hash/相互参照、no timestamp/path、staging・atomic publishを維持する。
+旧public Project0.1で生成する5ファイルはexact base由来のhashと比較し、legacy bytesの一致を検証する。
+新fixtureはproject-far-stack.jsonのみ。未知capの共有入力失敗では部分packageを残さない。
+Webはschema/integrityだけを確認し、Python bve.run verifyが意味検証の正本。D04 OPEN。

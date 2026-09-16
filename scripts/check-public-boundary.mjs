@@ -24,7 +24,7 @@ for (const file of files) {
       /\.(dwg|rvt|ifc|pdf|log)$/i.test(file) ||
       /\.(dxf|geojson)$/i.test(file) && !syntheticGeometry.has(file) || file.endsWith("TASK_PACKET_SNAPSHOT.md") ||
       /(^|\/)\.env(?:\.|$)/.test(file) && !file.endsWith(".env.example")) fail("forbidden-file");
-  if (file.startsWith("cases/") && !/^cases\/example-urban-office\/(project\.json|site\.geojson|site\.dxf|search-result\.json|README\.md)$/.test(file)) fail("non-synthetic-fixture-path");
+  if (file.startsWith("cases/") && !/^cases\/example-urban-office\/(project\.json|project-far-stack\.json|site\.geojson|site\.dxf|search-result\.json|README\.md)$/.test(file)) fail("non-synthetic-fixture-path");
   const text = readFileSync(file, "utf8");
   if (file.endsWith(".env.example") && text.split(/\r?\n/).some((line) => line.trim() && !line.trimStart().startsWith("#"))) fail("env-example-value");
   for (const [name, pattern] of patterns) if (pattern.test(text)) fail(name);

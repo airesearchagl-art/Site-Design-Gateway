@@ -28,3 +28,9 @@ Polygon同値、面積差0、出力schemaとCLI非開示を検証します。
 Phase 7で同じpipelineからv0.2へ再生成しました。Constraint由来のareaBasis/capsを含みます。
 旧v0.1 schemaは保持し、contextを除いたlegacy表現が旧canonical fixtureのhashと一致することもtestします。
 Phase 6 private workspaceからの転記はありません。
+
+## Phase 10 synthetic FAR stack
+
+`project-far-stack.json` はProject0.2。base600%、road-width-cap400%は架空の明示入力です。
+既存200m²敷地でeffective400% / max GFA800m²となります。道路幅員や係数は含まず、法規値を表しません。
+旧project.json / search-result.jsonはlegacy fixtureのままです。run出力はruntime dataとして追跡しません。

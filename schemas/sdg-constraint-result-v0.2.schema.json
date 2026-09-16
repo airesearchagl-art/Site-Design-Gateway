@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:constraint-result:0.2",
+  "title": "SDG constraint result v0.2 with explicit FAR stack",
+  "description": "Decimal minimum of supplied caps; never a governing legal rule or regulatory verification.",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "inputReferences", "areaBasis", "constraints", "reviewRequired"],
+  "properties": {
+    "schemaVersion": {"const": "0.2"},
+    "inputReferences": {"$ref": "urn:sdg:constraint-result:0.1#/properties/inputReferences"},
+    "areaBasis": {"$ref": "urn:sdg:constraint-result:0.1#/properties/areaBasis"},
+    "constraints": {
+      "type": "object", "additionalProperties": false,
+      "required": ["buildingCoverage", "floorAreaRatio", "height"],
+      "properties": {
+        "buildingCoverage": {"$ref": "urn:sdg:constraint-result:0.1#/properties/constraints/properties/buildingCoverage"},
+        "floorAreaRatio": {"$ref": "#/$defs/floorAreaRatio"},
+        "height": {"$ref": "urn:sdg:constraint-result:0.1#/properties/constraints/properties/height"}
+      }
+    },
+    "reviewRequired": {"type": "boolean"}
+  },
+  "$defs": {
+    "capEntry": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "kind", "input", "reference", "condition", "reviewRequired"],
+      "properties": {
+        "id": {"$ref": "urn:sdg:project:0.1#/properties/project/properties/id"},
+        "kind": {"type": "string"},
+        "input": {"type": "string"},
+        "reference": {"$ref": "urn:sdg:constraint-result:0.1#/$defs/reference"},
+        "condition": {"$ref": "urn:sdg:project:0.1#/$defs/far"},
+        "reviewRequired": {"type": "boolean"}
+      }
+    },
+    "baseCap": {
+      "$ref": "#/$defs/capEntry",
+      "properties": {"id": {"const": "base-zoning"}, "kind": {"const": "base_zoning"}, "input": {"const": "zoning.floorAreaRatio"}}
+    },
+    "additionalCap": {
+      "$ref": "#/$defs/capEntry",
+      "properties": {"id": {"$ref": "urn:sdg:project:0.2#/$defs/capId"}, "kind": {"$ref": "urn:sdg:project:0.2#/$defs/capKind"}, "input": {"const": "zoning.additionalFloorAreaRatioCaps"}}
+    },
+    "floorAreaRatio": {
+      "type": "object", "additionalProperties": false,
+      "required": ["state", "calculationId", "maxTotalFloorAreaM2", "effectiveCapPercent", "effectiveCapIds", "capStack", "provenance", "reviewRequired"],
+      "properties": {
+        "state": {"enum": ["COMPUTED", "UNAVAILABLE"]},
+        "calculationId": {"const": "floor_area_cap_stack_v0.2"},
+        "maxTotalFloorAreaM2": {"type": ["number", "null"], "minimum": 0},
+        "effectiveCapPercent": {"type": ["number", "null"], "minimum": 0},
+        "effectiveCapIds": {"type": "array", "maxItems": 17, "uniqueItems": true, "items": {"$ref": "urn:sdg:project:0.1#/properties/project/properties/id"}},
+        "capStack": {"type": "array", "minItems": 1, "maxItems": 17, "prefixItems": [{"$ref": "#/$defs/baseCap"}], "items": {"$ref": "#/$defs/additionalCap"}},
+        "provenance": {"type": "array", "minItems": 1, "maxItems": 1, "items": {"$ref": "urn:sdg:constraint-result:0.1#/$defs/areaProvenance"}},
+        "reviewRequired": {"type": "boolean"}
+      },
+      "allOf": [{
+        "if": {"properties": {"state": {"const": "COMPUTED"}}},
+        "then": {"properties": {"maxTotalFloorAreaM2": {"type": "number"}, "effectiveCapPercent": {"type": "number"}, "effectiveCapIds": {"minItems": 1}}},
+        "else": {"properties": {"maxTotalFloorAreaM2": {"type": "null"}, "effectiveCapPercent": {"type": "null"}, "effectiveCapIds": {"maxItems": 0}}}
+      }]
+    },
+    "contextCaps": {
+      "description": "Versioned result context; zero or unavailable caps cannot be used as positive candidate caps.",
+      "type": "object", "additionalProperties": false,
+      "required": ["maxFootprintAreaM2", "maxTotalFloorAreaM2", "maxHeightM"],
+      "properties": {
+        "maxFootprintAreaM2": {"type": ["number", "null"], "minimum": 0},
+        "maxTotalFloorAreaM2": {"type": ["number", "null"], "minimum": 0},
+        "maxHeightM": {"type": ["number", "null"], "exclusiveMinimum": 0}
+      }
+    }
+  }
+}

@@ -114,3 +114,12 @@ schema、finite数値、state/value、provenance、area basis/差分/選択値�
 参照hashは既存encoderによるcanonical結果bytesから生成し、入力JSONの空白には依存しない。
 整合的に全provenanceを書き換えた場合の元Project真正性は、この結果fileだけでは証明できない。
 Massingはさらに渡されたGeometryのexact hash・面積・statusとbindingする。
+
+## Phase 10 Constraint Result v0.2
+
+Project0.2の明示FAR stackから `floor_area_cap_stack_v0.2` を生成する。
+BCR / height / area basisは従来通り。FARはstate、effectiveCapPercent、effectiveCapIds、
+maxTotalFloorAreaM2、ordered capStackとreviewRequiredを保持し、selected area provenanceも残す。
+canonical Project hash、各capのid/kind/input/condition/statusを出典として保存する。
+未知capはUNAVAILABLE、null値、空effective IDs。v0.1のREVIEW_STATUSESとbytesは変更しない。
+追加capとbaseを含むv0.2 FAR固有review policy・Decimal/tie詳細は [FAR stack契約](far-stack-contract.md)。

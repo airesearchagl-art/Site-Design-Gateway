@@ -18,7 +18,7 @@ from bve.validation import MAX_INPUT_BYTES as PROJECT_LIMIT
 from .errors import Code, RunError, Stage, at_stage
 from .filesystem import is_link, read_regular
 from .manifest import MAX_MANIFEST_BYTES, decode, reference, validate_manifest
-from .model import ARTIFACTS, FILE_SET, RunSummary
+from .model import ARTIFACTS, FILE_SET, PACKAGE_VERSION, VERSION_MATRIX, RunSummary
 
 MAX_SEARCH_BYTES = 256 * 1024 * 1024
 LIMITS = {"project": PROJECT_LIMIT, "geometry": GEOMETRY_LIMIT,
@@ -39,6 +39,14 @@ def check_references(manifest: dict, constraints: dict, search: dict) -> None:
         raise RunError(Stage.VERIFY, Code.REFERENCE_MISMATCH)
 
 
+def check_versions(package_version: str, artifacts: dict[str, bytes]) -> None:
+    matrix = VERSION_MATRIX[package_version]  # Manifest was explicitly validated.
+    for kind, raw in artifacts.items():
+        value = decode(raw, LIMITS[kind])
+        if type(value) is not dict or value.get("schemaVersion") != matrix[kind]:
+            raise RunError(Stage.VERIFY, Code.ARTIFACT_VERSION_MISMATCH)
+
+
 def verify_package(package: Path) -> RunSummary:
     with at_stage(Stage.VERIFY):
         package = Path(package)
@@ -56,6 +64,7 @@ def verify_package(package: Path) -> RunSummary:
         artifacts = {kind: read_regular(package / name, LIMITS[kind], Stage.VERIFY)
                      for kind, name in ARTIFACTS.items()}
         check_hashes(manifest, artifacts)
+        check_versions(manifest["packageVersion"], artifacts)
         if project_bytes(artifacts["project"]) != artifacts["project"]:
             raise RunError(Stage.VERIFY, Code.NONCANONICAL_ARTIFACT)
         project = load_project(artifacts["project"])
@@ -76,7 +85,8 @@ def verify_package(package: Path) -> RunSummary:
         # for the schema's rank/count integer types, without rounding decimals.
         del search_data
         search_data = json.loads(artifacts["search"], parse_float=Decimal)
-        if not schema_validator("search").is_valid(search_data):
+        search_schema = "search" if manifest["packageVersion"] == PACKAGE_VERSION else "search_v3"
+        if not schema_validator(search_schema).is_valid(search_data):
             raise RunError(Stage.VERIFY, Code.ARTIFACT_SCHEMA_INVALID)
         check_references(manifest, constraints.result.to_dict(), search_data)
         config = manifest["configuration"]
@@ -92,4 +102,4 @@ def verify_package(package: Path) -> RunSummary:
         if search_bytes(expected) != artifacts["search"]:
             raise RunError(Stage.VERIFY, Code.ARTIFACT_SEMANTIC_MISMATCH)
         return RunSummary(expected.review_required, len(expected.floor_heights_m),
-                          len(expected.ranked_candidates), len(expected.rejections))
+                          len(expected.ranked_candidates), len(expected.rejections), manifest["packageVersion"])
