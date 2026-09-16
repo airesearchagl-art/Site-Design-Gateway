@@ -12,4 +12,4 @@ Python semantic authority preserved. Effective IDs are numeric sources, never le
 Unknown FAR stops Search as REQUIRED_CONSTRAINT_UNAVAILABLE. Browser UNAVAILABLE display tests are schema-only.
 Zero FAR yields existing NO_FEASIBLE_MASSING point rejections and Search v0.3 valid zero accepted.
 Old schemas, old fixtures, Massing generator/candidate and legacy review constants/bytes remain unchanged.
-Mutation, exact-head CI and Draft PR remain pending until actually executed. No early PASS claims.
+Local acceptance COMPLETE including mutations10/10. Remote exact-head CI and Draft PR are the remaining exit steps.

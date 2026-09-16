@@ -8,6 +8,6 @@
 - [x] Viewer / offline registry / authoritative FAR display / docs and CI
 - [x] Python967 / Web159 / lint / build / resources4/4 / boundary / pip / diff
 - [x] Local production desktop / mobile / functional / privacy smoke
-- [ ] Ten isolated mutations with control, syntax/import and assertion evidence
+- [x] Ten isolated mutations with control, syntax/import and assertion evidence
 - [ ] Seal / feature push / exact-head CI
 - [ ] Draft PR then immediate STOP
