@@ -2,7 +2,7 @@ name: Synthetic validation
 
 on:
   push:
-    branches: [feat/phase0-bootstrap, feat/phase1-geometry-foundation, feat/phase2-constraint-engine, feat/phase3-massing-candidate-foundation, feat/phase4-search-ranking-foundation, feat/phase5-web-results-viewer, feat/phase7-results-interpretation]
+    branches: [feat/phase0-bootstrap, feat/phase1-geometry-foundation, feat/phase2-constraint-engine, feat/phase3-massing-candidate-foundation, feat/phase4-search-ranking-foundation, feat/phase5-web-results-viewer, feat/phase7-results-interpretation, feat/phase8-local-run-package]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   python:
-    name: Python schema, geometry, constraints, massing and search (synthetic only)
+    name: Python Core and Run Package (synthetic only)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
@@ -48,6 +48,14 @@ jobs:
           python -m bve.search --geometry "$geometry_file" --constraints "$constraint_file" --floor-height-m 4 --floor-height-m 5 --floor-height-m 6 --floor-height-m 7 --floor-height-m 8
           python -m bve.search --geometry "$geometry_file" --constraints "$constraint_file" --floor-height-m 4 --floor-height-m 32
           python -m bve.search --geometry "$geometry_file" --constraints "$constraint_file" --floor-height-m 32 --floor-height-m 40
+      - name: Run Package create and verify (summary only; runner temp; no upload)
+        run: |
+          package="$RUNNER_TEMP/sdg-run-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python -m bve.run create --project cases/example-urban-office/project.json --geometry cases/example-urban-office/site.geojson --format geojson --area-basis declared_project_area --floor-height-m 4 --floor-height-m 5 --floor-height-m 6 --floor-height-m 7 --floor-height-m 8 --output "$package"
+          python -m bve.run verify --package "$package"
+          dxf_package="$RUNNER_TEMP/sdg-dxf-run-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python -m bve.run create --project cases/example-urban-office/project.json --geometry cases/example-urban-office/site.dxf --format dxf --layer SITE --area-basis geometry_area --floor-height-m 4 --floor-height-m 40 --output "$dxf_package"
+          python -m bve.run verify --package "$dxf_package"
 
   web:
     name: Web and public boundary (synthetic only)

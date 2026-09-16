@@ -6,12 +6,12 @@
 - fixtureは `cases/example-urban-office/` のsynthetic dataのみ。
 - `schemas/sdg-project-v0.1.schema.json` が案件条件の正本。Web/Pythonで別schemaを作らない。
 - BVE Coreに案件・自治体固有処理を埋め込まない。LLM調査値をofficial_verifiedへ昇格しない。
-- Current Phase = Phase 7 Results Interpretation UX Foundation。ローカルBVE Coreがcanonical exportしたSearch Result JSONを、
-  serverへ送らずbrowser memoryだけで検証・比較表示するread-only consumerを構築する。
+- Current Phase = Phase 8 Local Run Package & Orchestration Foundation。既存Coreを再利用するlocal create/verifyと
+  固定5ファイルのdeterministic Run Package v0.1を構築する。Web production sourceは変更しない。
 - Project/Geometry/Constraint/MassingおよびSearch v0.1 schemaは維持。Search v0.2は既存schemaへの参照でcontextを追加する。
   Web compute、semantic再計算、編集・保存、3D、認証、DB、Bridgeは対象外。
 - mainへ直接commitしない。作業branchでcheckpoint commitを残す。force push、破壊的cleanupは禁止。
-- このCampaignではReady、merge、Vercel操作、Production、Phase 8開始は禁止。Draft PR作成直後にSTOP。
+- このCampaignではReady、merge、Vercel操作、Production、Phase 9開始は禁止。Draft PR作成直後にSTOP。
 - SDG-VP-001はBLOCKED_EXTERNAL。D02 OPEN / PLATFORM_BLOCKEDを継承し、Preview PASSとは扱わない。
   Preview意図の2経路がProduction分類され両方削除済み。Git Integration DISCONNECTED確認後、
   HumanのPhase 3 transition exception = AUTHORIZED。旧Preview必須条件はこの例外で解除された。
@@ -37,3 +37,7 @@ Phase 7のconstraintContextはPython exportがcanonical Constraint Resultへ照�
 Webはarea basis・cap・actualと、cap-actual / actual/capの表示値だけを扱う。clamp、再sort、
 authoritative tie判定、governing/legal判定は禁止。明示localeで丸め表示し、入力を変更しない。
 D04 OPEN、VMVP-001 PASS WITH TARGET ANOMALYを継承。Phase 6 private workspaceや詳細reportは読まない。
+
+Phase 8はdocs/run-package-contract.mdを参照。入力はpublic syntheticだけで検証し、新dependencyは追加しない。
+manifestは固定相対pathとexact artifact hashのみ。原本名・絶対path・wall-clockを含めない。
+existing outputは上書きせず、stagingの完全verify後に排他的atomic publishする。runtime packageはGit/CI artifactに入れない。

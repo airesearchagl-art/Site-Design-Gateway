@@ -1,8 +1,8 @@
 # Project instructions
 
 目的は建築初期検討の入力条件と出典状態を明示するWeb Gatewayの最小基盤。
-計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 7 Results Interpretation UX Foundation。
-Phase 0〜4を維持し、canonical Search Resultをbrowser-onlyで比較表示する。
+計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 8 Local Run Package & Orchestration Foundation。
+Phase 0〜7を維持し、既存Coreを呼ぶlocal orchestrationと固定5ファイルのpackageを追加する。
 
 - Next.js / TypeScriptはProject検証とSearch Resultの形式確認・read-only表示、PythonはProject検証・Geometry・Constraints・Massing・Search計算とsemantic exportを担当する。
 - 単位を暗黙変換しない。面積はm2、比率はpercent、高さはmをschemaで明示する。
@@ -25,8 +25,8 @@ Polygon検証はGeometryへ集約する。面積の自動選択・任意threshol
 Massingは凸・穴なし敷地、固定homothetic footprintと同形整数階stackだけ。
 Constraint Resultはschemaと再計算で検証し、Geometry referenceを一致させる。階高の既定値は禁止。
 actual areaを丸めずcapと包含を再確認する。法規適合・後退・最適性を主張しない。
-WebからPythonを呼ばない。floorHeight以外の探索、3D、本番rulepacks、Run Package、Bridge、API、保存基盤は対象外。
-Draft PR作成後STOP。Ready、merge、Vercel操作、Production、Phase 8、Vault/Notion直接更新は禁止。
+WebからPythonを呼ばない。floorHeight以外の探索、3D、本番rulepacks、Bridge、API、保存基盤は対象外。
+Draft PR作成後STOP。Ready、merge、Vercel操作、Production、Phase 9、Vault/Notion直接更新は禁止。
 旧Preview必須GateはSDG-VP-001 BLOCKED_EXTERNAL、D02 OPEN / PLATFORM_BLOCKEDとして切り離された。
 意図しないProduction分類2件は削除済み。Git切断確認後、HumanのPhase 3 transition exception = AUTHORIZED。
 このPhaseではVercelを再検証せず、別Runで原因と安全経路をfresh auditする。
@@ -46,3 +46,8 @@ Phase 7ではauthoritative Constraint Result由来のcontextをSearch v0.2へcop
 UIにはbasis、cap、actual、remaining、usage、ranking ruleを表示する。単純な表示用差分/比率のみ許可し、
 法規計算、governing constraint、clamp、再sort、同順位badgeを追加しない。en-US丸め表示と原本保持を明記する。
 D04 OPEN。Phase 6 private workspaceや詳細reportを参照・転記しない。Vercel状態は継承のみ。
+
+Phase 8 Run PackageはProject/Geometry/Constraints/Searchの既存public APIとcanonical exporterを再利用する。
+manifest v0.1は独立schemaであり既存6schemaは変更しない。area basisと階高はHuman明示、defaultなし。
+strict fixed file set、hash/相互参照/意味検証、既存target拒否、完全staging検証後のatomic公開を必須とする。
+Web production sourceとdependencyは変更しない。詳細: docs/run-package-contract.md。

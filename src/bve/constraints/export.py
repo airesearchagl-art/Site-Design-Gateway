@@ -32,6 +32,28 @@ def _encode(value) -> str:
     raise ConstraintError(Code.INTERNAL_ERROR)
 
 
+def canonical_json_bytes(value) -> bytes:
+    """Public access to the existing Decimal encoder; no alternate numeric format."""
+    return (_encode(value) + "\n").encode("utf-8")
+
+
+def project_bytes(payload: bytes | str) -> bytes:
+    """Validate and canonicalize a complete Project without stripping its fields.
+
+    Consumers must bind references to these returned bytes, not the original
+    input formatting. The same bounded Project reader validates both forms.
+    """
+    from bve._json import decode_json
+    from bve.validation import MAX_INPUT_BYTES
+    from .inputs import load_project
+
+    load_project(payload)
+    _, data = decode_json(payload, max_bytes=MAX_INPUT_BYTES)
+    canonical = canonical_json_bytes(data)
+    load_project(canonical)
+    return canonical
+
+
 def result_bytes(result: ConstraintResult) -> bytes:
     if type(result) is not ConstraintResult:
         raise ConstraintError(Code.INVALID_ARGUMENTS)
@@ -45,7 +67,7 @@ def result_bytes(result: ConstraintResult) -> bytes:
             raise ConstraintError(Code.OUTPUT_SCHEMA_INVALID)
     except DecimalException:
         raise ConstraintError(Code.NUMERIC_RANGE) from None
-    return (_encode(data) + "\n").encode("utf-8")
+    return canonical_json_bytes(data)
 
 
 def constraint_summary(result: ConstraintResult) -> dict:

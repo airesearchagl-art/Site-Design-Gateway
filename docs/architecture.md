@@ -1,6 +1,6 @@
 # アーキテクチャ
 
-Current Phase = Phase 7 Results Interpretation UX Foundation。WebとPythonは同じcanonical schemasを参照する
+Current Phase = Phase 8 Local Run Package & Orchestration Foundation。WebとPythonは同じcanonical schemasを参照する
 独立したclientです。PythonのGeometry/Constraints/Massing/SearchとWebはAPIで接続しません。
 
 ```text
@@ -68,7 +68,7 @@ Phase 0ではサービスもBridgeも接続しません。
 
 Phase 0では幾何計算・DXF読込も対象外でした。過去のADRとRun記録は当時の判断として保持します。
 現在も法規計算、自治体固有処理、実案件固有処理、DXF / PDF出力、CAD/BIM連携、Web compute接続は対象外です。
-WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 8、
+WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 9、
 Vault/Notion直接更新は行いません。
 
 ## Phase 3 Massing
@@ -122,3 +122,21 @@ Search v0.2はcanonical Constraint由来のareaBasisとcapを内包する。旧v
 offline registryは6schemaとなる。Pythonがcontext/referenceの意味検証を担い、
 Webはpure display helperでremaining/usageと数値書式だけを作る。入力documentやrankは変更しない。
 zero acceptedでもcontextを表示し、Clearはcontextを含む結果全体を破棄する。D04はOPEN。
+
+## Phase 8 Local Run Package
+
+```text
+explicit Project + Geometry + basis + heights
+  → bve.run orchestration
+  → existing Project / Geometry / Constraints / Search APIs
+  → canonical artifacts + manifest → staging → full verify → exclusive atomic publish
+```
+
+`bve.run`はmodel/manifest、orchestration、verification、filesystem、errors、CLIを分離する。
+計算ロジックを複製しない。Project用には既存Decimal encoderをpublic APIとして公開し、
+canonical Projectへの参照を後段へ渡す。元入力のbytesは変更しない。
+verifyはschema/hashだけでなく既存Coreへ戻してcanonical結果を比較する。Searchはv0.2、legacy契約は維持。
+manifestは固定相対名・configuration・SHA-256だけ。追加file/hidden metadataはv0.1で拒否。
+stagingは完全検証後にnative no-replace renameで公開し、既存出力は上書きしない。
+WebとのAPI接続・package読込UI・Bridge・CSVは追加しない。
+[Run Package契約](run-package-contract.md)にplatform、limit、privacyとatomic保証範囲を固定する。

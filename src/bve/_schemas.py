@@ -8,7 +8,7 @@ from referencing import Registry, Resource
 from .validation import SCHEMA_PATH, _validator
 
 
-@lru_cache(maxsize=6)
+@lru_cache(maxsize=7)
 def schema_validator(kind: str) -> Draft202012Validator:
     project = _validator()
     if kind == "project":
@@ -17,15 +17,16 @@ def schema_validator(kind: str) -> Draft202012Validator:
                 "constraints": "sdg-constraint-result-v0.1.schema.json",
                 "massing": "sdg-massing-candidate-v0.1.schema.json",
                 "search_legacy": "sdg-search-result-v0.1.schema.json",
-                "search": "sdg-search-result-v0.2.schema.json"}[kind]
+                "search": "sdg-search-result-v0.2.schema.json",
+                "run": "sdg-run-manifest-v0.1.schema.json"}[kind]
     schema = json.loads((SCHEMA_PATH.parent / filename).read_bytes())
     Draft202012Validator.check_schema(schema)
     registry = Registry().with_resource(project.schema["$id"], Resource.from_contents(project.schema))
-    if kind in ("massing", "search_legacy", "search"):
+    if kind in ("massing", "search_legacy", "search", "run"):
         dependencies = ("geometry", "constraints")
-        if kind in ("search_legacy", "search"):
+        if kind in ("search_legacy", "search", "run"):
             dependencies += ("massing",)
-        if kind == "search":
+        if kind in ("search", "run"):
             dependencies += ("search_legacy",)
         for dependency in dependencies:
             contract = schema_validator(dependency).schema

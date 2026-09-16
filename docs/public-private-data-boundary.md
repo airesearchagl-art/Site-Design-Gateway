@@ -24,9 +24,9 @@ CLI はローカルファイルを検証します。案件名や入力全文を�
 
 ignore 設定だけで公開可否を判断せず、コミット前に対象ファイルと差分を確認します。秘密情報・個人情報・入力全文の混入、データ破損が見つかった場合は共有を止めて報告します。認証や権限の変更、非公開情報の別経路への移送で解消しません。
 
-Current Phase = Phase 7 Results Interpretation UX Foundation。Vault / Notion への書込は禁止です。
+Current Phase = Phase 8 Local Run Package & Orchestration Foundation。Vault / Notion への書込は禁止です。
 公開 Git への反映は feature branch と Draft PR まで。Draft作成後STOPし、Ready、merge、
-Vercel操作、Production、Phase 8には進みません。最終報告にDocumentation Sync Triggerを返します。
+Vercel操作、Production、Phase 9には進みません。最終報告にDocumentation Sync Triggerを返します。
 
 Geometry fixtureはゼロから作った `cases/example-urban-office/site.geojson` と `site.dxf`
 だけを許可します。一般のDXF/GeoJSON原本・出力は公開しません。Python CLIの出力先は明示し、
@@ -55,3 +55,9 @@ Cache API、sendBeacon、analytics、telemetry、WebSocket、EventSourceを使�
 Phase 7の公開Search fixtureは既存public synthetic CLIから再生成したv0.2だけ。
 Phase 6 private workspaceのinput/output、詳細report、値、画像、パスをpublic code/docs/fixtureへ転記しない。
 非ゼロarea difference等はtest内で完全syntheticに生成する。
+
+Phase 8の一般Run Packageはprivate runtime。Project本文・形状を含むため、manifestがpathを持たなくても
+公開可能とは扱わない。manifestには固定相対path、明示basis/heights、artifact hashだけを含める。
+元ファイル名、source directory、個人path、時刻、machine/user名を追加しない。
+testとCIはpublic synthetic sourceからtemporary packageを生成し、Gitへ追跡せずCI artifactへuploadしない。
+検証CLIは固定stage/codeと件数だけを出す。Phase 6 private workspaceを参照・転用しない。
