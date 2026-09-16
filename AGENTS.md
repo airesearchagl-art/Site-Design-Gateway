@@ -4,14 +4,14 @@
 - 実案件データ、実案件名・住所、施主情報、個人を識別するローカルパス、秘密情報、
   .envの値、署名付きURL、CAD/BIM/PDF原本、runtime input/log/dumpをGitへ入れない。
 - fixtureは `cases/example-urban-office/` のsynthetic dataのみ。
-- `schemas/sdg-project-v0.1.schema.json` が案件条件の正本。Web/Pythonで別schemaを作らない。
+- `schemas/sdg-project-v0.1.schema.json` / `sdg-project-v0.2.schema.json` がversion別の案件条件の正本。Web/Pythonで別schemaを作らない。
 - BVE Coreに案件・自治体固有処理を埋め込まない。LLM調査値をofficial_verifiedへ昇格しない。
-- Current Phase = Phase 9 Run Package Viewer Intake Foundation。固定5ファイルをbrowser-onlyで検証し、
-  既存Search Viewerへ渡す。Python production sourceと既存7schemaは変更しない。
+- Current Phase = Phase 10 Constraint Stack / Effective FAR Foundation。明示numeric FAR capsをPython Decimalで合成する。
+  既存7schemaを維持し、Project0.2 / Constraint0.2 / Search0.3 / Manifest0.2を追加する。
 - Project/Geometry/Constraint/MassingおよびSearch v0.1 schemaは維持。Search v0.2は既存schemaへの参照でcontextを追加する。
   Web compute、semantic再計算、編集・保存、3D、認証、DB、Bridgeは対象外。
 - mainへ直接commitしない。作業branchでcheckpoint commitを残す。force push、破壊的cleanupは禁止。
-- このCampaignではReady、merge、Vercel操作、Production、Phase 10開始は禁止。Draft PR作成直後にSTOP。
+- このCampaignではReady、merge、Vercel操作、Production、Phase 11開始は禁止。Draft PR作成直後にSTOP。
 - SDG-VP-001はBLOCKED_EXTERNAL。D02 OPEN / PLATFORM_BLOCKEDを継承し、Preview PASSとは扱わない。
   Preview意図の2経路がProduction分類され両方削除済み。Git Integration DISCONNECTED確認後、
   HumanのPhase 3 transition exception = AUTHORIZED。旧Preview必須条件はこの例外で解除された。
@@ -26,7 +26,7 @@
 - Long Run再開はmanifest/state/queue/debtを読み、branch/base/treeとexact local packetのSHA-256を確認する。
   exact packetは個人パスを含むためGit除外。公開要約をexact snapshotの代用にしない。
 
-Phase 4 Searchの計算契約・ranking semanticsは変更しない。WebはRun ManifestとSearch v0.1/v0.2を含む7schemaのoffline Ajv registryで
+Phase 4 Searchの計算契約・ranking semanticsは変更しない。WebはRun ManifestとSearch v0.1/v0.2/v0.3を含む11schemaのoffline Ajv registryで
 JSON syntax / UTF-8 / viewer resource / Schemaを確認し、Python semantic validationを再実行しない。
 viewer上限8 MiBはVIEWER_LIMITとしてSchema INVALIDと分離する。入力はbrowser memoryのみ、Clearで破棄する。
 summary、ranking/rejection、review warning、zero accepted、rank/reference選択、exterior ringの2D Local XY SVGをread-only表示する。
@@ -45,5 +45,11 @@ existing outputは上書きせず、stagingの完全verify後に排他的atomic 
 Phase 9ではexact file setと同一root直下、全File.size先行確認、actual-buffer recheckを必須とする。
 manifest/project 256 KiB、geometry/constraints 4 MiB、Search 8 MiB。raw parse前preflightは維持する。
 Web Crypto SHA-256はartifact integrityのみ。root参照とbasis/階高のparsed値/順序を照合する。
-Python bve.run verifyがauthoritative semantic verifier。package内Searchはv0.2、直接v0.1/v0.2は維持。
+Python bve.run verifyがauthoritative semantic verifier。package v0.1内Searchはv0.2、package v0.2内はv0.3。直接v0.1/v0.2/v0.3を維持。
 Clearで全state/inputを解除し遅延handoffを防ぐ。ZIP、network/storage、FS write、新dependencyは追加しない。
+
+Phase 10の詳細はdocs/far-stack-contract.md。追加capはrequired [] / 最大16、stable unique ID、base-zoning reserved。
+Decimal min、未知cap fail closed、base first / 入力順の全tie IDs、canonical Project hashとstatus保持を必須とする。
+v0.2 FARのみllm_researchedをreview対象へ含め、旧REVIEW_STATUSESは変更しない。
+道路係数・legal/governing inferenceを追加しない。Webはauthoritative FAR値を表示するだけ。
+Package0.1/0.2は明示matrixでdispatchし自動変換しない。未知capは共有Search失敗、0%はzero accepted。

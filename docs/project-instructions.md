@@ -1,13 +1,13 @@
 # Project instructions
 
 目的は建築初期検討の入力条件と出典状態を明示するWeb Gatewayの最小基盤。
-計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 9 Run Package Viewer Intake Foundation。
-Phase 0〜8を維持し、固定5ファイルのRun Packageをbrowser-onlyで確認して既存Viewerへ渡す。
+計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 10 Constraint Stack / Effective FAR Foundation。
+Phase 0〜9を維持し、明示FAR capsの合成とversion別のRun Package / Viewerを追加する。
 
 - Next.js / TypeScriptはProject検証とSearch Resultの形式確認・read-only表示、PythonはProject検証・Geometry・Constraints・Massing・Search計算とsemantic exportを担当する。
 - 単位を暗黙変換しない。面積はm2、比率はpercent、高さはmをschemaで明示する。
   検証成功は法規適合や建築可能性の証明ではない。
-- 既存7schemaを維持する。WebはRun Manifestを含む7schemaをoffline参照し、直接Searchはv0.1/v0.2を受け入れる。
+- 既存7schemaを維持する。Webは新4schemaを加えた11schemaをoffline参照し、直接Searchはv0.1/v0.2/v0.3を受け入れる。
   追加のschemaVersion変更は互換性判断を伴うためHuman Gateとする。
 - 日本語で簡潔に結果と未確認事項を報告する。UI内へ運用上の実装手順を混ぜない。
 - Runtime dataをpublic fixtureに転用しない。開発・CI・ブラウザ検証もsyntheticのみ。
@@ -18,7 +18,7 @@ Phase 0〜8を維持し、固定5ファイルのRun Packageをbrowser-onlyで確
 
 Geometryはlocal XY・m/mmの明示入力だけをmへ正規化する。Shapelyを唯一の計算Coreとし、
 DXF読込はezdxfを使う。未知単位・未知CRS・曲線・不正Polygonを推測や修復で採用しない。
-正規化Geometry schemaはProject schemaと別契約。既存Project schemaを複製・改版しない。
+正規化Geometry schemaはProject schemaと別契約。legacy Project schemaは変更しない。新versionは既存定義を参照する。
 Constraintsは検証済みProjectとSiteGeometryから固定の3計算だけを行う。normalized読込の
 Polygon検証はGeometryへ集約する。面積の自動選択・任意threshold・丸め・status昇格・formula DSLは禁止。
 出力のexact input hash、個別null/absent状態、provenance、reviewRequiredを保持する。
@@ -26,7 +26,7 @@ Massingは凸・穴なし敷地、固定homothetic footprintと同形整数階st
 Constraint Resultはschemaと再計算で検証し、Geometry referenceを一致させる。階高の既定値は禁止。
 actual areaを丸めずcapと包含を再確認する。法規適合・後退・最適性を主張しない。
 WebからPythonを呼ばない。floorHeight以外の探索、3D、本番rulepacks、Bridge、API、保存基盤は対象外。
-Draft PR作成後STOP。Ready、merge、Vercel操作、Production、Phase 10、Vault/Notion直接更新は禁止。
+Draft PR作成後STOP。Ready、merge、Vercel操作、Production、Phase 11、Vault/Notion直接更新は禁止。
 旧Preview必須GateはSDG-VP-001 BLOCKED_EXTERNAL、D02 OPEN / PLATFORM_BLOCKEDとして切り離された。
 意図しないProduction分類2件は削除済み。Git切断確認後、HumanのPhase 3 transition exception = AUTHORIZED。
 このPhaseではVercelを再検証せず、別Runで原因と安全経路をfresh auditする。
@@ -57,3 +57,8 @@ exact-byte SHA-256、root入力参照、basis/階高のparsed値と順序を検�
 Python semantic authorityをUIに明示し、計算・candidate hash・順位を再実行しない。D04 OPEN。
 直接Search、Phase 7表示、resource preflight、privacyを維持し、Clearの非同期競合も検証する。
 packageのtest helperはpublic syntheticを既存Pythonで一時生成するだけ。runtime packageを追跡しない。
+
+Phase 10はdocs/far-stack-contract.mdに従う。明示numeric capsだけをDecimalで合成し、既存面積helperを使う。
+未知capはfail closed、tie IDsはbase first / 入力順、出典statusを昇格しない。v0.2 FAR専用review policyを持つ。
+Project0.2 / Constraint0.2 / Search0.3 / Package0.2を追加し、legacy route・schema・canonical bytesを維持する。
+Webでmin/tieを再計算しない。道路幅員・法令係数・governing legal ruleの推測を実装しない。

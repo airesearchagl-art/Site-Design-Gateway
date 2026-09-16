@@ -3,8 +3,8 @@
 CAD上で一案ずつ試す初期検討から、入力条件・制約・計算根拠・候補比較を明示した
 再現可能な探索へ進めるWeb Gatewayです。計算主体はBVE Core（Buildable Volume Engine）です。
 
-Current Phase = Phase 9 Run Package Viewer Intake Foundation。既存のPython計算契約を維持し、
-local commandで生成したRun Packageの5ファイルをbrowser memoryだけで検証し、既存Viewerへ渡します。
+Current Phase = Phase 10 Constraint Stack / Effective FAR Foundation。明示されたFAR上限をPython Decimalで合成し、
+version別のRun Packageの5ファイルをbrowser memoryだけで検証して、FARの出典と候補を表示します。
 Webは従来のProject検証に加え、Search summary、ranking/rejection、candidate選択と2D footprintをread-onlyで提供します。
 
 ## ローカルで開始する
@@ -60,13 +60,13 @@ CI は公開可能な合成データだけを使い、Web の lint・test・buil
 
 ## 検証結果の意味
 
-Schema の正本は [`schemas/sdg-project-v0.1.schema.json`](schemas/sdg-project-v0.1.schema.json) です。Web と Python で同じファイルを参照し、仕様を二重管理しません。
+Project Schema の正本はversion別の [`v0.1`](schemas/sdg-project-v0.1.schema.json) / [`v0.2`](schemas/sdg-project-v0.2.schema.json) です。Web と Python で同じファイルを参照し、仕様を二重管理しません。
 
 | 判定 | 意味 |
 | --- | --- |
 | Schema `PASS` / `FAIL` | JSON が構造・型・列挙値の契約を満たすか |
 | UI `INVALID` | JSON 構文エラー、または Schema 不適合 |
-| UI `REVIEW_REQUIRED` | Schema 適合かつ `assumed` / `unknown` / `review_required` を含む |
+| UI `REVIEW_REQUIRED` | Schema 適合かつ `assumed` / `unknown` / `review_required` を含む（v0.2 FARは `llm_researched` も含む） |
 | UI `VALID` | Schema 適合かつ上記の要確認状態を含まない |
 
 出典状態は `official_verified`、`user_provided`、`drawing_derived`、`llm_researched`、`assumed`、`unknown`、`review_required` の 7 種です。`VALID` は法規適合や情報の正しさを保証しません。`llm_researched` を `official_verified` へ自動昇格させず、人が根拠を確認します。
@@ -105,8 +105,8 @@ synthetic fixtureは両形式とも200 m2、面積差0です。WebにはGeometry
 Phase 1でPython Geometry Foundationを追加しました。検索、本番法規rulepack、認証、
 保存・DB、CAD/BIM連携、最適化、Web compute APIは範囲外です。Run Packageは文書上の契約検討に留めます。
 
-今回の出口はPhase 7のDraft PRです。
-作成直後にSTOPし、Ready、merge、Vercel操作、Production、Phase 8へ進みません。
+今回の出口はPhase 10のDraft PRです。
+作成直後にSTOPし、Ready、merge、Vercel操作、Production、Phase 11へ進みません。
 過去のADR・Run記録は維持します。
 
 ## Phase 2 Constraint Engine
@@ -283,3 +283,20 @@ Browserは計算、candidate hash、順位を再生成しません。Numberで�
 Search v0.1/v0.2の直接選択とsampleは維持します（package内Searchはv0.2）。zero acceptedも表示可能です。
 入力は送信・保存せず、Clearでpackage/Searchと選択を破棄し、進行中の読込からの遅延表示も防ぎます。
 D02 OPEN / PLATFORM_BLOCKED、VMVP-001 PASS WITH TARGET ANOMALYは継承のみ。Vercelは操作しません。
+
+## Phase 10 Explicit FAR Constraint Stack
+
+Project v0.2は `zoning.additionalFloorAreaRatioCaps` を必須とし、追加なしは `[]` を明示します。
+base FARと最大16個の追加上限をDecimalで比較し、全numericなら最小値を採用します。
+未知capが1件でもあればFARはUNAVAILABLE。tieのsource IDはbase first / 入力順で全件保持します。
+既存v0.1 schema・出力bytes・review policyは維持します。道路幅員の係数や法規は推測しません。
+
+```sh
+python -m bve.run create --project cases/example-urban-office/project-far-stack.json --geometry cases/example-urban-office/site.geojson --format geojson --area-basis declared_project_area --floor-height-m 4 --floor-height-m 5 --floor-height-m 6 --floor-height-m 7 --floor-height-m 8 --output runtime-data/far-run
+python -m bve.run verify --package runtime-data/far-run
+```
+
+出力親directoryは事前に用意し、出力先は未使用としてください。全入力は公開syntheticです。
+base600% / additional400% / area200m²からeffective400%、GFA cap800m²を生成します。
+WebはSearch v0.3 / Package v0.2のauthoritative FAR contextを表示し、minやtieを再計算しません。
+[version matrix・FAR契約](docs/far-stack-contract.md)を参照してください。Pythonがsemantic authority、D04 OPENです。

@@ -37,20 +37,26 @@ class SearchResult:
     rejections: tuple[Rejection, ...]
 
     @property
+    def schema_version(self) -> str:
+        return {"0.1": "0.2", "0.2": "0.3"}[self.constraints.result.schema_version]
+
+    @property
     def review_required(self) -> bool:
         return self.constraints.result.review_required
 
     def to_dict(self) -> dict:
         constraints = self.constraints.result
-        return {"schemaVersion": "0.2",
+        context = {"areaBasis": constraints.to_dict()["areaBasis"],
+                   "constraintCaps": {"maxFootprintAreaM2": constraints.building_coverage.value,
+                                      "maxTotalFloorAreaM2": constraints.floor_area_ratio.value,
+                                      "maxHeightM": constraints.height.value}}
+        if self.schema_version == "0.3":
+            context["floorAreaRatio"] = constraints.to_dict()["constraints"]["floorAreaRatio"]
+        return {"schemaVersion": self.schema_version,
                 "inputReferences": {"project": self.constraints.result.project_reference,
                                     "geometry": self.site.source_reference,
                                     "constraints": self.constraints.reference},
-                "constraintContext": {
-                    "areaBasis": constraints.to_dict()["areaBasis"],
-                    "constraintCaps": {"maxFootprintAreaM2": constraints.building_coverage.value,
-                                       "maxTotalFloorAreaM2": constraints.floor_area_ratio.value,
-                                       "maxHeightM": constraints.height.value}},
+                "constraintContext": context,
                 "search": {"strategy": "floor_height_sweep_v0.1",
                            "ranking": "maximize_gross_floor_area_v0.1",
                            "floorHeightsM": list(self.floor_heights_m), "floorHeightStatus": "user_provided"},

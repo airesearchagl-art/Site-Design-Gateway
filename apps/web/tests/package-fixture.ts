@@ -3,7 +3,7 @@
  */
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -14,12 +14,14 @@ export type PackageBytes = Record<PackageFilename, Uint8Array<ArrayBuffer>>;
 export const artifactNames = ["project.json", "site.geojson", "constraints.json", "search-result.json"] as const;
 const kind = { "project.json": "project", "site.geojson": "geometry", "constraints.json": "constraints", "search-result.json": "search" } as const;
 
-function canonicalPackage(heights: string[]): PackageBytes {
+export function canonicalPackage(heights: string[], projectValue?: unknown): PackageBytes {
   const temporary = mkdtempSync(join(tmpdir(), "sdg-p9-synthetic-"));
   const output = join(temporary, "package");
   try {
+    const projectInput = projectValue === undefined ? "cases/example-urban-office/project.json" : join(temporary, "synthetic-project.json");
+    if (projectValue !== undefined) writeFileSync(projectInput, JSON.stringify(projectValue));
     const python = process.env.SDG_TEST_PYTHON ?? (process.platform === "win32" ? join(ROOT, ".venv/Scripts/python.exe") : "python");
-    execFileSync(python, ["-m", "bve.run", "create", "--project", "cases/example-urban-office/project.json",
+    execFileSync(python, ["-m", "bve.run", "create", "--project", projectInput,
       "--geometry", "cases/example-urban-office/site.geojson", "--format", "geojson", "--area-basis", "declared_project_area",
       ...heights.flatMap((height) => ["--floor-height-m", height]), "--output", output],
     { cwd: ROOT, env: { ...process.env, PYTHONPATH: join(ROOT, "src"), PYTHONDONTWRITEBYTECODE: "1" }, stdio: "pipe", timeout: 30_000 });

@@ -5,7 +5,7 @@ export const MAX_SEARCH_BYTES = 8 * 1024 * 1024;
 export const MAX_SEARCH_DEPTH = 64;
 export const MAX_SEARCH_NODES = 250_000;
 
-const validators = { "0.1": sharedValidators.searchLegacy, "0.2": sharedValidators.search };
+const validators = { "0.1": sharedValidators.searchLegacy, "0.2": sharedValidators.search, "0.3": sharedValidators.searchV3 };
 
 export type SearchIssue = {
   path: string;
@@ -28,10 +28,23 @@ export type AreaBasis = {
   provenance: { input: string; reference: string; condition: { value: number | null; unit: "m2"; status: string } }[];
 };
 
-export type ConstraintContext = { areaBasis: AreaBasis; constraintCaps: ConstraintCaps };
+export type ContextCaps = { [K in keyof ConstraintCaps]: number | null };
+export type ConstraintContext = { areaBasis: AreaBasis; constraintCaps: ContextCaps };
+export type FarCapEntry = {
+  id: string; kind: string; input: string; reference: string;
+  condition: { value: number | null; unit: "percent"; status: string }; reviewRequired: boolean;
+};
+export type FloorAreaRatioContext = {
+  state: "COMPUTED" | "UNAVAILABLE";
+  calculationId: "floor_area_cap_stack_v0.2";
+  effectiveCapPercent: number | null; effectiveCapIds: string[]; maxTotalFloorAreaM2: number | null;
+  capStack: FarCapEntry[]; reviewRequired: boolean;
+};
+export type FarConstraintContext = ConstraintContext & { floorAreaRatio: FloorAreaRatioContext };
 
 export type SearchResultDocument = ({ schemaVersion: "0.1"; constraintContext?: never }
-  | { schemaVersion: "0.2"; constraintContext: ConstraintContext }) & {
+  | { schemaVersion: "0.2"; constraintContext: ConstraintContext }
+  | { schemaVersion: "0.3"; constraintContext: FarConstraintContext }) & {
   inputReferences: { project: string; geometry: string; constraints: string };
   search: {
     strategy: "floor_height_sweep_v0.1";
@@ -129,8 +142,10 @@ export function validateSearchJson(text: string): SearchValidationResult {
   if (resourceFailure) return resourceFailure;
   const version = value !== null && typeof value === "object" && "schemaVersion" in value
     ? value.schemaVersion : undefined;
-  // Unsupported versions still receive generic schema diagnostics from the legacy contract.
-  const validateSearchSchema = version === "0.2" ? validators["0.2"] : validators["0.1"];
+  if (version !== "0.1" && version !== "0.2" && version !== "0.3") {
+    return failure("INVALID", "schemaVersion", "Search Result Schemaに適合しません。");
+  }
+  const validateSearchSchema = validators[version];
   if (!validateSearchSchema(value)) {
     return {
       state: "INVALID",

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:run-manifest:0.2",
+  "title": "SDG Run Package manifest v0.2",
+  "description": "Project 0.2 / Geometry 0.1 / Constraints 0.2 / Search 0.3. Exact artifact bytes; no legal certificate or source metadata.",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "packageVersion", "configuration", "artifacts"],
+  "properties": {
+    "schemaVersion": {"const": "0.2"},
+    "packageVersion": {"const": "sdg-run-package-v0.2"},
+    "configuration": {"$ref": "urn:sdg:run-manifest:0.1#/properties/configuration"},
+    "artifacts": {"$ref": "urn:sdg:run-manifest:0.1#/properties/artifacts"}
+  }
+}

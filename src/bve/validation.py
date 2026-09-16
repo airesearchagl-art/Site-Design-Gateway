@@ -19,7 +19,7 @@ MAX_DEPTH = 32
 SCHEMA_PATH = Path(__file__).resolve().parents[2] / "schemas" / "sdg-project-v0.1.schema.json"
 
 ResultCode = Literal[
-    "valid", "invalid_json", "input_too_large", "schema_invalid", "schema_unavailable"
+    "valid", "invalid_json", "input_too_large", "schema_invalid", "schema_unavailable", "duplicate_cap_id"
 ]
 
 
@@ -83,10 +83,21 @@ def validate_project(project: object) -> ValidationResult:
         return _failure("invalid_json")
 
     try:
-        validator = _validator()
+        version = project.get("schemaVersion") if type(project) is dict else None
+        if version == "0.1":
+            validator = _validator()
+        elif version == "0.2":
+            from ._schemas import schema_validator
+            validator = schema_validator("project_v2")
+        else:
+            return _failure("schema_invalid")
     except (OSError, ValueError, SchemaError):
         return _failure("schema_unavailable")
     count = sum(1 for _ in validator.iter_errors(project))
+    if not count:
+        from .project_semantics import unique_far_cap_ids
+        if not unique_far_cap_ids(project):
+            return _failure("duplicate_cap_id")
     return ValidationResult(count == 0, count, "schema_invalid" if count else "valid")
 
 

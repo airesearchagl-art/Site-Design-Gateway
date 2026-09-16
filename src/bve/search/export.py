@@ -31,6 +31,8 @@ def _validate_context(data: dict, authoritative: dict) -> None:
             "maxTotalFloorAreaM2": constraints["floorAreaRatio"]["maxTotalFloorAreaM2"],
             "maxHeightM": constraints["height"]["maxHeightM"]}
     _require(_encode(context["constraintCaps"]) == _encode(caps))
+    if authoritative["schemaVersion"] == "0.2":
+        _require(_encode(context["floorAreaRatio"]) == _encode(constraints["floorAreaRatio"]))
     for entry in data["rankedCandidates"]:
         _require(_encode(entry["candidate"]["constraintCaps"]) == _encode(context["constraintCaps"]))
 
@@ -84,7 +86,7 @@ def _validate_result(result: SearchResult, data: dict) -> None:
     _require(rejected_heights == sorted(rejected_heights))
     _require(sorted(seen_heights + rejected_heights) == list(heights))
     accepted_count, rejected_count = len(expected_entries), len(expected_rejections)
-    expected = {"schemaVersion": "0.2", "inputReferences": refs,
+    expected = {"schemaVersion": result.schema_version, "inputReferences": refs,
                 "constraintContext": data["constraintContext"],  # Independently bound above.
                 "search": {"strategy": "floor_height_sweep_v0.1", "ranking": "maximize_gross_floor_area_v0.1",
                            "floorHeightsM": list(heights), "floorHeightStatus": "user_provided"},
@@ -100,7 +102,7 @@ def search_bytes(result: SearchResult) -> bytes:
     if type(result) is not SearchResult:
         raise SearchError(Code.INVALID_ARGUMENTS)
     try:
-        validator = schema_validator("search")
+        validator = schema_validator({"0.2": "search", "0.3": "search_v3"}[result.schema_version])
     except Exception:
         raise SearchError(Code.SCHEMA_UNAVAILABLE) from None
     try:

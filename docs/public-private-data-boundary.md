@@ -66,3 +66,11 @@ Phase 9のfolder/5-file選択もbrowser memoryだけで処理する。root path�
 schema/hash/参照/設定の失敗は固定filename/code/一般説明のみ。Clearでstate/inputと遅延handoffを解除する。
 Web Crypto SHA-256はlocal integrity確認のみ。network/storage、FS write、service worker persistenceを禁止する。
 新たな検証packageはpublic syntheticから一時生成し、過去のprivate/runtime packageを取り込まない。
+
+## Phase 10 FAR inputs
+
+公開fixture追加は `cases/example-urban-office/project-far-stack.json` の完全syntheticのみ。
+road_width_derivedは外部で与えられたnumeric capという分類であり、実道路幅員や法令係数を収録しない。
+実FAR・用途地域・住所・案件名・原本/出典pathは持ち込まない。公開legacy project.jsonは維持する。
+runtime package、browser証跡、mutation copy、exact task packetはGit除外のlocal evidenceとする。
+公開Run記録には判定・件数・digestと相対source参照だけを記載する。Phase 6 private workspaceは読まない。

@@ -77,3 +77,14 @@ inputReferences.constraintsが一致することを検証する。areaBasis全�
 3 capを照合し、全candidateのcapもrootと照合する。zero acceptedもcontext必須。
 Project/Geometry/Constraint/Massingの計算、candidate hash、rank/tie-break契約は変更しない。
 public fixtureは同じsynthetic CLI pipelineからv0.2を再生成し、exact-byte testを維持する。
+
+## Phase 10 Search Result v0.3
+
+Constraint Result0.2からSearch0.3を出力し、constraintContext.floorAreaRatioへcanonical FAR contextをexact copyする。
+Python semantic exportは全fieldを照合し、id/kind/condition/status/reviewの改ざんを拒否する。
+areaBasisとconstraintCapsの既存照合も維持する。GFA降順・階高/hash tie-break・rejection enumは変更しない。
+Massing Candidate0.1のpositive cap schemaは維持し、no-candidate contextにはConstraint0.2のcontextCaps定義を参照する。
+FAR0%は既存NO_FEASIBLE_MASSINGによる全point rejection / zero acceptedとなる。candidate generator自体は変更しない。
+未知FARは共有入力のREQUIRED_CONSTRAINT_UNAVAILABLEとしてSearch全体を停止し、packageを作らない。
+BrowserのUNAVAILABLE表示テストはschema-only受入であり、Python Searchのsemantic成功を意味しない。
+legacy Search0.1/0.2は維持する。詳細: [FAR stack契約](far-stack-contract.md)。

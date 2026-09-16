@@ -82,6 +82,13 @@ code { overflow-wrap: anywhere; font-family: Consolas, monospace; font-size: 12p
 .package-facts dt { font-size: 11px; color: var(--muted); }
 .package-facts dd { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
 .package-authority { font-size: 13px; border-left: 3px solid var(--accent); padding-left: 12px; }
+.far-stack { margin: 24px 0; padding: 20px; border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+.far-stack h3 { margin-top: 0; }
+.far-effective { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.far-effective dt { color: var(--muted); font-size: 12px; }
+.far-effective dd { margin: 6px 0 0; font-weight: 600; overflow-wrap: anywhere; }
+.far-table table { min-width: 650px; }
+.far-disclaimer { overflow-wrap: anywhere; }
 .viewer-content { padding: 0 28px; }
 .viewer-message { margin: 24px 0 28px; padding: 20px; border-radius: 8px; }
 .viewer-message p:last-child { margin-bottom: 0; }
@@ -154,6 +161,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 0 0 
   .package-intake { padding: 20px 22px; }
   .package-controls { flex-direction: column; }
   .package-facts { grid-template-columns: 1fr; }
+  .far-effective { grid-template-columns: 1fr; }
   .viewer-content { padding: 0 22px; }
   .summary-grid { grid-template-columns: 1fr 1fr; }
   .basis-values { grid-template-columns: 1fr 1fr; }

@@ -1,4 +1,4 @@
-import type { AreaBasis, ConstraintCaps } from "./search-validation.ts";
+import type { AreaBasis, ContextCaps } from "./search-validation.ts";
 import type { CandidateView } from "./search-view.ts";
 
 export const DISPLAY_LOCALE = "en-US";
@@ -9,6 +9,10 @@ const percentage = new Intl.NumberFormat(DISPLAY_LOCALE, { minimumFractionDigits
 export function formatMeasure(value: number | null | undefined, showSign = false): string {
   if (value == null || !Number.isFinite(value)) return "Unavailable";
   return (showSign ? signed : measure).format(value);
+}
+
+export function formatPercent(value: number | null): string {
+  return value === null || !Number.isFinite(value) ? "Unavailable" : `${percentage.format(value)}%`;
 }
 
 export function areaBasisDisplay(area: AreaBasis) {
@@ -31,7 +35,7 @@ export function constraintUsage(actual: number | null, cap: number | null) {
   };
 }
 
-export function candidateUsage(candidate: CandidateView | undefined, caps: ConstraintCaps | undefined) {
+export function candidateUsage(candidate: CandidateView | undefined, caps: ContextCaps | undefined) {
   return [
     { label: "Footprint", unit: "m²", ...constraintUsage(candidate?.footprintAreaM2 ?? null, caps?.maxFootprintAreaM2 ?? null) },
     { label: "GFA", unit: "m²", ...constraintUsage(candidate?.grossFloorAreaM2 ?? null, caps?.maxTotalFloorAreaM2 ?? null) },

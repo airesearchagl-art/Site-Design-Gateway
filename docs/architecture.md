@@ -1,6 +1,6 @@
 # アーキテクチャ
 
-Current Phase = Phase 9 Run Package Viewer Intake Foundation。WebとPythonは同じcanonical schemasを参照する
+Current Phase = Phase 10 Constraint Stack / Effective FAR Foundation。WebとPythonは同じcanonical schemasを参照する
 独立したclientです。PythonのGeometry/Constraints/Massing/SearchとWebはAPIで接続しません。
 
 ```text
@@ -16,7 +16,7 @@ Current Phase = Phase 9 Run Package Viewer Intake Foundation。WebとPythonは�
 | 要素 | 責務 |
 | --- | --- |
 | `apps/web` | Next.js / TypeScript の画面とブラウザ内検証。入力を送信・保存しない |
-| `schemas/sdg-project-v0.1.schema.json` | 型・必須項目・列挙値の唯一の正本 |
+| `schemas/sdg-project-v0.1.schema.json` | legacy Project型・必須項目・列挙値の正本 |
 | Python `bve` モジュール | import 可能な検証コアと CLI。Web へ依存しない |
 | `cases/example-urban-office/project.json` | 匿名の合成 fixture。Core に例外分岐を持ち込まない |
 | root npm workspace | Web の依存関係・起動・lint・test・build をまとめる |
@@ -68,7 +68,7 @@ Phase 0ではサービスもBridgeも接続しません。
 
 Phase 0では幾何計算・DXF読込も対象外でした。過去のADRとRun記録は当時の判断として保持します。
 現在も法規計算、自治体固有処理、実案件固有処理、DXF / PDF出力、CAD/BIM連携、Web compute接続は対象外です。
-WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 10、
+WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 11、
 Vault/Notion直接更新は行いません。
 
 ## Phase 3 Massing
@@ -165,3 +165,13 @@ BrowserのPASSは共有Schema・integrity・参照・設定の整合性のみ。
 Python `bve.run verify`がauthoritative semantic verifierであり、candidate hashや計算・順位は再実行しない。
 Python-valid ≠ Web-displayable。Numberでの設定比較でもD04 OPEN。直接Search v0.1/v0.2とPhase 7表示を維持する。
 テストだけがpublic synthetic sourceから既存Python CLIでtemporary packageを生成し、CI artifactへuploadしない。
+
+## Phase 10 Explicit FAR pipeline
+
+Project0.2 → validated ordered FAR conditions → Constraint0.2 → Search0.3 → Package0.2。
+新4schemaは既存7schemaの定義を参照する。旧schemaと旧routeを同時に維持する。
+`compute_far_stack`だけがDecimalの最小値とtie IDを決定し、既存 `floor_area_cap` で面積を算定する。
+Constraint readerはprovenanceから再計算し、Search exporterはFAR context全体のexact copyを検証する。
+Run create/verifyとWebは明示version matrixでdispatchし、unknown versionをlatestへfallbackしない。
+Webの11schema registryはoffline。新FAR panelは表示のみでlegal inference / Decimal engineを持たない。
+詳細とlegacy matrixは [FAR stack契約](far-stack-contract.md)。D04 OPEN、dependency追加なし。

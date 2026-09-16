@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:project:0.2",
+  "title": "SDG Project v0.2 with explicit FAR caps",
+  "description": "Numeric caps supplied by humans/upstream sources; no road-width calculation or legal inference. Additional IDs must be unique within the Project.",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "project", "site", "zoning"],
+  "properties": {
+    "schemaVersion": {"const": "0.2"},
+    "project": {"$ref": "urn:sdg:project:0.1#/properties/project"},
+    "site": {"$ref": "urn:sdg:project:0.1#/properties/site"},
+    "zoning": {
+      "type": "object", "additionalProperties": false,
+      "required": ["buildingCoverageRatio", "floorAreaRatio", "additionalFloorAreaRatioCaps"],
+      "properties": {
+        "buildingCoverageRatio": {"$ref": "urn:sdg:project:0.1#/$defs/coverage"},
+        "floorAreaRatio": {"$ref": "urn:sdg:project:0.1#/$defs/far"},
+        "heightLimit": {"$ref": "urn:sdg:project:0.1#/$defs/height"},
+        "additionalFloorAreaRatioCaps": {"type": "array", "minItems": 0, "maxItems": 16, "items": {"$ref": "#/$defs/additionalCap"}}
+      }
+    }
+  },
+  "$defs": {
+    "capId": {"$ref": "urn:sdg:project:0.1#/properties/project/properties/id", "not": {"const": "base-zoning"}},
+    "capKind": {"enum": ["road_width_derived", "district_plan_explicit", "other_explicit"]},
+    "additionalCap": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "kind", "value", "unit", "status"],
+      "properties": {
+        "id": {"$ref": "#/$defs/capId"},
+        "kind": {"$ref": "#/$defs/capKind"},
+        "value": {"$ref": "urn:sdg:project:0.1#/$defs/far/properties/value"},
+        "unit": {"$ref": "urn:sdg:project:0.1#/$defs/far/properties/unit"},
+        "status": {"$ref": "urn:sdg:project:0.1#/$defs/status"}
+      },
+      "allOf": [{"$ref": "urn:sdg:project:0.1#/$defs/nullRequiresReview"}]
+    }
+  }
+}

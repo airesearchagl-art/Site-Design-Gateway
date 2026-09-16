@@ -1,6 +1,6 @@
-# Web Results Viewer / Phase 9 package intake contract
+# Web Results Viewer / Phase 10 FAR stack contract
 
-Current Phase = Phase 9 Run Package Viewer Intake Foundation。Phase 5 privacy/resource・Phase 7表示境界を維持する。
+Current Phase = Phase 10 Constraint Stack / Effective FAR Foundation。Phase 5 privacy/resource・Phase 7表示境界を維持する。
 
 Web は、ローカル BVE Core が canonical export した Search Result JSON をユーザーが選択し、
 ブラウザ内だけで形式確認・比較表示する read-only consumer である。
@@ -30,8 +30,8 @@ parse後にも同じnode/depth上限を防御として確認する。byte上限8
 
 ## Schema 境界
 
-正本はSearch Result v0.1とv0.2のschema。Ajv の offline registry へ Project、Geometry、
-Constraint Result、Massing Candidate、Search Result v0.1/v0.2、Run Manifest v0.1の7schemaを登録し、Web用copyを作らない。
+正本はSearch Result v0.1/v0.2/v0.3のschema。Ajv の offline registry へ Project、Geometry、
+Constraint Result、Massing Candidate、Search Result、Run Manifestのlegacy 7schemaと新4schemaを登録し、Web用copyを作らない。
 Ajv の問題表示は instance path、keyword、固定の一般説明だけとし、入力断片や raw exception message を含めない。
 
 Schema PASS はブラウザで BVE Core の semantic validation を再実行したことを意味しない。
@@ -81,7 +81,7 @@ Python CLI pipeline（Project / Geometry / Constraints / Search [4,5,6,7,8]）�
 Python exact-byte testでCoreへ固定する。一般のruntime/private Search Resultは公開Gitへ含めない。
 
 SDG-VP-001はBLOCKED_EXTERNAL、D02はOPEN / PLATFORM_BLOCKED。VMVP-001はPASS WITH TARGET ANOMALYを継承。
-Phase 9でVercelは操作しない。
+Phase 10でVercelは操作しない。
 
 ## Run Package v0.1 browser入口
 
@@ -123,3 +123,19 @@ Clearはpackage issues、Search、candidate、SVG、input値を解除してEMPTY
 abortと世代番号で進行中読込・hashの後のhandoffを防ぎ、buffer等をstorageへ退避しない。
 recursive privacy scanはnetwork、storage、Cache API、File System Access write、service worker、consoleを禁止する。
 ZIP、保存、編集、API、Python実行、新dependencyは対象外。Phase 8 Run Package契約自体は変更しない。
+
+## Phase 10 FAR display and version routes
+
+直接Project0.1/0.2、Search0.1/0.2/0.3、Package0.1/0.2を受け入れる。package matrixは
+[Run Package契約](run-package-contract.md)と同一で、artifactのversion混在を拒否する。
+Project0.2のduplicate cap IDsは構造的identityとして拒否する。WebでFAR semantic再計算はしない。
+Search0.3のFAR panelはbase/additional、status/review、effective cap、source IDs、max GFAを出力順に表示する。
+legacyにはcontext unavailableと表示し、Area Basis / Constraint Usageを維持する。
+Python出力のeffectiveCapPercent / effectiveCapIdsを使い、min / tie / sort / governing判定は行わない。
+表示用のen-US丸めだけを適用し、JSON値を変更しない。D04 OPEN。
+
+- Effective FAR cap is the minimum of the explicit numeric caps supplied to BVE.
+- It does not identify the governing legal rule or prove regulatory compliance.
+
+ClearはFAR panelも含めて破棄する。既存8 MiB・depth64・node250000・all-file preflight・actual-buffer再確認、
+128 MiB probes、network/storage禁止、遅延handoff防止を維持する。

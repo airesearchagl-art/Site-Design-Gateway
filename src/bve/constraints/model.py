@@ -6,6 +6,7 @@ from typing import Literal
 from .inputs import AreaSelection, Condition
 
 REVIEW_STATUSES = frozenset(("assumed", "unknown", "review_required"))
+FAR_STACK_REVIEW_STATUSES = frozenset(("llm_researched", "assumed", "unknown", "review_required"))
 State = Literal["COMPUTED", "UNAVAILABLE", "ABSENT"]
 
 
@@ -41,6 +42,42 @@ class Constraint:
 
 
 @dataclass(frozen=True)
+class FarCapEntry:
+    id: str
+    kind: str
+    provenance: Provenance
+
+    @property
+    def review_required(self) -> bool:
+        return self.provenance.condition.status in FAR_STACK_REVIEW_STATUSES
+
+    def to_dict(self) -> dict:
+        return {"id": self.id, "kind": self.kind, **self.provenance.to_dict(),
+                "reviewRequired": self.review_required}
+
+
+@dataclass(frozen=True)
+class FarStackConstraint:
+    state: State
+    value: Decimal | None
+    effective_cap_percent: Decimal | None
+    effective_cap_ids: tuple[str, ...]
+    cap_stack: tuple[FarCapEntry, ...]
+    provenance: tuple[Provenance, ...]
+
+    @property
+    def review_required(self) -> bool:
+        return (any(item.review_required for item in self.provenance)
+                or any(item.review_required for item in self.cap_stack))
+
+    def to_dict(self, value_key: str) -> dict:
+        return {"state": self.state, "calculationId": "floor_area_cap_stack_v0.2", value_key: self.value,
+                "effectiveCapPercent": self.effective_cap_percent, "effectiveCapIds": list(self.effective_cap_ids),
+                "capStack": [entry.to_dict() for entry in self.cap_stack],
+                "provenance": [entry.to_dict() for entry in self.provenance], "reviewRequired": self.review_required}
+
+
+@dataclass(frozen=True)
 class ConstraintResult:
     project_reference: str
     geometry_reference: str
@@ -48,8 +85,9 @@ class ConstraintResult:
     difference_m2: Decimal | None
     area_provenance: tuple[Provenance, Provenance]
     building_coverage: Constraint
-    floor_area_ratio: Constraint
+    floor_area_ratio: Constraint | FarStackConstraint
     height: Constraint
+    schema_version: str = "0.1"
 
     @property
     def review_required(self) -> bool:
@@ -58,7 +96,7 @@ class ConstraintResult:
                        (self.building_coverage, self.floor_area_ratio, self.height)))
 
     def to_dict(self) -> dict:
-        return {"schemaVersion": "0.1",
+        return {"schemaVersion": self.schema_version,
                 "inputReferences": {"project": self.project_reference, "geometry": self.geometry_reference},
                 "areaBasis": {"selectedBasis": self.area.selected_basis,
                               "declaredAreaM2": self.area.declared_area_m2,

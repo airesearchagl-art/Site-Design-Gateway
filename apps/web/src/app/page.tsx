@@ -54,7 +54,7 @@ export default function Home() {
     <main>
       <header className="topbar">
         <Link className="brand" href="/" aria-label="Site Design Gateway ホーム"><span className="mark" aria-hidden="true">SDG</span> Site Design Gateway</Link>
-        <span className="phase">PHASE 9 / RUN PACKAGE VIEWER</span>
+        <span className="phase">PHASE 10 / EXPLICIT FAR CAPS</span>
       </header>
 
       <section className="intro" aria-labelledby="intro-title">
