@@ -1,0 +1,280 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:constraint-result:0.3",
+  "title": "SDG Constraint Result v0.3 scalar height stack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "inputReferences",
+    "areaBasis",
+    "constraints",
+    "reviewRequired"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.3"
+    },
+    "inputReferences": {
+      "$ref": "urn:sdg:constraint-result:0.1#/properties/inputReferences"
+    },
+    "areaBasis": {
+      "$ref": "urn:sdg:constraint-result:0.1#/properties/areaBasis"
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "buildingCoverage",
+        "floorAreaRatio",
+        "height"
+      ],
+      "properties": {
+        "buildingCoverage": {
+          "$ref": "urn:sdg:constraint-result:0.1#/properties/constraints/properties/buildingCoverage"
+        },
+        "floorAreaRatio": {
+          "$ref": "urn:sdg:constraint-result:0.2#/$defs/floorAreaRatio"
+        },
+        "height": {
+          "$ref": "#/$defs/height"
+        }
+      }
+    },
+    "reviewRequired": {
+      "type": "boolean"
+    }
+  },
+  "$defs": {
+    "heightEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "input",
+        "reference",
+        "condition",
+        "reviewRequired"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "urn:sdg:project:0.1#/properties/project/properties/id"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "input": {
+          "type": "string"
+        },
+        "reference": {
+          "$ref": "urn:sdg:constraint-result:0.1#/$defs/reference"
+        },
+        "condition": {
+          "$ref": "urn:sdg:project:0.3#/$defs/heightCondition"
+        },
+        "reviewRequired": {
+          "type": "boolean"
+        }
+      }
+    },
+    "baseHeight": {
+      "$ref": "#/$defs/heightEntry",
+      "properties": {
+        "id": {
+          "const": "base-height"
+        },
+        "kind": {
+          "const": "base_height"
+        },
+        "input": {
+          "const": "zoning.heightLimit"
+        },
+        "condition": {
+          "$ref": "urn:sdg:project:0.1#/$defs/height"
+        }
+      }
+    },
+    "additionalHeight": {
+      "$ref": "#/$defs/heightEntry",
+      "properties": {
+        "id": {
+          "$ref": "urn:sdg:project:0.3#/$defs/heightCapId"
+        },
+        "kind": {
+          "$ref": "urn:sdg:project:0.3#/$defs/heightCapKind"
+        },
+        "input": {
+          "const": "zoning.additionalHeightCaps"
+        }
+      }
+    },
+    "height": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "calculationId",
+        "maxHeightM",
+        "effectiveHeightM",
+        "effectiveCapIds",
+        "capStack",
+        "reviewRequired"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "COMPUTED",
+            "UNAVAILABLE",
+            "ABSENT"
+          ]
+        },
+        "calculationId": {
+          "const": "height_cap_stack_v0.3"
+        },
+        "maxHeightM": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "effectiveHeightM": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "effectiveCapIds": {
+          "type": "array",
+          "maxItems": 17,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:sdg:project:0.1#/properties/project/properties/id"
+          }
+        },
+        "capStack": {
+          "type": "array",
+          "maxItems": 17,
+          "prefixItems": [
+            {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/baseHeight"
+                },
+                {
+                  "$ref": "#/$defs/additionalHeight"
+                }
+              ]
+            }
+          ],
+          "items": {
+            "$ref": "#/$defs/additionalHeight"
+          }
+        },
+        "reviewRequired": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "COMPUTED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "maxHeightM": {
+                "type": "number"
+              },
+              "effectiveHeightM": {
+                "type": "number"
+              },
+              "effectiveCapIds": {
+                "minItems": 1
+              },
+              "capStack": {
+                "minItems": 1
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "maxHeightM": {
+                "type": "null"
+              },
+              "effectiveHeightM": {
+                "type": "null"
+              },
+              "effectiveCapIds": {
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "ABSENT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "capStack": {
+                "maxItems": 0
+              },
+              "reviewRequired": {
+                "const": false
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "capStack": {
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "contextCaps": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxFootprintAreaM2",
+        "maxTotalFloorAreaM2",
+        "maxHeightM"
+      ],
+      "properties": {
+        "maxFootprintAreaM2": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "maxTotalFloorAreaM2": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "maxHeightM": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

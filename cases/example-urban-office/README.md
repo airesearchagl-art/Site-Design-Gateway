@@ -34,3 +34,9 @@ Phase 6 private workspaceからの転記はありません。
 `project-far-stack.json` はProject0.2。base600%、road-width-cap400%は架空の明示入力です。
 既存200m²敷地でeffective400% / max GFA800m²となります。道路幅員や係数は含まず、法規値を表しません。
 旧project.json / search-result.jsonはlegacy fixtureのままです。run出力はruntime dataとして追跡しません。
+
+## Phase 11 height stack
+
+project-height-stack.jsonはProject0.3の完全synthetic。FAR600/400%、base height31m / additional24m。
+実engineではeffective FAR400%、effective height24m。階高4/5/6/7/8mのGFAは800/640/640/480/480m²。
+道路幅員・地区計画・斜線係数は入力しない。旧Project0.1/0.2 fixturesは保持する。

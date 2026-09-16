@@ -123,3 +123,12 @@ maxTotalFloorAreaM2、ordered capStackとreviewRequiredを保持し、selected a
 canonical Project hash、各capのid/kind/input/condition/statusを出典として保存する。
 未知capはUNAVAILABLE、null値、空effective IDs。v0.1のREVIEW_STATUSESとbytesは変更しない。
 追加capとbaseを含むv0.2 FAR固有review policy・Decimal/tie詳細は [FAR stack契約](far-stack-contract.md)。
+
+## Phase 11 Constraint Result v0.3
+
+FARはPhase 10契約のまま、高さだけ `height_cap_stack_v0.3` へversion化する。
+heightはstate / maxHeightM / effectiveHeightM / effectiveCapIds / capStack / reviewRequired。
+ABSENTは空stack/null、UNAVAILABLEは宣言stack保持/null、COMPUTEDは0以上のDecimal値を保持する。
+`load_constraint_result(payload, project=validated_project)` は元Projectに対する全source条件の照合も行う。
+省略時は派生値・内部参照の整合性を確認するが、自己整合したkind/非最小値/orderの変更を認証できない。
+このAPI分離はHuman確認済み。Package0.3では元Project照合を必須とする。詳細: [高さstack契約](height-stack-contract.md)。

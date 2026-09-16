@@ -6,3 +6,10 @@ def unique_far_cap_ids(project: dict) -> bool:
         return True
     ids = [entry["id"] for entry in project["zoning"]["additionalFloorAreaRatioCaps"]]
     return len(ids) == len(set(ids))
+
+
+def unique_height_cap_ids(data: dict) -> bool:
+    if data["schemaVersion"] != "0.3":
+        return True
+    ids = [entry["id"] for entry in data["zoning"]["additionalHeightCaps"]]
+    return len(ids) == len(set(ids))

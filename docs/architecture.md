@@ -1,6 +1,6 @@
 # アーキテクチャ
 
-Current Phase = Phase 10 Constraint Stack / Effective FAR Foundation。WebとPythonは同じcanonical schemasを参照する
+Current Phase = Phase 11 Explicit Height Cap Stack / Effective Height Foundation。WebとPythonは同じcanonical schemasを参照する
 独立したclientです。PythonのGeometry/Constraints/Massing/SearchとWebはAPIで接続しません。
 
 ```text
@@ -68,7 +68,7 @@ Phase 0ではサービスもBridgeも接続しません。
 
 Phase 0では幾何計算・DXF読込も対象外でした。過去のADRとRun記録は当時の判断として保持します。
 現在も法規計算、自治体固有処理、実案件固有処理、DXF / PDF出力、CAD/BIM連携、Web compute接続は対象外です。
-WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 11、
+WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 12、
 Vault/Notion直接更新は行いません。
 
 ## Phase 3 Massing
@@ -175,3 +175,11 @@ Constraint readerはprovenanceから再計算し、Search exporterはFAR context
 Run create/verifyとWebは明示version matrixでdispatchし、unknown versionをlatestへfallbackしない。
 Webの11schema registryはoffline。新FAR panelは表示のみでlegal inference / Decimal engineを持たない。
 詳細とlegacy matrixは [FAR stack契約](far-stack-contract.md)。D04 OPEN、dependency追加なし。
+
+## Phase 11 scalar height pipeline
+
+Project0.3 → Constraint0.3 → Search0.4 → Package0.3。既存11schemaに参照ベースで4schemaを追加する。
+height_stackがDecimal min / unknown fail closed / optional base / input-order tiesを決定する。
+FAR計算helper・Massing generator・rankingは維持する。既知0mのSearchは全pointがNO_FEASIBLE_MASSING。
+Constraint readerの内部整合性確認と、元Project照合を分離する。Package0.3 verifyは元Projectを必ず渡す。
+Webは15schemaのoffline registryとread-only表示だけ。詳細: [scalar height契約](height-stack-contract.md)。

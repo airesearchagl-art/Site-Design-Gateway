@@ -1,6 +1,6 @@
-# Web Results Viewer / Phase 10 FAR stack contract
+# Web Results Viewer / Phase 11 scalar height contract
 
-Current Phase = Phase 10 Constraint Stack / Effective FAR Foundation。Phase 5 privacy/resource・Phase 7表示境界を維持する。
+Current Phase = Phase 11 Explicit Height Cap Stack / Effective Height Foundation。Phase 5 privacy/resource・Phase 7表示境界を維持する。
 
 Web は、ローカル BVE Core が canonical export した Search Result JSON をユーザーが選択し、
 ブラウザ内だけで形式確認・比較表示する read-only consumer である。
@@ -139,3 +139,17 @@ Python出力のeffectiveCapPercent / effectiveCapIdsを使い、min / tie / sort
 
 ClearはFAR panelも含めて破棄する。既存8 MiB・depth64・node250000・all-file preflight・actual-buffer再確認、
 128 MiB probes、network/storage禁止、遅延handoff防止を維持する。
+
+## Phase 11 Height cap stack
+
+Project0.1/0.2/0.3、Search0.1/0.2/0.3/0.4、Package0.1/0.2/0.3をoffline15schema registryで受け入れる。
+新packageも同じartifact matrixを必須とする。高さIDの構造的unique確認を追加する。
+Search0.4ではbase/additional、status/review、effectiveHeightMとeffectiveCapIdsをexport順に表示する。
+legacyにはHeight context unavailable。FAR panel・Area Basis・Usage・ranking・SVGを維持する。
+Webでmin / sort / tie / spatial / legal inferenceを行わない。en-US丸めは表示だけ。D04 OPEN。
+
+- Effective height cap is the minimum of the explicit scalar height caps supplied to BVE.
+- It does not evaluate spatial slope planes, identify the governing legal rule, or prove regulatory compliance.
+
+ABSENT/UNAVAILABLEを数値に置き換えない。既知0は0mと表示する。Clearで両stackと全state/inputを破棄する。
+既存preflight/8MiB/128MiB/privacy・非同期Clear境界は維持する。

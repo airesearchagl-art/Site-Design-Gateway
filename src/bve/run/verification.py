@@ -18,7 +18,7 @@ from bve.validation import MAX_INPUT_BYTES as PROJECT_LIMIT
 from .errors import Code, RunError, Stage, at_stage
 from .filesystem import is_link, read_regular
 from .manifest import MAX_MANIFEST_BYTES, decode, reference, validate_manifest
-from .model import ARTIFACTS, FILE_SET, PACKAGE_VERSION, VERSION_MATRIX, RunSummary
+from .model import ARTIFACTS, FILE_SET, PACKAGE_VERSION, PACKAGE_VERSION_V2, PACKAGE_VERSION_V3, VERSION_MATRIX, RunSummary
 
 MAX_SEARCH_BYTES = 256 * 1024 * 1024
 LIMITS = {"project": PROJECT_LIMIT, "geometry": GEOMETRY_LIMIT,
@@ -76,7 +76,8 @@ def verify_package(package: Path) -> RunSummary:
         canonical_geometry["properties"]["sourceReference"] = geometry_data["properties"]["sourceReference"]
         if json_bytes(canonical_geometry) != artifacts["geometry"]:
             raise RunError(Stage.VERIFY, Code.NONCANONICAL_ARTIFACT)
-        constraints = load_constraint_result(artifacts["constraints"])
+        constraints = load_constraint_result(artifacts["constraints"],
+                                             project=project if manifest["packageVersion"] == PACKAGE_VERSION_V3 else None)
         if result_bytes(constraints.result) != artifacts["constraints"]:
             raise RunError(Stage.VERIFY, Code.NONCANONICAL_ARTIFACT)
         search_data = decode(artifacts["search"], MAX_SEARCH_BYTES)
@@ -85,7 +86,7 @@ def verify_package(package: Path) -> RunSummary:
         # for the schema's rank/count integer types, without rounding decimals.
         del search_data
         search_data = json.loads(artifacts["search"], parse_float=Decimal)
-        search_schema = "search" if manifest["packageVersion"] == PACKAGE_VERSION else "search_v3"
+        search_schema = {PACKAGE_VERSION:"search", PACKAGE_VERSION_V2:"search_v3", PACKAGE_VERSION_V3:"search_v4"}[manifest["packageVersion"]]
         if not schema_validator(search_schema).is_valid(search_data):
             raise RunError(Stage.VERIFY, Code.ARTIFACT_SCHEMA_INVALID)
         check_references(manifest, constraints.result.to_dict(), search_data)

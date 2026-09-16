@@ -1,4 +1,4 @@
-import { sharedValidators, uniqueFarCapIds } from "./schema-registry.ts";
+import { sharedValidators, uniqueFarCapIds, uniqueHeightCapIds } from "./schema-registry.ts";
 import { searchTextWithinResources } from "./search-resource-preflight.ts";
 import {
   inspectResources, MAX_SEARCH_BYTES, MAX_SEARCH_DEPTH, MAX_SEARCH_NODES,
@@ -19,8 +19,10 @@ const ARTIFACTS = [
   ["constraints", "constraints.json"], ["search", "search-result.json"],
 ] as const;
 type ArtifactKind = typeof ARTIFACTS[number][0];
-type PackageVersion = "sdg-run-package-v0.1" | "sdg-run-package-v0.2";
+type PackageVersion = "sdg-run-package-v0.1" | "sdg-run-package-v0.2" | "sdg-run-package-v0.3";
 const packageValidators = {
+  "sdg-run-package-v0.3": { project: sharedValidators.projectV3, geometry: sharedValidators.geometry,
+    constraints: sharedValidators.constraintsV3, search: sharedValidators.searchV4, manifest: sharedValidators.manifestV3 },
   "sdg-run-package-v0.1": { project: sharedValidators.project, geometry: sharedValidators.geometry,
     constraints: sharedValidators.constraints, search: sharedValidators.search, manifest: sharedValidators.manifest },
   "sdg-run-package-v0.2": { project: sharedValidators.projectV2, geometry: sharedValidators.geometry,
@@ -141,7 +143,7 @@ export async function validateRunPackage(
     if ("state" in parsed) return parsed;
     const version = parsed.value !== null && typeof parsed.value === "object" && "packageVersion" in parsed.value
       ? parsed.value.packageVersion : undefined;
-    if (version !== "sdg-run-package-v0.1" && version !== "sdg-run-package-v0.2") return failure("schema", "manifest.json");
+    if (version !== "sdg-run-package-v0.1" && version !== "sdg-run-package-v0.2" && version !== "sdg-run-package-v0.3") return failure("schema", "manifest.json");
     const validators = packageValidators[version];
     if (!validators.manifest(parsed.value)) return failure("schema", "manifest.json");
     const manifest = parsed.value as Manifest;
@@ -163,7 +165,7 @@ export async function validateRunPackage(
         const artifact = parseArtifact(input.text, name);
         if ("state" in artifact) return artifact;
         if (!validators[kind](artifact.value)) return failure("schema", name);
-        if (kind === "project" && !uniqueFarCapIds(artifact.value)) return failure("schema", name);
+        if (kind === "project" && (!uniqueFarCapIds(artifact.value) || !uniqueHeightCapIds(artifact.value))) return failure("schema", name);
         if (kind === "constraints") constraints = artifact.value as ConstraintLinks;
       }
       let hash: string;

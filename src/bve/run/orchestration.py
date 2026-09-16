@@ -44,7 +44,7 @@ def create_package(*, project: Path, geometry: Path, format: str, area_basis: st
         site = load_normalized_geometry(normalized)
     with at_stage(Stage.CONSTRAINTS):
         caps = result_bytes(compute_constraints(validated_project, site, area_basis=area_basis))
-        validated_caps = load_constraint_result(caps)
+        validated_caps = load_constraint_result(caps, project=validated_project if validated_project.schema_version == "0.3" else None)
     with at_stage(Stage.SEARCH):
         result = search_massing_candidates(site, validated_caps, floor_heights_m=floor_heights_m)
         search = search_bytes(result)

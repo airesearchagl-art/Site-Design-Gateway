@@ -38,7 +38,7 @@ class SearchResult:
 
     @property
     def schema_version(self) -> str:
-        return {"0.1": "0.2", "0.2": "0.3"}[self.constraints.result.schema_version]
+        return {"0.1": "0.2", "0.2": "0.3", "0.3": "0.4"}[self.constraints.result.schema_version]
 
     @property
     def review_required(self) -> bool:
@@ -50,8 +50,10 @@ class SearchResult:
                    "constraintCaps": {"maxFootprintAreaM2": constraints.building_coverage.value,
                                       "maxTotalFloorAreaM2": constraints.floor_area_ratio.value,
                                       "maxHeightM": constraints.height.value}}
-        if self.schema_version == "0.3":
+        if self.schema_version in ("0.3", "0.4"):
             context["floorAreaRatio"] = constraints.to_dict()["constraints"]["floorAreaRatio"]
+        if self.schema_version == "0.4":
+            context["height"] = constraints.to_dict()["constraints"]["height"]
         return {"schemaVersion": self.schema_version,
                 "inputReferences": {"project": self.constraints.result.project_reference,
                                     "geometry": self.site.source_reference,

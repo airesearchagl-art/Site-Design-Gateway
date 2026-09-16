@@ -7,7 +7,7 @@ from bve._json import JSONInputError, decode_json
 from bve._schemas import schema_validator
 from bve.geometry import SiteGeometry
 from bve.geometry.model import SourceStatus
-from bve.project_semantics import unique_far_cap_ids
+from bve.project_semantics import unique_far_cap_ids, unique_height_cap_ids
 from bve.validation import MAX_INPUT_BYTES
 
 from .errors import Code, ConstraintError
@@ -30,6 +30,13 @@ class AdditionalFarCap:
     condition: Condition
 
 
+@dataclass(frozen=True)
+class AdditionalHeightCap:
+    id: str
+    kind: str
+    condition: Condition
+
+
 @dataclass(frozen=True, init=False)
 class ValidatedProject:
     area: Condition
@@ -39,6 +46,7 @@ class ValidatedProject:
     reference: str
     schema_version: str
     additional_far_caps: tuple[AdditionalFarCap, ...]
+    additional_height_caps: tuple[AdditionalHeightCap, ...]
 
     def __init__(self, payload: bytes | str):
         try:
@@ -46,28 +54,34 @@ class ValidatedProject:
         except JSONInputError as error:
             raise ConstraintError(Code(str(error))) from None
         version = data.get("schemaVersion") if type(data) is dict else None
-        if version not in ("0.1", "0.2"):
+        if version not in ("0.1", "0.2", "0.3"):
             raise ConstraintError(Code.PROJECT_SCHEMA_INVALID)
         try:
-            validator = schema_validator("project" if version == "0.1" else "project_v2")
+            validator = schema_validator({"0.1":"project", "0.2":"project_v2", "0.3":"project_v3"}[version])
         except Exception:
             raise ConstraintError(Code.SCHEMA_UNAVAILABLE) from None
         if not validator.is_valid(data):
             raise ConstraintError(Code.PROJECT_SCHEMA_INVALID)
         if not unique_far_cap_ids(data):
             raise ConstraintError(Code.DUPLICATE_CAP_ID)
+        if not unique_height_cap_ids(data):
+            raise ConstraintError(Code.DUPLICATE_HEIGHT_CAP_ID)
         zoning = data["zoning"]
         object.__setattr__(self, "area", Condition(**data["site"]["area"]))
         object.__setattr__(self, "coverage", Condition(**zoning["buildingCoverageRatio"]))
         object.__setattr__(self, "far", Condition(**zoning["floorAreaRatio"]))
         object.__setattr__(self, "height", Condition(**zoning["heightLimit"]) if "heightLimit" in zoning else None)
         additional = ()
-        if version == "0.2":
+        if version in ("0.2", "0.3"):
             from .export import canonical_json_bytes
             raw = canonical_json_bytes(data)
             additional = tuple(AdditionalFarCap(entry["id"], entry["kind"],
                                Condition(entry["value"], entry["unit"], entry["status"]))
                                for entry in zoning["additionalFloorAreaRatioCaps"])
+        additional_height = tuple(AdditionalHeightCap(entry["id"], entry["kind"],
+                                  Condition(entry["value"], entry["unit"], entry["status"]))
+                                  for entry in zoning["additionalHeightCaps"]) if version == "0.3" else ()
+        object.__setattr__(self, "additional_height_caps", additional_height)
         object.__setattr__(self, "schema_version", version)
         object.__setattr__(self, "additional_far_caps", additional)
         object.__setattr__(self, "reference", "sha256:" + sha256(raw).hexdigest())

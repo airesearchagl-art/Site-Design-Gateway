@@ -89,6 +89,13 @@ code { overflow-wrap: anywhere; font-family: Consolas, monospace; font-size: 12p
 .far-effective dd { margin: 6px 0 0; font-weight: 600; overflow-wrap: anywhere; }
 .far-table table { min-width: 650px; }
 .far-disclaimer { overflow-wrap: anywhere; }
+.height-stack { margin: 24px 0; padding: 20px; border: 1px solid var(--line); border-radius: 8px; min-width: 0; }
+.height-stack h3 { margin-top: 0; }
+.height-effective { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.height-effective dt { color: var(--muted); font-size: 12px; }
+.height-effective dd { margin: 6px 0 0; font-weight: 600; overflow-wrap: anywhere; }
+.height-table table { min-width: 650px; }
+.height-disclaimer { overflow-wrap: anywhere; }
 .viewer-content { padding: 0 28px; }
 .viewer-message { margin: 24px 0 28px; padding: 20px; border-radius: 8px; }
 .viewer-message p:last-child { margin-bottom: 0; }
@@ -162,6 +169,7 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 0 0 
   .package-controls { flex-direction: column; }
   .package-facts { grid-template-columns: 1fr; }
   .far-effective { grid-template-columns: 1fr; }
+  .height-effective { grid-template-columns: 1fr; }
   .viewer-content { padding: 0 22px; }
   .summary-grid { grid-template-columns: 1fr 1fr; }
   .basis-values { grid-template-columns: 1fr 1fr; }

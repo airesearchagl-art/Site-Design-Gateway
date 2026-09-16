@@ -7,6 +7,7 @@ from .inputs import AreaSelection, Condition
 
 REVIEW_STATUSES = frozenset(("assumed", "unknown", "review_required"))
 FAR_STACK_REVIEW_STATUSES = frozenset(("llm_researched", "assumed", "unknown", "review_required"))
+HEIGHT_STACK_REVIEW_STATUSES = frozenset(("llm_researched", "assumed", "unknown", "review_required"))
 State = Literal["COMPUTED", "UNAVAILABLE", "ABSENT"]
 
 
@@ -78,6 +79,37 @@ class FarStackConstraint:
 
 
 @dataclass(frozen=True)
+class HeightCapEntry:
+    id: str
+    kind: str
+    provenance: Provenance
+
+    @property
+    def review_required(self) -> bool:
+        return self.provenance.condition.status in HEIGHT_STACK_REVIEW_STATUSES
+
+    def to_dict(self) -> dict:
+        return {"id": self.id, "kind": self.kind, **self.provenance.to_dict(), "reviewRequired": self.review_required}
+
+
+@dataclass(frozen=True)
+class HeightStackConstraint:
+    state: State
+    value: Decimal | None
+    effective_cap_ids: tuple[str, ...]
+    cap_stack: tuple[HeightCapEntry, ...]
+
+    @property
+    def review_required(self) -> bool:
+        return any(entry.review_required for entry in self.cap_stack)
+
+    def to_dict(self, value_key: str) -> dict:
+        return {"state": self.state, "calculationId": "height_cap_stack_v0.3", value_key: self.value,
+                "effectiveHeightM": self.value, "effectiveCapIds": list(self.effective_cap_ids),
+                "capStack": [entry.to_dict() for entry in self.cap_stack], "reviewRequired": self.review_required}
+
+
+@dataclass(frozen=True)
 class ConstraintResult:
     project_reference: str
     geometry_reference: str
@@ -86,7 +118,7 @@ class ConstraintResult:
     area_provenance: tuple[Provenance, Provenance]
     building_coverage: Constraint
     floor_area_ratio: Constraint | FarStackConstraint
-    height: Constraint
+    height: Constraint | HeightStackConstraint
     schema_version: str = "0.1"
 
     @property
