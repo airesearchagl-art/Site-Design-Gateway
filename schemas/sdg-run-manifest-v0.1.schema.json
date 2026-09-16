@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:run-manifest:0.1",
+  "title": "SDG Run Package manifest v0.1",
+  "description": "Fixed relative artifacts and exact-byte SHA-256 only. No wall-clock or source path metadata. This is not a legal or optimization certificate.",
+  "type": "object", "additionalProperties": false,
+  "required": ["schemaVersion", "packageVersion", "configuration", "artifacts"],
+  "properties": {
+    "schemaVersion": {"const": "0.1"},
+    "packageVersion": {"const": "sdg-run-package-v0.1"},
+    "configuration": {
+      "type": "object", "additionalProperties": false,
+      "required": ["areaBasis", "floorHeightsM"],
+      "properties": {
+        "areaBasis": {"enum": ["declared_project_area", "geometry_area"]},
+        "floorHeightsM": {"$ref": "urn:sdg:search-result:0.1#/properties/search/properties/floorHeightsM"}
+      }
+    },
+    "artifacts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["project", "geometry", "constraints", "search"],
+      "properties": {
+        "project": {"$ref": "#/$defs/project"},
+        "geometry": {"$ref": "#/$defs/geometry"},
+        "constraints": {"$ref": "#/$defs/constraints"},
+        "search": {"$ref": "#/$defs/search"}
+      }
+    }
+  },
+  "$defs": {
+    "reference": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"},
+    "project": {
+      "type": "object", "additionalProperties": false, "required": ["path", "reference"],
+      "properties": {"path": {"const": "project.json"}, "reference": {"$ref": "#/$defs/reference"}}
+    },
+    "geometry": {
+      "type": "object", "additionalProperties": false, "required": ["path", "reference"],
+      "properties": {"path": {"const": "site.geojson"}, "reference": {"$ref": "#/$defs/reference"}}
+    },
+    "constraints": {
+      "type": "object", "additionalProperties": false, "required": ["path", "reference"],
+      "properties": {"path": {"const": "constraints.json"}, "reference": {"$ref": "#/$defs/reference"}}
+    },
+    "search": {
+      "type": "object", "additionalProperties": false, "required": ["path", "reference"],
+      "properties": {"path": {"const": "search-result.json"}, "reference": {"$ref": "#/$defs/reference"}}
+    }
+  }
+}

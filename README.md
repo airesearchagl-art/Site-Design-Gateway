@@ -3,8 +3,8 @@
 CAD上で一案ずつ試す初期検討から、入力条件・制約・計算根拠・候補比較を明示した
 再現可能な探索へ進めるWeb Gatewayです。計算主体はBVE Core（Buildable Volume Engine）です。
 
-Current Phase = Phase 7 Results Interpretation UX Foundation。既存のPython計算契約を維持し、
-ローカルBVE Coreが生成済みのSearch Result JSONをbrowser memoryだけで読み込み、比較表示します。
+Current Phase = Phase 8 Local Run Package & Orchestration Foundation。既存のPython計算契約を維持し、
+一回のlocal commandで検証済みRun Packageを生成します。生成済みSearch Result JSONはbrowser memoryだけで読み込み、比較表示します。
 Webは従来のProject検証に加え、Search summary、ranking/rejection、candidate選択と2D footprintをread-onlyで提供します。
 
 ## ローカルで開始する
@@ -232,3 +232,30 @@ Webは正本のrankを保持し、再sortやNumberによるTIED判定をしま�
 m・m²は最大小数3桁、割合は小数1桁、明示en-USで表示します。丸め表示でもcanonical JSONは不変です。
 **D04 OPEN**：JavaScript Numberの表示改善はlossless Decimal/数値字句の保証ではありません。
 privacy/resource契約と8 MiB・depth64・250,000 nodes・parse前preflightは維持します。
+
+## Phase 8 Local Run Package
+
+Pythonの既存Coreを順番に呼ぶlocal orchestrationです。出力親ディレクトリを先に用意し、
+**まだ存在しない**出力先とarea basis・階高を明示します。以下はpublic syntheticの例です。
+
+```sh
+python -m bve.run create --project cases/example-urban-office/project.json --geometry cases/example-urban-office/site.geojson --format geojson --area-basis declared_project_area --floor-height-m 4 --floor-height-m 5 --floor-height-m 6 --floor-height-m 7 --floor-height-m 8 --output runtime-data/SDG_Run
+python -m bve.run verify --package runtime-data/SDG_Run
+```
+
+DXFは`--geometry cases/example-urban-office/site.dxf --format dxf --layer SITE`へ置き換えます。
+area basisは`declared_project_area`または`geometry_area`、階高は既存契約の1〜64件です。既定値・自動選択はありません。
+
+固定構造は`manifest.json`、`project.json`、`site.geojson`、`constraints.json`、`search-result.json`の5ファイル。
+manifestは固定相対名・明示設定・4 artifactのexact-byte SHA-256だけを持ち、時刻・入力パス・元のファイル名を含みません。
+Projectを既存Decimal encoderでcanonical化してから、後段の参照hashをbindingします。
+
+完成・完全検証した一時directoryをatomicに公開し、既存file/directory/symlinkを上書きしません。
+`verify`はhash・schema・canonical bytes・相互参照・既存Coreによる意味検証を行います。
+PASSはpackageの整合性を示し、法規適合・最適解を保証しません。accepted=0も完了packageです。
+Web production sourceや6schema registryは変更せず、Webへは`search-result.json`を選択します。
+
+createはWindowsとLinuxの排他的renameを使用します。利用不能なOS/filesystemではfail closed。
+hard crash、停電時の永続性、攻撃者が同時変更する親directoryは保証対象外です。
+一般入力と生成packageはprivate runtimeとして扱い、GitやHostedへ渡しません。
+詳細は[Run Package契約](docs/run-package-contract.md)。D02 / D04はOPENです。
