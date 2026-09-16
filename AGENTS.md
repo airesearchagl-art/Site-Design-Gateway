@@ -4,7 +4,7 @@
 - 実案件データ、実案件名・住所、施主情報、個人を識別するローカルパス、秘密情報、
   .envの値、署名付きURL、CAD/BIM/PDF原本、runtime input/log/dumpをGitへ入れない。
 - fixtureは `cases/example-urban-office/` のsynthetic dataのみ。
-- `schemas/sdg-project-v0.1.schema.json` / `sdg-project-v0.2.schema.json` がversion別の案件条件の正本。Web/Pythonで別schemaを作らない。
+- `schemas/sdg-project-v0.1.schema.json` / `sdg-project-v0.2.schema.json` / `sdg-project-v0.3.schema.json` がversion別の案件条件の正本。Web/Pythonで別schemaを作らない。
 - BVE Coreに案件・自治体固有処理を埋め込まない。LLM調査値をofficial_verifiedへ昇格しない。
 - Current Phase = Phase 11 Explicit Height Cap Stack / Effective Height Foundation。明示scalar height capsをPython Decimalで合成し、既存FAR契約を維持する。
   既存11schemaを維持し、Project0.3 / Constraint0.3 / Search0.4 / Manifest0.3を追加する。

@@ -28,3 +28,28 @@ labelled sections and caption/headings, no new effects/state duplication, networ
 Ignored evidence includes packet, packages, logs, harnesses, screenshots, mutation copies. None committed.
 Vercel NOT TOUCHED; Private Workspace NOT READ; new dependency NONE; no legal research.
 Mutation/CI results will be recorded only after execution. Draft PR creation is the final action.
+
+## Mutation evidence
+
+Source checkpoint: 708eab08778004f016e224f9409f2126187fd851. Each mutation ran in a fresh git-archive copy.
+Every control PASS; syntax/import PASS; targeted assertions failed. Working source unchanged.
+Compile/import/fixture preparation failures do not qualify as kills.
+
+| Mutation | Behavior changed | Target | Assertion failures | Result |
+| --- | --- | --- | --- | --- |
+| M-P11-01 | duplicate height ID guard | test_duplicate_height_id_guard | 1 | KILLED |
+| M-P11-02 | height min to max | test_height_min_and_ties | 4 | KILLED |
+| M-P11-03 | null ignored | test_height_unknown_fail_closed | 8 | KILLED |
+| M-P11-04 | ABSENT changed to UNAVAILABLE | test_base_absent_empty_stack | 1 | KILLED |
+| M-P11-05 | LLM review removed | test_height_review_policy | 2 | KILLED |
+| M-P11-06 | Search height exact-copy removed | test_search_height_exact_copy_guard | 9 | KILLED |
+| M-P11-07 | Package0.3 matrix removed | test_v3_matrix_guard | 4 | KILLED |
+| M-P11-08 | legacy0.2 route removed | test_cli_three_versions | 1 | KILLED |
+| M-P11-09 | browser local height min | P11-WEB-07/12 | 1 | KILLED |
+| M-P11-10 | spatial/legal disclaimer removed | P11-WEB-13 | 1 | KILLED |
+| M-P11-11 | CacheStorage/privacy guard removed | privacy guard explicitly | 1 | KILLED |
+
+After checkpoint only public documentation seals are changed; production/test/schema bytes stay identical.
+Documentation Sync Trigger: yes. Reason: Phase 11 major schema / scalar height constraint contract.
+D02 OPEN / PLATFORM_BLOCKED, D04 OPEN, VMVP-001 PASS WITH TARGET ANOMALY.
+CI outcome belongs to the PR/final report after execution. Draft PR is the hard stop.

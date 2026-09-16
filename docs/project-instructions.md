@@ -2,12 +2,12 @@
 
 目的は建築初期検討の入力条件と出典状態を明示するWeb Gatewayの最小基盤。
 計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 11 Explicit Height Cap Stack / Effective Height Foundation。
-Phase 0〜9を維持し、明示FAR capsの合成とversion別のRun Package / Viewerを追加する。
+Phase 0〜10を維持し、明示scalar height capsの合成とversion別のRun Package / Viewerを追加する。
 
 - Next.js / TypeScriptはProject検証とSearch Resultの形式確認・read-only表示、PythonはProject検証・Geometry・Constraints・Massing・Search計算とsemantic exportを担当する。
 - 単位を暗黙変換しない。面積はm2、比率はpercent、高さはmをschemaで明示する。
   検証成功は法規適合や建築可能性の証明ではない。
-- 既存7schemaを維持する。WebはPhase 11の新4schemaを加えた15schemaをoffline参照し、直接Searchはv0.1/v0.2/v0.3を受け入れる。
+- 既存11schemaを維持する。WebはPhase 11の新4schemaを加えた15schemaをoffline参照し、直接Searchはv0.1/v0.2/v0.3/v0.4を受け入れる。
   追加のschemaVersion変更は互換性判断を伴うためHuman Gateとする。
 - 日本語で簡潔に結果と未確認事項を報告する。UI内へ運用上の実装手順を混ぜない。
 - Runtime dataをpublic fixtureに転用しない。開発・CI・ブラウザ検証もsyntheticのみ。

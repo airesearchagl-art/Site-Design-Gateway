@@ -3,8 +3,8 @@
 CAD上で一案ずつ試す初期検討から、入力条件・制約・計算根拠・候補比較を明示した
 再現可能な探索へ進めるWeb Gatewayです。計算主体はBVE Core（Buildable Volume Engine）です。
 
-Current Phase = Phase 11 Explicit Height Cap Stack / Effective Height Foundation。明示されたFAR上限をPython Decimalで合成し、
-version別のRun Packageの5ファイルをbrowser memoryだけで検証して、FARの出典と候補を表示します。
+Current Phase = Phase 11 Explicit Height Cap Stack / Effective Height Foundation。明示されたFAR・scalar height上限をPython Decimalで合成し、
+version別のRun Packageの5ファイルをbrowser memoryだけで検証して、FAR・高さの出典と候補を表示します。
 Webは従来のProject検証に加え、Search summary、ranking/rejection、candidate選択と2D footprintをread-onlyで提供します。
 
 ## ローカルで開始する

@@ -30,8 +30,8 @@ parse後にも同じnode/depth上限を防御として確認する。byte上限8
 
 ## Schema 境界
 
-正本はSearch Result v0.1/v0.2/v0.3のschema。Ajv の offline registry へ Project、Geometry、
-Constraint Result、Massing Candidate、Search Result、Run Manifestのlegacy 7schemaと新4schemaを登録し、Web用copyを作らない。
+正本はSearch Result v0.1/v0.2/v0.3/v0.4のschema。Ajv の offline registry へ Project、Geometry、
+Constraint Result、Massing Candidate、Search Result、Run Manifestのlegacy 11schemaと新4schemaを登録し、Web用copyを作らない。
 Ajv の問題表示は instance path、keyword、固定の一般説明だけとし、入力断片や raw exception message を含めない。
 
 Schema PASS はブラウザで BVE Core の semantic validation を再実行したことを意味しない。

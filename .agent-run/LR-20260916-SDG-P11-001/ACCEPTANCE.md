@@ -13,4 +13,4 @@ Python authority preserved. Standalone reader internal consistency is not origin
 Optional Project binding API approved by Human; Package0.3 verify always supplies it.
 No spatial or legal inference. Unknown/ABSENT are shared Search failure; known0m is completed zero accepted.
 Old11schema, public Project0.1/0.2 fixtures, Massing generator, FAR byte/review/calculation contracts preserved.
-Mutation and remote exit gates are pending until actually executed.
+Local acceptance COMPLETE including11/11 mutations. Remote exact-head CI and Draft PR remain the exit steps.
