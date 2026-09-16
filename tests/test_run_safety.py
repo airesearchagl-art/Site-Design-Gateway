@@ -104,11 +104,20 @@ def test_exclusive_output_guard_independently(tmp_path):
 
 def test_interrupt_before_publication_cleans_owned_staging(run_inputs, tmp_path, monkeypatch):
     before = set(tmp_path.iterdir())
+    retained = []
+    original = orchestration.tempfile.TemporaryDirectory
+    def retain(*args, **kwargs):
+        temporary = original(*args, **kwargs)
+        retained.append(temporary)
+        return temporary
+    # Do not let garbage collection hide a missing explicit failure cleanup.
+    monkeypatch.setattr(orchestration.tempfile, "TemporaryDirectory", retain)
     def interrupt(*args):
         raise KeyboardInterrupt
     monkeypatch.setattr(orchestration, "verify_package", interrupt)
     with pytest.raises(KeyboardInterrupt):
         create(run_inputs, tmp_path / "output")
+    assert len(retained) == 1
     assert set(tmp_path.iterdir()) == before
 
 
