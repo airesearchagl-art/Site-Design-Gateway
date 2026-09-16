@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sdg:project:0.3",
+  "title": "SDG Project v0.3 explicit scalar height caps",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "project",
+    "site",
+    "zoning"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "0.3"
+    },
+    "project": {
+      "$ref": "urn:sdg:project:0.1#/properties/project"
+    },
+    "site": {
+      "$ref": "urn:sdg:project:0.1#/properties/site"
+    },
+    "zoning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "buildingCoverageRatio",
+        "floorAreaRatio",
+        "additionalFloorAreaRatioCaps",
+        "additionalHeightCaps"
+      ],
+      "properties": {
+        "buildingCoverageRatio": {
+          "$ref": "urn:sdg:project:0.1#/$defs/coverage"
+        },
+        "floorAreaRatio": {
+          "$ref": "urn:sdg:project:0.1#/$defs/far"
+        },
+        "heightLimit": {
+          "$ref": "urn:sdg:project:0.1#/$defs/height"
+        },
+        "additionalFloorAreaRatioCaps": {
+          "$ref": "urn:sdg:project:0.2#/properties/zoning/properties/additionalFloorAreaRatioCaps"
+        },
+        "additionalHeightCaps": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 16,
+          "items": {
+            "$ref": "#/$defs/additionalHeightCap"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "heightCapId": {
+      "$ref": "urn:sdg:project:0.1#/properties/project/properties/id",
+      "not": {
+        "const": "base-height"
+      }
+    },
+    "heightCapKind": {
+      "enum": [
+        "absolute_height_explicit",
+        "district_plan_explicit",
+        "external_rule_result",
+        "other_explicit"
+      ]
+    },
+    "heightCondition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "unit",
+        "status"
+      ],
+      "properties": {
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "unit": {
+          "const": "m"
+        },
+        "status": {
+          "$ref": "urn:sdg:project:0.1#/$defs/status"
+        }
+      },
+      "allOf": [
+        {
+          "$ref": "urn:sdg:project:0.1#/$defs/nullRequiresReview"
+        }
+      ]
+    },
+    "additionalHeightCap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "value",
+        "unit",
+        "status"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/heightCapId"
+        },
+        "kind": {
+          "$ref": "#/$defs/heightCapKind"
+        },
+        "value": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "unit": {
+          "const": "m"
+        },
+        "status": {
+          "$ref": "urn:sdg:project:0.1#/$defs/status"
+        }
+      },
+      "allOf": [
+        {
+          "$ref": "urn:sdg:project:0.1#/$defs/nullRequiresReview"
+        }
+      ]
+    }
+  }
+}

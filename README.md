@@ -3,8 +3,8 @@
 CAD上で一案ずつ試す初期検討から、入力条件・制約・計算根拠・候補比較を明示した
 再現可能な探索へ進めるWeb Gatewayです。計算主体はBVE Core（Buildable Volume Engine）です。
 
-Current Phase = Phase 10 Constraint Stack / Effective FAR Foundation。明示されたFAR上限をPython Decimalで合成し、
-version別のRun Packageの5ファイルをbrowser memoryだけで検証して、FARの出典と候補を表示します。
+Current Phase = Phase 11 Explicit Height Cap Stack / Effective Height Foundation。明示されたFAR・scalar height上限をPython Decimalで合成し、
+version別のRun Packageの5ファイルをbrowser memoryだけで検証して、FAR・高さの出典と候補を表示します。
 Webは従来のProject検証に加え、Search summary、ranking/rejection、candidate選択と2D footprintをread-onlyで提供します。
 
 ## ローカルで開始する
@@ -105,8 +105,8 @@ synthetic fixtureは両形式とも200 m2、面積差0です。WebにはGeometry
 Phase 1でPython Geometry Foundationを追加しました。検索、本番法規rulepack、認証、
 保存・DB、CAD/BIM連携、最適化、Web compute APIは範囲外です。Run Packageは文書上の契約検討に留めます。
 
-今回の出口はPhase 10のDraft PRです。
-作成直後にSTOPし、Ready、merge、Vercel操作、Production、Phase 11へ進みません。
+今回の出口はPhase 11のDraft PRです。
+作成直後にSTOPし、Ready、merge、Vercel操作、Production、Phase 12へ進みません。
 過去のADR・Run記録は維持します。
 
 ## Phase 2 Constraint Engine
@@ -300,3 +300,18 @@ python -m bve.run verify --package runtime-data/far-run
 base600% / additional400% / area200m²からeffective400%、GFA cap800m²を生成します。
 WebはSearch v0.3 / Package v0.2のauthoritative FAR contextを表示し、minやtieを再計算しません。
 [version matrix・FAR契約](docs/far-stack-contract.md)を参照してください。Pythonがsemantic authority、D04 OPENです。
+
+## Phase 11 Explicit scalar height caps
+
+Project0.3は既存FAR stackを維持し、required `additionalHeightCaps`（追加なしは `[]`）を追加します。
+optional base heightと明示上限だけをDecimalで比較します。baseなし・追加なしはABSENT、1件でもnullならUNAVAILABLE、
+0mは既知の上限でSearch zero acceptedです。斜線・道路幅員・用途地域などから高さを算定しません。
+
+```sh
+python -m bve.run create --project cases/example-urban-office/project-height-stack.json --geometry cases/example-urban-office/site.geojson --format geojson --area-basis declared_project_area --floor-height-m 4 --floor-height-m 5 --floor-height-m 6 --floor-height-m 7 --floor-height-m 8 --output runtime-data/height-run
+python -m bve.run verify --package runtime-data/height-run
+```
+
+親directoryは事前に作成し、出力先は未使用としてください。synthetic base31m / additional24mからeffective24mを生成します。
+WebはSearch0.4 / Package0.3の高さ・FAR contextを表示し、legacy各versionも維持します。
+[高さstack契約とversion matrix](docs/height-stack-contract.md)を参照してください。Pythonがsemantic authority、D04 OPEN。

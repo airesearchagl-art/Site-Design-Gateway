@@ -1,4 +1,4 @@
-import { sharedValidators, uniqueFarCapIds } from "./schema-registry.ts";
+import { sharedValidators, uniqueFarCapIds, uniqueHeightCapIds } from "./schema-registry.ts";
 
 export const MAX_JSON_BYTES = 256 * 1024;
 const needsReview = new Set(["assumed", "unknown", "review_required"]);
@@ -58,8 +58,8 @@ export function validateJson(text: string): ValidationResult {
     }
   }
   const version = value !== null && typeof value === "object" && "schemaVersion" in value ? value.schemaVersion : undefined;
-  if (version !== "0.1" && version !== "0.2") return invalid("対応するProject schemaVersionを指定してください。");
-  const validate = version === "0.1" ? sharedValidators.project : sharedValidators.projectV2;
+  if (version !== "0.1" && version !== "0.2" && version !== "0.3") return invalid("対応するProject schemaVersionを指定してください。");
+  const validate = { "0.1": sharedValidators.project, "0.2": sharedValidators.projectV2, "0.3": sharedValidators.projectV3 }[version];
   if (!validate(value)) {
     return {
       schema: "FAIL",
@@ -72,11 +72,13 @@ export function validateJson(text: string): ValidationResult {
     };
   }
   if (!uniqueFarCapIds(value)) return invalid("Additional FAR capのIDが重複しています。");
+  if (!uniqueHeightCapIds(value)) return invalid("Additional height capのIDが重複しています。");
   const sources = collectSources(value);
   return {
     schema: "PASS",
-    outcome: sources.some((source) => needsReview.has(source.status) || (version === "0.2" && source.status === "llm_researched"
-      && (source.path === "/zoning/floorAreaRatio" || source.path.startsWith("/zoning/additionalFloorAreaRatioCaps/")))) ? "REVIEW_REQUIRED" : "VALID",
+    outcome: sources.some((source) => needsReview.has(source.status) || (version !== "0.1" && source.status === "llm_researched"
+      && (source.path === "/zoning/floorAreaRatio" || source.path.startsWith("/zoning/additionalFloorAreaRatioCaps/")
+        || (version === "0.3" && (source.path === "/zoning/heightLimit" || source.path.startsWith("/zoning/additionalHeightCaps/")))))) ? "REVIEW_REQUIRED" : "VALID",
     issues: [],
     sources,
   };

@@ -88,3 +88,11 @@ FAR0%は既存NO_FEASIBLE_MASSINGによる全point rejection / zero acceptedと�
 未知FARは共有入力のREQUIRED_CONSTRAINT_UNAVAILABLEとしてSearch全体を停止し、packageを作らない。
 BrowserのUNAVAILABLE表示テストはschema-only受入であり、Python Searchのsemantic成功を意味しない。
 legacy Search0.1/0.2は維持する。詳細: [FAR stack契約](far-stack-contract.md)。
+
+## Phase 11 Search Result v0.4
+
+constraintContextにheightを追加し、areaBasis / FAR / height / derived capsをPython exportがexact canonical比較する。
+既存FAR・ranking/tie-break/rejection enumは不変。effective heightだけを既存floor-count制約に渡す。
+0mはNO_FEASIBLE_MASSINGによるcompleted zero accepted。ABSENT/UNAVAILABLEは共有入力の
+REQUIRED_CONSTRAINT_UNAVAILABLEでSearch失敗。Massing Candidate0.1のpositive height schemaは緩和しない。
+Search0.4のcontextCapsだけが0/nullを扱う。WebのABSENT/UNAVAILABLE表示テストはschema-onlyであり、実行成功ではない。

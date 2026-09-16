@@ -109,3 +109,16 @@ v0.2も固定5ファイル、hash/相互参照、no timestamp/path、staging・a
 旧public Project0.1で生成する5ファイルはexact base由来のhashと比較し、legacy bytesの一致を検証する。
 新fixtureはproject-far-stack.jsonのみ。未知capの共有入力失敗では部分packageを残さない。
 Webはschema/integrityだけを確認し、Python bve.run verifyが意味検証の正本。D04 OPEN。
+
+## Phase 11 Package v0.3
+
+| Package | Project | Geometry | Constraint | Search | Manifest |
+| --- | --- | --- | --- | --- | --- |
+| v0.1 | 0.1 | 0.1 | 0.1 | 0.2 | 0.1 |
+| v0.2 | 0.2 | 0.1 | 0.2 | 0.3 | 0.2 |
+| v0.3 | 0.3 | 0.1 | 0.3 | 0.4 | 0.3 |
+
+createはProject、verifyはmanifest packageVersionで明示dispatch。mixed/unknownを拒否し自動upgradeしない。
+固定5ファイル・hash/reference・staging/atomic/no-clobberは維持する。v0.3 readerには元Projectを必ず渡す。
+高さABSENT/UNAVAILABLEではpackageを公開せず部分directoryも残さない。既知0mはvalid zero-accepted package。
+旧v0.1/v0.2の全5ファイルhashをPhase 11 exact baseから固定して回帰検証する。

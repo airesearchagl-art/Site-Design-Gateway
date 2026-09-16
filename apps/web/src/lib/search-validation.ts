@@ -5,7 +5,7 @@ export const MAX_SEARCH_BYTES = 8 * 1024 * 1024;
 export const MAX_SEARCH_DEPTH = 64;
 export const MAX_SEARCH_NODES = 250_000;
 
-const validators = { "0.1": sharedValidators.searchLegacy, "0.2": sharedValidators.search, "0.3": sharedValidators.searchV3 };
+const validators = { "0.1": sharedValidators.searchLegacy, "0.2": sharedValidators.search, "0.3": sharedValidators.searchV3, "0.4": sharedValidators.searchV4 };
 
 export type SearchIssue = {
   path: string;
@@ -42,9 +42,20 @@ export type FloorAreaRatioContext = {
 };
 export type FarConstraintContext = ConstraintContext & { floorAreaRatio: FloorAreaRatioContext };
 
+export type HeightCapEntry = Omit<FarCapEntry, "condition"> & {
+  condition: { value: number | null; unit: "m"; status: string };
+};
+export type HeightContext = {
+  state: "COMPUTED" | "UNAVAILABLE" | "ABSENT"; calculationId: "height_cap_stack_v0.3";
+  effectiveHeightM: number | null; effectiveCapIds: string[]; maxHeightM: number | null;
+  capStack: HeightCapEntry[]; reviewRequired: boolean;
+};
+export type HeightConstraintContext = FarConstraintContext & { height: HeightContext };
+
 export type SearchResultDocument = ({ schemaVersion: "0.1"; constraintContext?: never }
   | { schemaVersion: "0.2"; constraintContext: ConstraintContext }
-  | { schemaVersion: "0.3"; constraintContext: FarConstraintContext }) & {
+  | { schemaVersion: "0.3"; constraintContext: FarConstraintContext }
+  | { schemaVersion: "0.4"; constraintContext: HeightConstraintContext }) & {
   inputReferences: { project: string; geometry: string; constraints: string };
   search: {
     strategy: "floor_height_sweep_v0.1";
@@ -142,7 +153,7 @@ export function validateSearchJson(text: string): SearchValidationResult {
   if (resourceFailure) return resourceFailure;
   const version = value !== null && typeof value === "object" && "schemaVersion" in value
     ? value.schemaVersion : undefined;
-  if (version !== "0.1" && version !== "0.2" && version !== "0.3") {
+  if (version !== "0.1" && version !== "0.2" && version !== "0.3" && version !== "0.4") {
     return failure("INVALID", "schemaVersion", "Search Result Schemaに適合しません。");
   }
   const validateSearchSchema = validators[version];

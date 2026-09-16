@@ -4,7 +4,9 @@ from types import MappingProxyType
 
 PACKAGE_VERSION = "sdg-run-package-v0.1"
 PACKAGE_VERSION_V2 = "sdg-run-package-v0.2"
+PACKAGE_VERSION_V3 = "sdg-run-package-v0.3"
 VERSION_MATRIX = MappingProxyType({
+    PACKAGE_VERSION_V3: MappingProxyType({"project":"0.3", "geometry":"0.1", "constraints":"0.3", "search":"0.4"}),
     PACKAGE_VERSION: MappingProxyType({"project": "0.1", "geometry": "0.1", "constraints": "0.1", "search": "0.2"}),
     PACKAGE_VERSION_V2: MappingProxyType({"project": "0.2", "geometry": "0.1", "constraints": "0.2", "search": "0.3"}),
 })
@@ -19,6 +21,8 @@ def package_version_for_project(version: str) -> str:
         return PACKAGE_VERSION
     if version == "0.2":
         return PACKAGE_VERSION_V2
+    if version == "0.3":
+        return PACKAGE_VERSION_V3
     raise RunError(Stage.PROJECT, Code.ARTIFACT_VERSION_MISMATCH)
 
 

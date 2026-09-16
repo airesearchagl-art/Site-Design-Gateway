@@ -1,4 +1,4 @@
-import type { ConstraintCaps, ConstraintContext, FarConstraintContext, RankedCandidateDocument, SearchResultDocument } from "./search-validation.ts";
+import type { ConstraintCaps, ConstraintContext, FarConstraintContext, HeightConstraintContext, RankedCandidateDocument, SearchResultDocument } from "./search-validation.ts";
 
 export type CandidateSelection = { rank: number; candidateReference: string };
 
@@ -14,7 +14,8 @@ export type CandidateView = CandidateSelection & {
 
 export type SearchViewModel = ({ schemaVersion: "0.1"; constraintContext?: never }
   | { schemaVersion: "0.2"; constraintContext: ConstraintContext }
-  | { schemaVersion: "0.3"; constraintContext: FarConstraintContext }) & {
+  | { schemaVersion: "0.3"; constraintContext: FarConstraintContext }
+  | { schemaVersion: "0.4"; constraintContext: HeightConstraintContext }) & {
   summary: SearchResultDocument["summary"];
   strategy: string;
   ranking: string;
@@ -43,6 +44,7 @@ function candidateView(entry: RankedCandidateDocument): CandidateView {
 export function toSearchViewModel(document: SearchResultDocument): SearchViewModel {
   const version = document.schemaVersion === "0.1" ? { schemaVersion: document.schemaVersion }
     : document.schemaVersion === "0.2" ? { schemaVersion: document.schemaVersion, constraintContext: document.constraintContext }
+    : document.schemaVersion === "0.3" ? { schemaVersion: document.schemaVersion, constraintContext: document.constraintContext }
     : { schemaVersion: document.schemaVersion, constraintContext: document.constraintContext };
   return {
     ...version,

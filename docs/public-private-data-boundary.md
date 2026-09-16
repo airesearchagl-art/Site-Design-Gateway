@@ -24,9 +24,9 @@ CLI はローカルファイルを検証します。案件名や入力全文を�
 
 ignore 設定だけで公開可否を判断せず、コミット前に対象ファイルと差分を確認します。秘密情報・個人情報・入力全文の混入、データ破損が見つかった場合は共有を止めて報告します。認証や権限の変更、非公開情報の別経路への移送で解消しません。
 
-Current Phase = Phase 9 Run Package Viewer Intake Foundation。Vault / Notion への書込は禁止です。
+Current Phase = Phase 11 Explicit Height Cap Stack / Effective Height Foundation。Vault / Notion への書込は禁止です。
 公開 Git への反映は feature branch と Draft PR まで。Draft作成後STOPし、Ready、merge、
-Vercel操作、Production、Phase 10には進みません。最終報告にDocumentation Sync Triggerを返します。
+Vercel操作、Production、Phase 12には進みません。最終報告にDocumentation Sync Triggerを返します。
 
 Geometry fixtureはゼロから作った `cases/example-urban-office/site.geojson` と `site.dxf`
 だけを許可します。一般のDXF/GeoJSON原本・出力は公開しません。Python CLIの出力先は明示し、
@@ -74,3 +74,11 @@ road_width_derivedは外部で与えられたnumeric capという分類であり
 実FAR・用途地域・住所・案件名・原本/出典pathは持ち込まない。公開legacy project.jsonは維持する。
 runtime package、browser証跡、mutation copy、exact task packetはGit除外のlocal evidenceとする。
 公開Run記録には判定・件数・digestと相対source参照だけを記載する。Phase 6 private workspaceは読まない。
+
+## Phase 11 height inputs
+
+追加fixtureはexample-urban-office/project-height-stack.jsonの完全syntheticのみ。
+既存project.json / project-far-stack.jsonは変更しない。31m/24mは架空値で法令・実案件値ではない。
+実高さ・住所・高度地区・実CAD/PDF・Case001やprivate workspaceを参照しない。
+元Project照合APIはcallerが渡した既存入力をmemoryで確認し、ConstraintへProject全文を複製しない。
+Python/Webとも入力値や個人pathをlogに追加しない。runtime packagesと監査証跡はGit除外。

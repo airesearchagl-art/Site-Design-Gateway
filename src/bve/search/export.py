@@ -31,8 +31,10 @@ def _validate_context(data: dict, authoritative: dict) -> None:
             "maxTotalFloorAreaM2": constraints["floorAreaRatio"]["maxTotalFloorAreaM2"],
             "maxHeightM": constraints["height"]["maxHeightM"]}
     _require(_encode(context["constraintCaps"]) == _encode(caps))
-    if authoritative["schemaVersion"] == "0.2":
+    if authoritative["schemaVersion"] in ("0.2", "0.3"):
         _require(_encode(context["floorAreaRatio"]) == _encode(constraints["floorAreaRatio"]))
+    if authoritative["schemaVersion"] == "0.3":
+        _require(_encode(context["height"]) == _encode(constraints["height"]))
     for entry in data["rankedCandidates"]:
         _require(_encode(entry["candidate"]["constraintCaps"]) == _encode(context["constraintCaps"]))
 
@@ -102,7 +104,7 @@ def search_bytes(result: SearchResult) -> bytes:
     if type(result) is not SearchResult:
         raise SearchError(Code.INVALID_ARGUMENTS)
     try:
-        validator = schema_validator({"0.2": "search", "0.3": "search_v3"}[result.schema_version])
+        validator = schema_validator({"0.2": "search", "0.3": "search_v3", "0.4": "search_v4"}[result.schema_version])
     except Exception:
         raise SearchError(Code.SCHEMA_UNAVAILABLE) from None
     try:

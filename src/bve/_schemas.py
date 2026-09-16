@@ -8,7 +8,7 @@ from referencing import Registry, Resource
 from .validation import SCHEMA_PATH, _validator
 
 
-@lru_cache(maxsize=11)
+@lru_cache(maxsize=15)
 def schema_validator(kind: str) -> Draft202012Validator:
     project = _validator()
     if kind == "project":
@@ -21,6 +21,12 @@ def schema_validator(kind: str) -> Draft202012Validator:
         "run_v2": ("sdg-run-manifest-v0.2.schema.json",
                    ("geometry", "constraints", "massing", "search_legacy", "run")),
     }
+    versioned.update({
+        "project_v3": ("sdg-project-v0.3.schema.json", ("project_v2",)),
+        "constraints_v3": ("sdg-constraint-result-v0.3.schema.json", ("constraints", "project_v2", "constraints_v2", "project_v3")),
+        "search_v4": ("sdg-search-result-v0.4.schema.json", ("geometry", "constraints", "massing", "search_legacy", "project_v2", "constraints_v2", "project_v3", "constraints_v3")),
+        "run_v3": ("sdg-run-manifest-v0.3.schema.json", ("geometry", "constraints", "massing", "search_legacy", "run")),
+    })
     if kind in versioned:
         filename, dependencies = versioned[kind]
         schema = json.loads((SCHEMA_PATH.parent / filename).read_bytes())
