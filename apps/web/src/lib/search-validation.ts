@@ -1,28 +1,11 @@
-import Ajv2020 from "ajv/dist/2020.js";
 import { searchTextWithinResources } from "./search-resource-preflight.ts";
-import projectSchema from "../../../../schemas/sdg-project-v0.1.schema.json" with { type: "json" };
-import geometrySchema from "../../../../schemas/sdg-site-geometry-v0.1.schema.json" with { type: "json" };
-import constraintSchema from "../../../../schemas/sdg-constraint-result-v0.1.schema.json" with { type: "json" };
-import massingSchema from "../../../../schemas/sdg-massing-candidate-v0.1.schema.json" with { type: "json" };
-import searchSchema from "../../../../schemas/sdg-search-result-v0.1.schema.json" with { type: "json" };
-import searchSchemaV2 from "../../../../schemas/sdg-search-result-v0.2.schema.json" with { type: "json" };
+import { sharedValidators } from "./schema-registry.ts";
 
 export const MAX_SEARCH_BYTES = 8 * 1024 * 1024;
 export const MAX_SEARCH_DEPTH = 64;
 export const MAX_SEARCH_NODES = 250_000;
 
-// Existing canonical schemas use JSON Schema composition where `properties`
-// inherits its object type through $ref/allOf. Keep every other strict check.
-const ajv = new Ajv2020({
-  allErrors: true,
-  strict: true,
-  strictTypes: false,
-  strictTuples: false,
-});
-for (const schema of [projectSchema, geometrySchema, constraintSchema, massingSchema, searchSchema, searchSchemaV2]) {
-  ajv.addSchema(schema);
-}
-const validators = { "0.1": ajv.getSchema(searchSchema.$id)!, "0.2": ajv.getSchema(searchSchemaV2.$id)! };
+const validators = { "0.1": sharedValidators.searchLegacy, "0.2": sharedValidators.search };
 
 export type SearchIssue = {
   path: string;
@@ -96,7 +79,7 @@ function failure(state: "INVALID" | "VIEWER_LIMIT", keyword: string, message: st
   return { state, schema: "NOT_CHECKED", issues };
 }
 
-function inspectResources(value: unknown): SearchValidationResult | null {
+export function inspectResources(value: unknown): SearchValidationResult | null {
   let nodes = 0;
 
   function visit(item: unknown, depth: number): SearchValidationResult | null {

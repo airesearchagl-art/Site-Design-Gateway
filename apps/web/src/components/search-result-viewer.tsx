@@ -2,6 +2,8 @@
 
 import { useMemo, useRef, useState } from "react";
 import { AreaBasisPanel, ConstraintUsagePanel } from "./search-interpretation";
+import { PackageCheckSummary } from "./package-check-summary";
+import { validateRunPackage, type PackageValidationResult } from "../lib/run-package-validation.ts";
 import { formatMeasure, RANKING_RULES, ROUNDING_NOTICE } from "../lib/search-display.ts";
 import searchSample from "../../../../cases/example-urban-office/search-result.json" with { type: "json" };
 import {
@@ -33,13 +35,27 @@ export function SearchResultViewer() {
   const [selection, setSelection] = useState<CandidateSelection | null>(null);
   const request = useRef(0);
   const fileInput = useRef<HTMLInputElement>(null);
+  const directoryInput = useRef<HTMLInputElement>(null);
+  const packageInput = useRef<HTMLInputElement>(null);
+  const packageRequest = useRef<AbortController | null>(null);
+  const [packageResult, setPackageResult] = useState<PackageValidationResult | null>(null);
+  const [packageLoading, setPackageLoading] = useState(false);
   const model = useMemo(
     () => result?.state === "DISPLAYABLE" ? toSearchViewModel(result.value) : null,
     [result],
   );
   const selected = model && selection ? findCandidate(model, selection) : undefined;
   const preview = selected ? footprintPreview(selected) : { available: false as const };
-  const state = loading ? "LOADING" : result?.state ?? "EMPTY";
+  const state = loading ? "LOADING" : result?.state ?? packageResult?.state ?? "EMPTY";
+
+  function resetPackage() {
+    packageRequest.current?.abort();
+    packageRequest.current = null;
+    setPackageResult(null);
+    setPackageLoading(false);
+    if (directoryInput.current) directoryInput.current.value = "";
+    if (packageInput.current) packageInput.current.value = "";
+  }
 
   function show(next: SearchValidationResult) {
     setResult(next);
@@ -52,6 +68,7 @@ export function SearchResultViewer() {
 
   function loadSample() {
     request.current += 1;
+    resetPackage();
     setLoading(false);
     show(validateSearchJson(JSON.stringify(searchSample)));
   }
@@ -59,6 +76,7 @@ export function SearchResultViewer() {
   async function selectFile(file?: File) {
     if (!file) return;
     const current = ++request.current;
+    resetPackage();
     setLoading(true);
     setResult(null);
     setSelection(null);
@@ -71,10 +89,32 @@ export function SearchResultViewer() {
 
   function clearResult() {
     request.current += 1;
+    resetPackage();
     setLoading(false);
     setResult(null);
     setSelection(null);
     if (fileInput.current) fileInput.current.value = "";
+  }
+
+  async function selectPackage(files: File[]) {
+    if (!files.length) return;
+    const current = ++request.current;
+    resetPackage();
+    if (fileInput.current) fileInput.current.value = "";
+    const controller = new AbortController();
+    packageRequest.current = controller;
+    setLoading(true);
+    setPackageLoading(true);
+    setResult(null);
+    setSelection(null);
+    const next = await validateRunPackage(files, controller.signal);
+    if (request.current === current && !controller.signal.aborted) {
+      setPackageResult(next);
+      if (next.state === "DISPLAYABLE") show(next.search);
+      setLoading(false);
+      setPackageLoading(false);
+      packageRequest.current = null;
+    }
   }
 
   return (
@@ -83,9 +123,27 @@ export function SearchResultViewer() {
         <div>
           <span className="step">STEP 03</span>
           <h2 id="search-title">3. Review Search Result</h2>
-          <p>ローカルBVE Coreが生成したSearch Result JSONを、ブラウザ内だけで比較表示します。</p>
+          <p>ローカルBVE CoreのRun PackageまたはSearch Result JSONを、ブラウザ内だけで確認・比較表示します。</p>
         </div>
         <strong className={`viewer-state state-${state.toLowerCase()}`}>{state}</strong>
+      </div>
+
+      <div className="package-intake" data-package-state={packageLoading ? "LOADING" : packageResult?.state ?? "EMPTY"}>
+        <h3>SDG Run Package</h3>
+        <p className="small" id="package-help">folder直下のmanifest.json / project.json / site.geojson / constraints.json / search-result.jsonを選択します。
+          folder選択に対応しないブラウザでは5ファイル同時選択を使えます。送信・保存なし。ZIPは対象外です。</p>
+        <div className="package-controls">
+          <button type="button" className="primary" onClick={() => directoryInput.current?.click()}>SDG Run Packageを選択</button>
+          <input ref={directoryInput} id="run-package-folder" type="file" multiple {...{ webkitdirectory: "" }} hidden
+            aria-label="SDG Run Package folder" aria-describedby="package-help"
+            onChange={(event) => { const files = Array.from(event.target.files ?? []); event.target.value = ""; void selectPackage(files); }} />
+          <button type="button" onClick={() => packageInput.current?.click()}>5ファイル同時選択</button>
+          <input ref={packageInput} id="run-package-files" type="file" multiple hidden
+            aria-label="Run Packageの5ファイル" aria-describedby="package-help"
+            onChange={(event) => { const files = Array.from(event.target.files ?? []); event.target.value = ""; void selectPackage(files); }} />
+        </div>
+        {packageLoading ? <p role="status">Packageをブラウザ内で確認中…</p> : null}
+        <PackageCheckSummary result={packageResult} />
       </div>
 
       <div className="search-controls">
@@ -102,12 +160,12 @@ export function SearchResultViewer() {
           />
           <span id="search-file-help" className="small">.json / viewer上限 8 MiB / 送信・保存なし</span>
         </div>
-        <button type="button" onClick={clearResult} disabled={!loading && !result}>Clear result</button>
+        <button type="button" onClick={clearResult} disabled={!loading && !result && !packageResult}>Clear result</button>
       </div>
 
       <div className="viewer-content" aria-live="polite" aria-atomic="false">
         {loading ? <p className="empty">Search Resultを読み込み中…</p> : null}
-        {!loading && !result ? <p className="empty">sampleまたはローカルJSONを読み込むと、ここに結果を表示します。</p> : null}
+        {!loading && !result && !packageResult ? <p className="empty">package、sampleまたはローカルJSONを読み込むと、ここに結果を表示します。</p> : null}
         {!loading && result?.state === "VIEWER_LIMIT" ? (
           <div className="viewer-message limit-message">
             <strong>VIEWER LIMIT</strong>

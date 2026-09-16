@@ -1,13 +1,13 @@
 # Project instructions
 
 目的は建築初期検討の入力条件と出典状態を明示するWeb Gatewayの最小基盤。
-計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 8 Local Run Package & Orchestration Foundation。
-Phase 0〜7を維持し、既存Coreを呼ぶlocal orchestrationと固定5ファイルのpackageを追加する。
+計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 9 Run Package Viewer Intake Foundation。
+Phase 0〜8を維持し、固定5ファイルのRun Packageをbrowser-onlyで確認して既存Viewerへ渡す。
 
 - Next.js / TypeScriptはProject検証とSearch Resultの形式確認・read-only表示、PythonはProject検証・Geometry・Constraints・Massing・Search計算とsemantic exportを担当する。
 - 単位を暗黙変換しない。面積はm2、比率はpercent、高さはmをschemaで明示する。
   検証成功は法規適合や建築可能性の証明ではない。
-- 既存5schemaを維持し、Human承認済みSearch v0.2を追加する。Webは6schemaをoffline参照しv0.1/v0.2を受け入れる。
+- 既存7schemaを維持する。WebはRun Manifestを含む7schemaをoffline参照し、直接Searchはv0.1/v0.2を受け入れる。
   追加のschemaVersion変更は互換性判断を伴うためHuman Gateとする。
 - 日本語で簡潔に結果と未確認事項を報告する。UI内へ運用上の実装手順を混ぜない。
 - Runtime dataをpublic fixtureに転用しない。開発・CI・ブラウザ検証もsyntheticのみ。
@@ -26,7 +26,7 @@ Massingは凸・穴なし敷地、固定homothetic footprintと同形整数階st
 Constraint Resultはschemaと再計算で検証し、Geometry referenceを一致させる。階高の既定値は禁止。
 actual areaを丸めずcapと包含を再確認する。法規適合・後退・最適性を主張しない。
 WebからPythonを呼ばない。floorHeight以外の探索、3D、本番rulepacks、Bridge、API、保存基盤は対象外。
-Draft PR作成後STOP。Ready、merge、Vercel操作、Production、Phase 9、Vault/Notion直接更新は禁止。
+Draft PR作成後STOP。Ready、merge、Vercel操作、Production、Phase 10、Vault/Notion直接更新は禁止。
 旧Preview必須GateはSDG-VP-001 BLOCKED_EXTERNAL、D02 OPEN / PLATFORM_BLOCKEDとして切り離された。
 意図しないProduction分類2件は削除済み。Git切断確認後、HumanのPhase 3 transition exception = AUTHORIZED。
 このPhaseではVercelを再検証せず、別Runで原因と安全経路をfresh auditする。
@@ -50,4 +50,10 @@ D04 OPEN。Phase 6 private workspaceや詳細reportを参照・転記しない�
 Phase 8 Run PackageはProject/Geometry/Constraints/Searchの既存public APIとcanonical exporterを再利用する。
 manifest v0.1は独立schemaであり既存6schemaは変更しない。area basisと階高はHuman明示、defaultなし。
 strict fixed file set、hash/相互参照/意味検証、既存target拒否、完全staging検証後のatomic公開を必須とする。
-Web production sourceとdependencyは変更しない。詳細: docs/run-package-contract.md。
+Phase 8でWeb production sourceとdependencyは変更しなかった。詳細: docs/run-package-contract.md。
+
+Phase 9のpackage入口はdocs/web-results-contract.mdに従う。fixed file set/path、全file先行size確認、
+exact-byte SHA-256、root入力参照、basis/階高のparsed値と順序を検証する。共有7schemaはcopyしない。
+Python semantic authorityをUIに明示し、計算・candidate hash・順位を再実行しない。D04 OPEN。
+直接Search、Phase 7表示、resource preflight、privacyを維持し、Clearの非同期競合も検証する。
+packageのtest helperはpublic syntheticを既存Pythonで一時生成するだけ。runtime packageを追跡しない。

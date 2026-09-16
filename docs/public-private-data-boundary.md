@@ -24,9 +24,9 @@ CLI はローカルファイルを検証します。案件名や入力全文を�
 
 ignore 設定だけで公開可否を判断せず、コミット前に対象ファイルと差分を確認します。秘密情報・個人情報・入力全文の混入、データ破損が見つかった場合は共有を止めて報告します。認証や権限の変更、非公開情報の別経路への移送で解消しません。
 
-Current Phase = Phase 8 Local Run Package & Orchestration Foundation。Vault / Notion への書込は禁止です。
+Current Phase = Phase 9 Run Package Viewer Intake Foundation。Vault / Notion への書込は禁止です。
 公開 Git への反映は feature branch と Draft PR まで。Draft作成後STOPし、Ready、merge、
-Vercel操作、Production、Phase 9には進みません。最終報告にDocumentation Sync Triggerを返します。
+Vercel操作、Production、Phase 10には進みません。最終報告にDocumentation Sync Triggerを返します。
 
 Geometry fixtureはゼロから作った `cases/example-urban-office/site.geojson` と `site.dxf`
 だけを許可します。一般のDXF/GeoJSON原本・出力は公開しません。Python CLIの出力先は明示し、
@@ -61,3 +61,8 @@ Phase 8の一般Run Packageはprivate runtime。Project本文・形状を含む�
 元ファイル名、source directory、個人path、時刻、machine/user名を追加しない。
 testとCIはpublic synthetic sourceからtemporary packageを生成し、Gitへ追跡せずCI artifactへuploadしない。
 検証CLIは固定stage/codeと件数だけを出す。Phase 6 private workspaceを参照・転用しない。
+
+Phase 9のfolder/5-file選択もbrowser memoryだけで処理する。root pathやraw内容・例外を表示しない。
+schema/hash/参照/設定の失敗は固定filename/code/一般説明のみ。Clearでstate/inputと遅延handoffを解除する。
+Web Crypto SHA-256はlocal integrity確認のみ。network/storage、FS write、service worker persistenceを禁止する。
+新たな検証packageはpublic syntheticから一時生成し、過去のprivate/runtime packageを取り込まない。

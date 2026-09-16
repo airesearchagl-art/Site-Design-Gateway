@@ -2,7 +2,7 @@ name: Synthetic validation
 
 on:
   push:
-    branches: [feat/phase0-bootstrap, feat/phase1-geometry-foundation, feat/phase2-constraint-engine, feat/phase3-massing-candidate-foundation, feat/phase4-search-ranking-foundation, feat/phase5-web-results-viewer, feat/phase7-results-interpretation, feat/phase8-local-run-package]
+    branches: [feat/phase0-bootstrap, feat/phase1-geometry-foundation, feat/phase2-constraint-engine, feat/phase3-massing-candidate-foundation, feat/phase4-search-ranking-foundation, feat/phase5-web-results-viewer, feat/phase7-results-interpretation, feat/phase8-local-run-package, feat/phase9-run-package-viewer]
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -70,6 +70,13 @@ jobs:
         with:
           node-version: '24'
           cache: npm
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: pyproject.toml
+      - name: Existing Python Core for public synthetic package test preparation only
+        run: python -m pip install -e .
       - run: npm ci
       - run: npm run check:boundary
       - run: npm run lint
