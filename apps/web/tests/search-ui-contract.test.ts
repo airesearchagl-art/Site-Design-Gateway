@@ -17,7 +17,7 @@ function sourceFiles(directory: string): string[] {
 }
 
 test("current phase header and all viewer states are explicit", () => {
-  assert.ok(page.includes("PHASE 7 / RESULTS INTERPRETATION"));
+  assert.ok(page.includes("PHASE 9 / RUN PACKAGE VIEWER"));
   for (const state of ["EMPTY", "LOADING", "DISPLAYABLE", "INVALID", "VIEWER_LIMIT"]) {
     assert.ok(component.includes(state), `missing viewer state ${state}`);
   }
@@ -64,6 +64,9 @@ test("Web source has no input network, persistence or realtime capability", () =
     /\bWebSocket\b/,
     /\bEventSource\b/,
     /\bconsole\s*(?:\.|\[)/,
+    /\bshowSaveFilePicker\b/,
+    /\bcreateWritable\b/,
+    /\bserviceWorker\b/,
   ]) {
     assert.doesNotMatch(source, forbidden);
   }

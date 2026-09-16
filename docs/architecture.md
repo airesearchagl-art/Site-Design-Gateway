@@ -1,6 +1,6 @@
 # アーキテクチャ
 
-Current Phase = Phase 8 Local Run Package & Orchestration Foundation。WebとPythonは同じcanonical schemasを参照する
+Current Phase = Phase 9 Run Package Viewer Intake Foundation。WebとPythonは同じcanonical schemasを参照する
 独立したclientです。PythonのGeometry/Constraints/Massing/SearchとWebはAPIで接続しません。
 
 ```text
@@ -68,7 +68,7 @@ Phase 0ではサービスもBridgeも接続しません。
 
 Phase 0では幾何計算・DXF読込も対象外でした。過去のADRとRun記録は当時の判断として保持します。
 現在も法規計算、自治体固有処理、実案件固有処理、DXF / PDF出力、CAD/BIM連携、Web compute接続は対象外です。
-WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 9、
+WebのDXF / PDF画面要素は無効のままです。Draft PR作成後STOPし、Ready、merge、Vercel操作、Production、Phase 10、
 Vault/Notion直接更新は行いません。
 
 ## Phase 3 Massing
@@ -140,3 +140,28 @@ manifestは固定相対名・configuration・SHA-256だけ。追加file/hidden m
 stagingは完全検証後にnative no-replace renameで公開し、既存出力は上書きしない。
 WebとのAPI接続・package読込UI・Bridge・CSVは追加しない。
 [Run Package契約](run-package-contract.md)にplatform、limit、privacyとatomic保証範囲を固定する。
+
+## Phase 9 Browser package intake
+
+```text
+selected five Files → exact names/direct-child paths → all File.size preflight
+  → manifest shared schema → sequential artifact reads/actual-buffer recheck
+  → shared schemas + exact bytes SHA-256 → references/configuration
+  → existing validated Search result → same SearchResultViewer / toSearchViewModel
+```
+
+固定名はmanifest.json / project.json / site.geojson / constraints.json / search-result.json。
+上限は256 KiB / 256 KiB / 4 MiB / 4 MiB / 8 MiB。Searchは既存validateSearchJsonを通り、
+raw depth64 / 250,000 nodesをparse前に確認する。順番に読み込み、最初から全artifactをbuffer化しない。
+7つのcanonical schemaはoffline registryを共有する。manifest pathは読込先へ解釈せず、固定filename mapを使う。
+root参照5件、area basis、階高のparsed values/長さ/順序を照合する。既存schema・Python sourceは変更しない。
+
+File collectionを受けるvalidatorはReactと独立し、folder pickerとfallbackの双方から使う。
+返すのは固定status/issuesと検証済みSearchだけ。manifest・非Search artifact・root pathをUI stateへ複製しない。
+Clearはinputを空にしAbortSignalと世代番号で遅延handoffを防ぐ。処理中のFile readは同期消去できないが、
+完了後に破棄し次artifactへ進まない。新dependency、network、storage、ZIP、API、Python-in-browserはない。
+
+BrowserのPASSは共有Schema・integrity・参照・設定の整合性のみ。
+Python `bve.run verify`がauthoritative semantic verifierであり、candidate hashや計算・順位は再実行しない。
+Python-valid ≠ Web-displayable。Numberでの設定比較でもD04 OPEN。直接Search v0.1/v0.2とPhase 7表示を維持する。
+テストだけがpublic synthetic sourceから既存Python CLIでtemporary packageを生成し、CI artifactへuploadしない。

@@ -3,8 +3,8 @@
 CAD上で一案ずつ試す初期検討から、入力条件・制約・計算根拠・候補比較を明示した
 再現可能な探索へ進めるWeb Gatewayです。計算主体はBVE Core（Buildable Volume Engine）です。
 
-Current Phase = Phase 8 Local Run Package & Orchestration Foundation。既存のPython計算契約を維持し、
-一回のlocal commandで検証済みRun Packageを生成します。生成済みSearch Result JSONはbrowser memoryだけで読み込み、比較表示します。
+Current Phase = Phase 9 Run Package Viewer Intake Foundation。既存のPython計算契約を維持し、
+local commandで生成したRun Packageの5ファイルをbrowser memoryだけで検証し、既存Viewerへ渡します。
 Webは従来のProject検証に加え、Search summary、ranking/rejection、candidate選択と2D footprintをread-onlyで提供します。
 
 ## ローカルで開始する
@@ -51,6 +51,10 @@ npm run check:boundary
 ```
 
 仮想環境を有効にした場合、Python の確認は `python -m pytest`、CLI は `python -m bve cases/example-urban-office/project.json` でも実行できます。再現用の依存インストールにはルートで `npm ci` を使います。
+
+Webのpackageテストも、上記editable install済みPython Coreを使ってpublic synthetic packageを一時生成します。
+Windowsでは`.venv/Scripts/python.exe`、他OSではPATHの`python`を使い、`SDG_TEST_PYTHON`で実行ファイルを指定できます。
+これは開発・CIのfixture準備のみで、ブラウザからPythonを呼びません。runtime packageを追跡しません。
 
 CI は公開可能な合成データだけを使い、Web の lint・test・build と Python のテストを実行します。コマンドの掲載は成功記録ではありません。実行ごとの結果は CI と対応する Run 記録で確認してください。
 
@@ -253,9 +257,29 @@ Projectを既存Decimal encoderでcanonical化してから、後段の参照hash
 完成・完全検証した一時directoryをatomicに公開し、既存file/directory/symlinkを上書きしません。
 `verify`はhash・schema・canonical bytes・相互参照・既存Coreによる意味検証を行います。
 PASSはpackageの整合性を示し、法規適合・最適解を保証しません。accepted=0も完了packageです。
-Web production sourceや6schema registryは変更せず、Webへは`search-result.json`を選択します。
+Phase 8時点ではWebへ`search-result.json`を個別に渡していました。Phase 9のpackage入口は下記です。
 
 createはWindowsとLinuxの排他的renameを使用します。利用不能なOS/filesystemではfail closed。
 hard crash、停電時の永続性、攻撃者が同時変更する親directoryは保証対象外です。
 一般入力と生成packageはprivate runtimeとして扱い、GitやHostedへ渡しません。
 詳細は[Run Package契約](docs/run-package-contract.md)。D02 / D04はOPENです。
+
+## Phase 9 Run Package Viewer intake
+
+STEP 03の「SDG Run Packageを選択」でfolderを選びます。folder選択非対応のブラウザでは
+「5ファイル同時選択」を使います。固定5ファイルは`manifest.json`、`project.json`、`site.geojson`、
+`constraints.json`、`search-result.json`のみ。欠落、重複、余分なファイル（隠しmetadataを含む）、
+nested folder、複数rootはINVALIDです。ZIPは扱いません。
+
+Web上限は順に256 KiB / 256 KiB / 4 MiB / 4 MiB / 8 MiBです。全File.sizeを確認してから読み、
+actual bufferも再確認します。Searchのdepth64・250,000 nodes・JSON.parse前preflightは維持します。
+超過はVIEWER_LIMIT。Python-valid packageでもWeb-displayableとは限りません。
+
+canonical 7schemaのoffline Ajv確認、Web Cryptoによるexact bytes SHA-256、root入力参照、
+area basisと順序を含む階高の一致を検証して、同じSearch objectを既存Viewerへ渡します。
+これは署名・作成者認証ではありません。**Python `bve.run verify`がauthoritative semantic verifier**です。
+Browserは計算、candidate hash、順位を再生成しません。Numberでの設定比較はDecimalの証明ではなく、D04 OPENです。
+
+Search v0.1/v0.2の直接選択とsampleは維持します（package内Searchはv0.2）。zero acceptedも表示可能です。
+入力は送信・保存せず、Clearでpackage/Searchと選択を破棄し、進行中の読込からの遅延表示も防ぎます。
+D02 OPEN / PLATFORM_BLOCKED、VMVP-001 PASS WITH TARGET ANOMALYは継承のみ。Vercelは操作しません。

@@ -19,6 +19,9 @@ test("privacy guard explicitly covers every prohibited browser capability", () =
     "WebSocket",
     "EventSource",
     "console",
+    "showSaveFilePicker",
+    "createWritable",
+    "serviceWorker",
   ]) {
     assert.ok(guard.includes(token), `privacy guard missing ${token}`);
   }

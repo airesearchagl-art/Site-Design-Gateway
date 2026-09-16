@@ -1,6 +1,6 @@
-# Web Results Viewer / Phase 7 interpretation contract
+# Web Results Viewer / Phase 9 package intake contract
 
-Current Phase = Phase 7 Results Interpretation UX Foundation。Phase 5 privacy/resource境界を維持する。
+Current Phase = Phase 9 Run Package Viewer Intake Foundation。Phase 5 privacy/resource・Phase 7表示境界を維持する。
 
 Web は、ローカル BVE Core が canonical export した Search Result JSON をユーザーが選択し、
 ブラウザ内だけで形式確認・比較表示する read-only consumer である。
@@ -15,7 +15,7 @@ Project、Geometry、Constraints、Massing、Search の計算や、candidate has
 
 ## 入力と状態
 
-入力は `.json` ファイル1件または tracked synthetic sample。内容は React state と処理中の一時値だけに保持し、
+直接入力は `.json` ファイル1件または tracked synthetic sample。追加の5-file package入口は後述。内容は React state と処理中の一時値だけに保持し、
 送信、保存、upload、form submission、telemetry、console 出力をしない。`Clear result` は表示中の Search Result と選択を破棄する。
 
 viewer state は `EMPTY`、`LOADING`、`DISPLAYABLE`、`INVALID`、`VIEWER_LIMIT` を区別する。
@@ -31,7 +31,7 @@ parse後にも同じnode/depth上限を防御として確認する。byte上限8
 ## Schema 境界
 
 正本はSearch Result v0.1とv0.2のschema。Ajv の offline registry へ Project、Geometry、
-Constraint Result、Massing Candidate、Search Result v0.1/v0.2の6schemaを登録し、Web用copyを作らない。
+Constraint Result、Massing Candidate、Search Result v0.1/v0.2、Run Manifest v0.1の7schemaを登録し、Web用copyを作らない。
 Ajv の問題表示は instance path、keyword、固定の一般説明だけとし、入力断片や raw exception message を含めない。
 
 Schema PASS はブラウザで BVE Core の semantic validation を再実行したことを意味しない。
@@ -80,4 +80,46 @@ authoritative rankと配列順を保ち、ブラウザで再sort・Decimal equal
 Python CLI pipeline（Project / Geometry / Constraints / Search [4,5,6,7,8]）のactual bytesを追跡し、
 Python exact-byte testでCoreへ固定する。一般のruntime/private Search Resultは公開Gitへ含めない。
 
-SDG-VP-001はBLOCKED_EXTERNAL、D02はOPEN / PLATFORM_BLOCKED。Phase 5でVercelは操作しない。
+SDG-VP-001はBLOCKED_EXTERNAL、D02はOPEN / PLATFORM_BLOCKED。VMVP-001はPASS WITH TARGET ANOMALYを継承。
+Phase 9でVercelは操作しない。
+
+## Run Package v0.1 browser入口
+
+`File[]`相当の選択から確認する独立validatorを、folder picker（webkitdirectory）と通常のmultiple inputで共用する。
+exact setはmanifest.json / project.json / site.geojson / constraints.json / search-result.json。
+missing、extra、duplicate、hidden metadataはINVALID。relative pathがある場合、全fileは同じrootのdirect childのみ。
+空relative pathのfallbackではexact filename setを確認する。rootや絶対pathは表示・保存・errorへ含めない。
+manifestの固定pathはcanonical Schemaで制限し、実読込は固定name mapのみから行う。
+
+| File | Web byte limit |
+| --- | --- |
+| manifest.json | 256 KiB |
+| project.json | 256 KiB |
+| site.geojson | 4 MiB |
+| constraints.json | 4 MiB |
+| search-result.json | 8 MiB |
+
+全File.sizeを確認する前にarrayBufferを呼ばない。読込後もactual bufferを再確認し、UTF-8をstrict decodeする。
+manifestを先に読みshared Schemaを検証し、その後artifactを逐次処理する。raw preflightは全artifactへ適用し、
+Searchは既存validateSearchJsonの8 MiB / depth64 / 250,000 nodes境界を通る。package内Searchはv0.2のみ。
+PythonのSearch package上限256 MiBはWebへ持ち込まない。VIEWER_LIMITはpackage不正を意味せず、Python verifyで有効な場合もある。
+
+crypto.subtle.digest("SHA-256", exact selected bytes)で4artifactをhash化しmanifest referenceと照合する。
+鍵生成・署名・暗号化はしない。constraintsのproject/geometryとSearchのproject/geometry/constraintsのroot参照を照合する。
+manifestのareaBasisはconstraints selectedBasisと、floorHeightsMはSearchの長さ/順序/parsed valuesと一致を要求する。
+sort・補完・Decimal同値推定はしない。exact-byte hashでもJSON.parseの数値字句問題は解決せずD04 OPEN。
+
+PASS時は同じSearch validation resultを既存Viewerへhandoffし、表示経路を複製しない。
+UIはPackage integrity / version / artifact count / Browser checkを表示し、次を明示する。
+
+- Package integrity and shared-schema checks passed in this browser.
+- Python `bve.run verify` remains the authoritative semantic verifier.
+
+integrityは署名・作成者認証・法規適合ではない。candidate hash、geometry、constraints、massing、rankingの意味検証はPythonが正本。
+zero acceptedでもArea Basis/caps/rejectionsを表示し、candidate usageはUnavailable。直接Search v0.1/v0.2とsampleを維持する。
+errorは固定filename/code/一般説明だけ。raw JSON、hash値、任意key、例外、stackをechoしない。
+
+Clearはpackage issues、Search、candidate、SVG、input値を解除してEMPTYへ戻す。
+abortと世代番号で進行中読込・hashの後のhandoffを防ぎ、buffer等をstorageへ退避しない。
+recursive privacy scanはnetwork、storage、Cache API、File System Access write、service worker、consoleを禁止する。
+ZIP、保存、編集、API、Python実行、新dependencyは対象外。Phase 8 Run Package契約自体は変更しない。
