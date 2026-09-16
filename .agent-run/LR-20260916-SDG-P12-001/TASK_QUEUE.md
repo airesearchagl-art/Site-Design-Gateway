@@ -7,7 +7,8 @@
 - [x] Six-file package create/verify, legacy five-file preservation
 - [x] Web intake, authoritative panel and SVG
 - [x] Boundary tests, required checks, 128 MiB regressions
-- [ ] Local production browser privacy/responsive smoke
-- [ ] At least twelve isolated mutations
-- [ ] Docs, CI, seal checkpoint, push and exact-head CI
+- [x] Local production browser privacy/responsive smoke
+- [x] Fourteen isolated mutations
+- [x] Contract documentation and synthetic CI route
+- [ ] Seal checkpoint, push and exact-head CI
 - [ ] Draft PR then immediate STOP
