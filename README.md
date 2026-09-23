@@ -3,9 +3,19 @@
 CAD上で一案ずつ試す初期検討から、入力条件・制約・計算根拠・候補比較を明示した
 再現可能な探索へ進めるWeb Gatewayです。計算主体はBVE Core（Buildable Volume Engine）です。
 
-Current Phase = Phase 12 Explicit Buildable Area Geometry / Footprint Domain Foundation。明示されたpolygonを安全に受け取り、候補footprintの生成領域に使います。
-BCR/FARの敷地面積基準とscalar height契約を維持し、5/6ファイルのversion別Run Packageをbrowser memoryだけで検証・表示します。
-Webは従来のProject検証に加え、Search summary、ranking/rejection、candidate選択と2D footprintをread-onlyで提供します。
+Current milestone = MVP-RC2A Human-first UX。Phase 12の計算契約を保ち、設計者が敷地条件と初期ボリューム案を読み比べる入口を整えています。
+Webはブラウザ内だけで計算済み結果を確認・表示します。計算と意味検証の正本はローカルPython BVE Coreです。
+法規適合や建築可能最大値を証明するツールではありません。
+
+## 検討を始める
+
+- **サンプルで試す**：架空の都市型オフィスの条件と結果を1操作で表示します。
+- **自分の検討結果を開く**：ローカルSDG / BVE Coreで作成済みの検討結果フォルダを選びます。
+- **自分の案件を準備する**：敷地形状、敷地・法規条件、計画条件、任意の配置検討範囲を整理します。未確認・仮定・図面由来を分け、後から根拠を確認できます。
+
+比較条件は入力された想定階高、並び順は計算済みの延床面積順です。案 A/B/C…を選ぶと延床面積・建築面積・階数・建物高さ・想定階高が切り替わります。
+JSON生成補助プロンプトと技術情報は詳細欄にあります。WebでのPDF/DXF解析、住所からの法規取得、ボリューム計算はありません。
+詳細は[Human-first UX契約](docs/human-first-ux.md)を参照してください。
 
 ## ローカルで開始する
 
@@ -16,7 +26,7 @@ npm install
 npm run dev
 ```
 
-起動ログに表示されるローカル URL を開き、「サンプルを読み込む」から動作を確認します。開発用の環境変数や API キーは不要です。
+起動ログに表示されるローカル URL を開き、「サンプルで試す」から動作を確認します。開発用の環境変数や API キーは不要です。
 
 Python は仮想環境へインストールします。現在はsource/editable installを対象とし、
 正本Schemaを読むためリポジトリを保持してください。wheel単体での配布は対象外です。

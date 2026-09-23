@@ -1,6 +1,9 @@
-# Web Results Viewer / Phase 11 scalar height contract
+# Web Results Viewer contract
 
-Current Phase = Phase 12 Explicit Buildable Area Geometry / Footprint Domain Foundation。Phase 5 privacy/resource・Phase 7表示境界を維持する。
+Current milestone = MVP-RC2A Human-first UX。Phase 12までの計算・形式・privacy/resource境界を維持する。
+以下のPhase別項目の英語ラベル・内部状態は内部契約として保持する。通常画面の文言と情報配置は
+[Human-first UX契約](human-first-ux.md)を優先し、raw code / path / hashは初期状態で閉じた詳細欄へ置く。
+「表示をクリア」は従来のClearと同じ破棄・非同期取消契約を持つ。
 
 Web は、ローカル BVE Core が canonical export した Search Result JSON をユーザーが選択し、
 ブラウザ内だけで形式確認・比較表示する read-only consumer である。

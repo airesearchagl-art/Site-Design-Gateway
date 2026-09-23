@@ -40,7 +40,7 @@ test("P11-WEB-01/05/06 Search0.4 renders height stack from canonical Python outp
   const data=document(bytes,"search-result.json");
   assert.equal(validateSearchJson(JSON.stringify(data)).state,"DISPLAYABLE");
   const html=render(data);
-  for(const text of ["Base height cap","31 m","Additional scalar height caps","explicit-height-cap","24 m","absolute_height_explicit","user_provided","assumed","REVIEW REQUIRED"]) assert.ok(html.includes(text),text);
+  for(const text of ["基準の高さ制限","31 m","入力された高さ制限","explicit-height-cap","24 m","absolute_height_explicit","user_provided","assumed","REVIEW REQUIRED"]) assert.ok(html.includes(text),text);
   const original=JSON.stringify(data);render(data);assert.equal(JSON.stringify(data),original);
 });
 
@@ -49,7 +49,7 @@ for(const version of ["0.1","0.2","0.3"]){
     const data=document(version==="0.3"?legacyFar:packageBytes(),"search-result.json");
     data.schemaVersion=version;if(version==="0.1")delete data.constraintContext;
     assert.equal(validateSearchJson(JSON.stringify(data)).state,"DISPLAYABLE");
-    assert.ok(render(data).includes("Unavailable in this Search Result version"));
+    assert.ok(render(data).includes("この結果データには高さ制限の条件一覧が含まれていません。"));
     if(version==="0.3")assert.equal(farStackDisplay(data.constraintContext.floorAreaRatio).effective,"400.0%");
   });
 }

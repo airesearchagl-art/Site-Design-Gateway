@@ -1,8 +1,9 @@
 # Project instructions
 
 目的は建築初期検討の入力条件と出典状態を明示するWeb Gatewayの最小基盤。
-計算主体はBVE Core（Buildable Volume Engine）。Current Phase = Phase 12 Explicit Buildable Area Geometry / Footprint Domain Foundation。
-Phase 0〜11を維持し、明示buildable areaの包含・出典照合とversion別のRun Package / Viewerを追加する。
+計算主体はBVE Core（Buildable Volume Engine）。Current milestone = MVP-RC2A Human-first UX。
+Phase 12のCore・21schema・canonical bytesを維持し、Webの入口・用語・候補比較だけを改善する。
+UXの詳細正本は[Human-first UX契約](human-first-ux.md)。このRunではVercel、private workspace、RC2B、Phase 13を扱わない。
 
 - Next.js / TypeScriptはProject検証とSearch Resultの形式確認・read-only表示、PythonはProject検証・Geometry・Constraints・Massing・Search計算とsemantic exportを担当する。
 - 単位を暗黙変換しない。面積はm2、比率はpercent、高さはmをschemaで明示する。

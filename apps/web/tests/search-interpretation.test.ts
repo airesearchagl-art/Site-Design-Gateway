@@ -11,6 +11,7 @@ import sample from "../../../cases/example-urban-office/search-result.json" with
 import { validateSearchJson, type SearchResultDocument } from "../src/lib/search-validation.ts";
 import { toSearchViewModel, findCandidate, type CandidateView, type SearchViewModel } from "../src/lib/search-view.ts";
 import { areaBasisDisplay, candidateUsage, constraintUsage, formatMeasure, RANKING_RULES, ROUNDING_NOTICE, USAGE_DISCLAIMER } from "../src/lib/search-display.ts";
+import { candidateName } from "../src/lib/human-labels.ts";
 
 // Render the real stateless TSX panels with existing TypeScript/React tooling; no generated files.
 const file = fileURLToPath(new URL("../src/components/search-interpretation.tsx", import.meta.url));
@@ -53,7 +54,7 @@ test("P7-WEB-02 legacy v0.1 displays without inferred area basis", () => {
   const legacy = toSearchViewModel(result.value);
   assert.equal(legacy.schemaVersion, "0.1");
   assert.equal(legacy.constraintContext, undefined);
-  assert.match(renderBasis(legacy), /Context unavailable in legacy Search Result v0.1/);
+  assert.match(renderBasis(legacy), /この結果データには、面積算定の基準が含まれていません/);
   assert.match(renderUsage(legacy, legacy.candidates[0]), /93.3%/);
 });
 
@@ -62,7 +63,7 @@ test("P7-WEB-03 selected area basis follows both authoritative basis values", ()
     const value = model();
     value.constraintContext!.areaBasis.selectedBasis = basis;
     assert.equal(areaBasisDisplay(value.constraintContext!.areaBasis).selected, label);
-    assert.match(renderBasis(value), new RegExp(`Selected: <strong>${label}</strong>`));
+    assert.match(renderBasis(value), new RegExp(`使用した基準：<strong>${basis === "declared_project_area" ? "入力された敷地面積" : "敷地形状から求めた面積"}</strong>`));
   }
 });
 
@@ -76,8 +77,8 @@ test("P7-WEB-04 signed difference and nullable declared area are rendered", () =
   assert.match(renderBasis(value), /-10 m²/);
   area.selectedBasis = "geometry_area";
   area.declaredAreaM2 = area.differenceM2 = null;
-  assert.match(renderBasis(value), /Declared area<\/dt><dd>Unavailable/);
-  assert.match(renderBasis(value), /Difference<\/dt><dd>Unavailable/);
+  assert.match(renderBasis(value), /入力された敷地面積<\/dt><dd>情報なし/);
+  assert.match(renderBasis(value), /面積の差<\/dt><dd>情報なし/);
 });
 
 test("P7-WEB-05 each selected candidate changes actual remaining and usage", () => {
@@ -89,7 +90,7 @@ test("P7-WEB-05 each selected candidate changes actual remaining and usage", () 
     assert.equal(row.cap, "1,200");
     const html = renderUsage(value, selected);
     for (const text of expected) assert.ok(html.includes(text));
-    assert.ok(html.includes(`Rank ${selected.rank}`));
+    assert.ok(html.includes(candidateName(selected.rank)));
   }
 });
 
@@ -135,9 +136,9 @@ test("P7-WEB-10 zero accepted retains basis caps and unavailable usage", () => {
   value.candidates = [];
   const html = renderBasis(value) + renderUsage(value);
   assert.match(html, /Declared project area/);
-  assert.match(html, /No candidate selected \/ unavailable/);
+  assert.match(html, /表示できる案がないため、利用状況は情報なしです/);
   for (const cap of ["160", "1,200", "31"]) assert.ok(html.includes(`<dd>${cap}</dd>`));
-  assert.match(html, /Actual<\/dt><dd>Unavailable/);
+  assert.match(html, /選択案<\/dt><dd>情報なし/);
   assert.doesNotMatch(html, /0\.0%/);
 });
 

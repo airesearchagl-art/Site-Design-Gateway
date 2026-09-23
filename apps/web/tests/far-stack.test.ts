@@ -42,8 +42,8 @@ test("P10-WEB-01/04/05/06/07 Search v0.3 displays canonical FAR stack and exact 
   const data = document(bytes,"search-result.json");
   assert.equal(validateSearchJson(JSON.stringify(data)).state,"DISPLAYABLE");
   const html = render(data);
-  for (const text of ["Base FAR", "Additional FAR caps", "600.0%", "400.0%", "road-width-cap", "road_width_derived", "user_provided",
-    "Effective FAR cap", "Effective cap source ID(s)", "Effective max GFA cap", "800 m²"]) assert.ok(html.includes(text),text);
+  for (const text of ["基準の容積率", "入力された容積率の条件", "600.0%", "400.0%", "road-width-cap", "road_width_derived", "user_provided",
+    "計算に用いた容積率の上限", "Effective cap source ID(s)", "延床面積の上限", "800 m²"]) assert.ok(html.includes(text),text);
   const before = JSON.stringify(data);
   render(data);
   assert.equal(JSON.stringify(data),before);
@@ -55,7 +55,7 @@ test("P10-WEB-02/03 direct legacy Search routes retain interpretation without in
     data.schemaVersion=version;
     if (version === "0.1") delete data.constraintContext;
     assert.equal(validateSearchJson(JSON.stringify(data)).state,"DISPLAYABLE");
-    assert.ok(render(data).includes("Unavailable in this Search Result version"));
+    assert.ok(render(data).includes("この結果データには容積率の条件一覧が含まれていません。"));
     assert.ok(!render(data).includes("Effective FAR cap"));
   }
 });
@@ -105,7 +105,7 @@ test("P10-WEB-11 real FAR panel renders the legal boundary disclaimer", () => {
   assert.ok(html.includes(FAR_MINIMUM_NOTICE));
   assert.ok(html.includes(FAR_LEGAL_NOTICE));
   assert.equal(FAR_LEGAL_NOTICE,"It does not identify the governing legal rule or prove regulatory compliance.");
-  assert.ok(html.includes("法的な支配規定の判定は行いません"));
+  assert.ok(html.includes("どの法規が支配するかの判定は行いません"));
 });
 
 for (const [version,sourceBytes] of [["sdg-run-package-v0.1",packageBytes()],["sdg-run-package-v0.2",bytes]] as const) {
