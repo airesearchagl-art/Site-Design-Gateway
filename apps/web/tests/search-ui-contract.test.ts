@@ -16,25 +16,28 @@ function sourceFiles(directory: string): string[] {
   });
 }
 
-test("current phase header and all viewer states are explicit", () => {
-  assert.ok(page.includes("PHASE 12 / SUPPLIED FOOTPRINT DOMAIN"));
+test("human-first header and all internal viewer states are explicit", () => {
+  assert.ok(page.includes("初期ボリュームを比較"));
+  assert.ok(!page.includes("PHASE 12 / SUPPLIED FOOTPRINT DOMAIN"));
   for (const state of ["EMPTY", "LOADING", "DISPLAYABLE", "INVALID", "VIEWER_LIMIT"]) {
     assert.ok(component.includes(state), `missing viewer state ${state}`);
   }
 });
 
 test("required ranking, review, zero-result and semantic-limit messages stay visible", () => {
-  assert.ok(component.includes("順位はGFA降順による比較であり、設計品質・推奨・最適性・法規適合を意味しません。"));
+  const comparison = readFileSync(join(WEB, "src/components/candidate-comparison.tsx"), "utf8");
+  assert.ok(comparison.includes("延床面積が大きい順"));
+  assert.ok(comparison.includes("順位は設計品質・推奨・最適性・法規適合を意味しません。"));
   assert.match(component, /model\.summary\.reviewRequired\s*\?/);
-  assert.ok(component.includes("REVIEW REQUIRED"));
+  assert.ok(component.includes("要確認"));
   assert.match(component, /model\.candidates\.length === 0\s*\?/);
-  assert.ok(component.includes("Search completed."));
+  assert.ok(component.includes("比較は完了しました"));
   assert.ok(component.includes("semantic validationをブラウザで再実行したことを意味しません"));
 });
 
 test("viewer uses the tracked fixture and exposes read-only accessible controls", () => {
   assert.ok(component.includes('cases/example-urban-office/search-result.json'));
-  for (const label of ["Search Result sample", "Clear result", "Search Result JSONファイルを選択", "Conceptual footprint · Local XY"]) {
+  for (const label of ["サンプルで試す", "表示をクリア", "Search Result JSONファイルを選択", "建築面積のかたち"]) {
     assert.ok(component.includes(label));
   }
   assert.ok(component.includes('role="img"'));

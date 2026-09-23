@@ -20,6 +20,7 @@ export type SearchViewModel = ({ schemaVersion: "0.1"; constraintContext?: never
   summary: SearchResultDocument["summary"];
   strategy: string;
   ranking: string;
+  floorHeightsM: number[];
   candidates: CandidateView[];
   rejections: SearchResultDocument["rejections"];
 };
@@ -53,6 +54,7 @@ export function toSearchViewModel(document: SearchResultDocument): SearchViewMod
     summary: document.summary,
     strategy: document.search.strategy,
     ranking: document.search.ranking,
+    floorHeightsM: [...document.search.floorHeightsM],
     candidates: document.rankedCandidates.map(candidateView),
     rejections: document.rejections.map((rejection) => ({ ...rejection })),
   };

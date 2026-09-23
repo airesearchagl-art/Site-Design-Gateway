@@ -2,118 +2,87 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import sample from "../../../../cases/example-urban-office/project.json" with { type: "json" };
-import { SearchResultViewer } from "../components/search-result-viewer";
+import { SearchResultViewer, type SearchViewerHandle } from "../components/search-result-viewer";
+import { ProjectConditions } from "../components/project-conditions";
+import { SAFETY_NOTICE } from "../lib/human-labels";
 import { PROJECT_PROMPT } from "../lib/prompt";
-import { validateFile, validateJson, type ValidationResult } from "../lib/validation";
-
-const statusLabels: Record<string, string> = {
-  official_verified: "公式資料で確認済み（申告）",
-  user_provided: "ユーザー提供",
-  drawing_derived: "図面から取得",
-  llm_researched: "LLM調査・公式未確認",
-  assumed: "仮定・要確認",
-  unknown: "不明・要確認",
-  review_required: "レビュー待ち",
-};
+import { validateFile, type ValidationResult } from "../lib/validation";
 
 export default function Home() {
   const [result, setResult] = useState<ValidationResult | null>(null);
   const [copyMessage, setCopyMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const request = useRef(0);
+  const viewer = useRef<SearchViewerHandle>(null);
+  const preparation = useRef<HTMLDetailsElement>(null);
+  const projectInput = useRef<HTMLInputElement>(null);
 
   async function copyPrompt() {
-    try {
-      await navigator.clipboard.writeText(PROJECT_PROMPT);
-      setCopyMessage("プロンプトをコピーしました。");
-    } catch {
-      setCopyMessage("コピーできませんでした。プロンプト欄を選択してコピーしてください。");
-    }
+    try { await navigator.clipboard.writeText(PROJECT_PROMPT); setCopyMessage("プロンプトをコピーしました。"); }
+    catch { setCopyMessage("コピーできませんでした。プロンプト欄を選択してコピーしてください。"); }
   }
-
-  function loadSample() {
-    request.current += 1;
-    setLoading(false);
-    setResult(validateJson(JSON.stringify(sample)));
+  function clearProject() { request.current += 1; setResult(null); setLoading(false); if (projectInput.current) projectInput.current.value = ""; }
+  function loadSample() { clearProject(); viewer.current?.loadSample(); }
+  function openPreparation() {
+    if (preparation.current) { preparation.current.open = true; preparation.current.scrollIntoView({ block: "start" }); preparation.current.querySelector("summary")?.focus(); }
   }
-
   async function selectFile(file?: File) {
     if (!file) return;
-    const current = ++request.current;
-    setLoading(true);
-    setResult(null);
+    const current = ++request.current; setLoading(true); setResult(null);
     const next = await validateFile(file);
-    if (current === request.current) {
-      setResult(next);
-      setLoading(false);
-    }
+    if (current === request.current) { setResult(next); setLoading(false); }
   }
 
-  return (
-    <main>
-      <header className="topbar">
-        <Link className="brand" href="/" aria-label="Site Design Gateway ホーム"><span className="mark" aria-hidden="true">SDG</span> Site Design Gateway</Link>
-        <span className="phase">PHASE 12 / SUPPLIED FOOTPRINT DOMAIN</span>
-      </header>
-
-      <section className="intro" aria-labelledby="intro-title">
-        <p className="eyebrow">条件から、次の検討へ。</p>
-        <h1 id="intro-title">Site Design Gateway</h1>
-        <p className="lead">建築初期検討の入力条件と、ローカルBVE Coreの探索結果を、確かめられる形に。</p>
-        <p className="note">生成済みSearch Resultの計算基準・制約上限・候補の値を比較表示します。法規適合の確認は行いません。</p>
-      </section>
-
-      <div className="workflow">
-        <section className="panel" aria-labelledby="create-title">
-          <span className="step">STEP 01</span>
-          <h2 id="create-title">1. Create Project JSON</h2>
-          <p>プロンプトをChatGPT・Claude・Geminiなどへ渡して、共通形式のJSONを作成します。</p>
-          <div className="prompt-actions">
-            <span className="small">Schema v0.1 + synthetic sample</span>
-            <button type="button" onClick={copyPrompt}>Copy prompt</button>
-          </div>
+  return <main>
+    <header className="topbar">
+      <Link className="brand" href="/" aria-label="Site Design Gateway ホーム"><span className="mark" aria-hidden="true">SDG</span> Site Design Gateway</Link>
+      <span className="product-caption">建築初期検討</span>
+    </header>
+    <section className="intro" aria-labelledby="intro-title">
+      <p className="eyebrow">敷地を知る。条件を確かめる。案を比べる。</p>
+      <h1 id="intro-title">敷地条件から、<br />初期ボリュームを比較</h1>
+      <p className="lead">敷地・計画条件を整理し、計算済みの案を<br className="desktop-break" />建築面積・延床面積・階数・高さで比較します。</p>
+      <div className="entry-actions" aria-label="検討の始め方">
+        <button type="button" className="primary" onClick={loadSample}>サンプルで試す<span>架空のオフィスで比較を体験</span></button>
+        <button type="button" onClick={() => viewer.current?.openIntake()}>自分の検討結果を開く<span>計算済みのフォルダを選択</span></button>
+        <button type="button" onClick={openPreparation}>自分の案件を準備する<span>手持ちの資料・条件を整理</span></button>
+      </div>
+      <p className="safety-notice">{SAFETY_NOTICE}</p>
+      <p className="privacy-note">選んだデータはブラウザ内だけで扱います。送信・保存はしません。</p>
+    </section>
+    <SearchResultViewer ref={viewer} onSample={loadSample} onClear={clearProject} />
+    <details className="panel preparation" ref={preparation} id="preparation">
+      <summary>自分の案件を準備する</summary>
+      <div className="preparation-content">
+        <h2>手持ちの資料から始めましょう</h2>
+        <p>全部揃ってから始める必要はありません。未確認の値、仮定した値、図面から取得した値を分けて整理し、後から根拠を確認できます。</p>
+        <div className="preparation-grid">
+          <section><span className="step">01</span><h3>敷地形状</h3><p>DXF・GeoJSONや、その他の図面資料。敷地境界と単位が分かる資料を用意します。</p></section>
+          <section><span className="step">02</span><h3>敷地・法規条件</h3><p>敷地面積、建ぺい率、容積率、高さ制限。分かる範囲で、値と出典・確認状態を揃えます。</p></section>
+          <section><span className="step">03</span><h3>計画条件</h3><p>想定用途、比較したい想定階高、その他の初期条件。今回の比較では想定階高を変えます。</p></section>
+          <section><span className="step">任意</span><h3>配置検討範囲</h3><p>外部で作成済みの配置可能範囲があれば用意します。法的に建築可能な範囲であることを示すものではありません。</p></section>
+        </div>
+        <div className="hybrid-route"><h3>準備から比較まで</h3><ol><li>手持ち資料と条件を整理する。</li><li>ローカルのSDG / BVE Coreで入力を確認し、ボリューム案を計算する。</li><li>この画面の「自分の検討結果を開く」から計算済みフォルダを選ぶ。</li></ol>
+          <p>現在、このWeb画面では計算・PDF / DXFの自動解析・住所からの法規取得は行いません。</p>
+        </div>
+        <details className="technical-details prompt-preparation"><summary>AIを使って入力データを準備する</summary>
+          <ol><li>利用権限と公開可否を確認した手持ちの敷地資料・計画条件を、ChatGPT / Claude / Gemini等へ渡します。</li><li>下の補助プロンプトを一緒に渡します。</li><li>生成されたProject JSONの値と出典を人が確認し、local BVE Coreで使用します。</li></ol>
+          <p className="small">この画面からAIへの送信は行いません。AI調査値を公式確認済みとして扱わないでください。</p>
+          <div className="prompt-actions"><span className="small">Project JSON / Schema v0.1 + synthetic sample</span><button type="button" onClick={copyPrompt}>補助プロンプトをコピー</button></div>
           <label className="field-label" htmlFor="project-prompt">Project JSON生成プロンプト</label>
           <textarea id="project-prompt" className="prompt" value={PROJECT_PROMPT} readOnly spellCheck={false} />
           <p className="feedback" role="status">{copyMessage}</p>
-          <p className="note">出典の状態を残したまま生成します。LLM調査値は「公式確認済み」と区別します。</p>
-        </section>
-
-        <section className="panel" aria-labelledby="upload-title">
-          <span className="step">STEP 02</span>
-          <h2 id="upload-title">2. Upload Project JSON</h2>
-          <p>まずは架空のサンプルで確認できます。選択したJSONはブラウザ内で検証し、送信・保存しません。</p>
-          <button type="button" className="primary sample" onClick={loadSample}>サンプルを読み込む</button>
-          <p className="small">example-urban-office · 架空の都市型オフィス</p>
-          <div className="file-zone">
-            <label className="field-label" htmlFor="project-file">JSONファイルを選択</label>
-            <input id="project-file" type="file" accept=".json,application/json" aria-describedby="file-help" onChange={(event) => { void selectFile(event.target.files?.[0]); event.target.value = ""; }} />
-            <p id="file-help" className="small">.json / 256 KiBまで</p>
-          </div>
-          <div className="placeholders" aria-label="将来のファイル対応">
-            <button type="button" disabled>DXF upload · 今後対応</button>
-            <button type="button" disabled>PDF upload · 今後対応</button>
-          </div>
-        </section>
+        </details>
+        <details className="technical-details"><summary>準備した入力データを確認する（Project JSON）</summary>
+          <p>計算前に、入力形式と確認状態をブラウザ内で確認できます。ここではボリューム計算は行いません。</p>
+          <label className="field-label" htmlFor="project-file">入力条件のJSONファイル</label>
+          <input ref={projectInput} id="project-file" type="file" accept=".json,application/json" aria-describedby="file-help" onChange={event => { void selectFile(event.target.files?.[0]); event.target.value = ""; }} />
+          <p id="file-help" className="small">256 KiBまで / 送信・保存なし</p>
+          <div aria-live="polite" aria-busy={loading}>{loading ? <p>入力条件を確認中…</p> : result ? <ProjectConditions result={result} /> : <p className="empty">準備済みの入力データを選ぶと、敷地面積などの値と確認状態を表示します。</p>}</div>
+          <button type="button" onClick={clearProject} disabled={!loading && !result}>入力条件の表示をクリア</button>
+        </details>
       </div>
-
-      <section className="panel results" aria-labelledby="result-title" aria-busy={loading}>
-        <div className="result-heading"><h2 id="result-title">Validation result</h2><span className="small">形式と出典を、別々に確認</span></div>
-        <div aria-live="polite" aria-atomic="true">
-          {loading ? <p>読み込み中…</p> : !result ? <p className="empty">サンプルまたはJSONファイルを読み込むと、ここに結果を表示します。</p> : (
-            <>
-              <div className="verdict"><strong className={`badge ${result.outcome.toLowerCase()}`}>{result.outcome}</strong><span>Schema <b>{result.schema}</b></span></div>
-              <p>{result.outcome === "INVALID" ? "JSONの形式に問題があります。以下の項目を確認してください。" : result.outcome === "REVIEW_REQUIRED" ? "形式は適合しています。仮定・不明・レビュー待ちの条件を確認してください。" : "形式は適合しています。各出典と値の妥当性は引き続き確認してください。"}</p>
-              {result.issues.length > 0 ? <ul className="issues">{result.issues.map((issue, index) => <li key={`${issue.path}-${index}`}><code>{issue.path}</code><span>{issue.message}</span></li>)}</ul> : null}
-              {result.sources.length > 0 ? (
-                <div className="table-scroll"><table><caption>入力値の出典status（入力の申告を表示）</caption><thead><tr><th scope="col">項目</th><th scope="col">値 / 単位</th><th scope="col">出典status</th></tr></thead><tbody>{result.sources.map((source) => <tr key={source.path}><th scope="row"><code>{source.path}</code></th><td>{source.value ?? "未確定"} <span className="small">{source.unit}</span></td><td><span className={`source-tag ${source.status}`}>{source.status}</span><br /><span className="small">{statusLabels[source.status]}</span></td></tr>)}</tbody></table></div>
-              ) : null}
-            </>
-          )}
-        </div>
-      </section>
-      <SearchResultViewer />
-      <footer><span>Site Design Gateway · BVE Core</span><span>入力条件 / 出典 / 再現可能な検討</span></footer>
-    </main>
-  );
+    </details>
+    <footer><span>Site Design Gateway</span><span>入力条件と出典を確かめながら、初期検討を進める。</span></footer>
+  </main>;
 }

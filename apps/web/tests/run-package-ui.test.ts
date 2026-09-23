@@ -7,7 +7,7 @@ const summary = readFileSync(new URL("../src/components/package-check-summary.ts
 const css = readFileSync(new URL("../src/app/globals.css", import.meta.url), "utf8");
 
 test("folder progressive enhancement and standard five-file fallback are both available", () => {
-  assert.ok(viewer.includes("SDG Run Packageを選択"));
+  assert.ok(viewer.includes("検討結果フォルダを選択"));
   assert.ok(viewer.includes('webkitdirectory: ""'));
   assert.ok(viewer.includes("5 / 6ファイル同時選択"));
   assert.match(viewer, /id="run-package-files" type="file" multiple/);

@@ -1,5 +1,10 @@
 # Repository rules
 
+- Current milestone = MVP-RC2A Human-first UX。今回の変更はWeb UX・対応テスト・文書だけ。
+  Phase 12のCore/schema/fixture/canonical bytesと既存validator・rankingの権威を維持する。
+  通常UIは日本語の建築用語、技術情報は閉じた詳細欄。比較値はauthoritative Search由来。
+  詳細は`docs/human-first-ux.md`。Vercel/private workspace/RC2Bへ進まず、Draft PR作成後STOP。
+
 - このRepositoryはPublic。source、schema、匿名synthetic fixture、テスト、文書だけを保存する。
 - 実案件データ、実案件名・住所、施主情報、個人を識別するローカルパス、秘密情報、
   .envの値、署名付きURL、CAD/BIM/PDF原本、runtime input/log/dumpをGitへ入れない。

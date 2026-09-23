@@ -190,3 +190,104 @@ footer { display: flex; justify-content: space-between; gap: 20px; padding: 0 0 
   footer { flex-direction: column; gap: 4px; }
   th, td { min-width: 120px; }
 }
+
+/* MVP-RC2A: architectural workflow, progressive disclosure, no new runtime. */
+.product-caption { color: var(--muted); font-size: 12px; }
+.intro { padding: 44px 0 30px; }
+.intro h1 { max-width: 850px; line-height: 1.35; font-size: clamp(28px, 4vw, 46px); letter-spacing: -.02em; }
+.intro .lead { margin-bottom: 24px; }
+.entry-actions { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 12px; margin: 24px 0; }
+.entry-actions button { text-align: left; padding: 20px; border-radius: 10px; font-size: 16px; }
+.entry-actions span { display: block; font-size: 12px; font-weight: 400; margin-top: 7px; }
+.safety-notice { font-size: 13px; line-height: 1.85; border-left: 3px solid #b18a49; padding: 5px 0 5px 14px; margin: 18px 0 12px; }
+.privacy-note { font-size: 12px; color: var(--muted); margin: 0; }
+summary { cursor: pointer; font-weight: 600; }
+summary:focus-visible, [tabindex]:focus-visible { outline: 3px solid #279579; outline-offset: 4px; }
+details[open] > summary { margin-bottom: 16px; }
+.technical-details { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; font-size: 12px; min-width: 0; }
+.technical-details > summary { color: var(--muted); }
+.technical-details p, .technical-details li, .technical-details dd { overflow-wrap: anywhere; }
+.technical-details dl { margin: 12px 0; }
+.technical-details dd { margin-left: 0; }
+.technical-details input { margin: 8px 0 12px; }
+.technical-details ul, .technical-details ol { padding-left: 20px; }
+.search-panel { overflow: visible; }
+.search-intro .eyebrow { margin-bottom: 8px; }
+.search-intro h2 { font-size: 26px; scroll-margin-top: 24px; }
+.viewer-state { font: 600 12px/1.5 Arial, "Yu Gothic", sans-serif; letter-spacing: 0; }
+.package-intake { background: #f5f8f5; }
+.package-intake > summary { font-size: 15px; }
+.intake-content { padding-top: 4px; }
+.search-controls { grid-template-columns: max-content 1fr max-content; align-items: center; padding-top: 16px; padding-bottom: 16px; background: white; }
+.sample-banner { color: var(--accent); background: #edf6f1; border-radius: 6px; padding: 12px 16px; font-size: 13px; }
+.comparison-explanation { padding: 20px; border-radius: 9px; background: #eff5f3; border: 1px solid #bed3c9; }
+.comparison-explanation h3 { margin: 0 0 14px; }
+.comparison-explanation p { margin-bottom: 6px; }
+.comparison-facts { display: grid; grid-template-columns: .65fr 1.5fr 1fr; gap: 20px; margin: 0 0 16px; }
+.comparison-facts dt { font-size: 12px; color: var(--muted); }
+.comparison-facts dd { margin: 5px 0 0; font-weight: 600; overflow-wrap: anywhere; }
+.candidate-kpis { margin: 24px 0; }
+.selected-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; margin-bottom: 12px; }
+.selected-heading h3 { margin: 0; }
+.selected-heading span { font-size: 13px; color: var(--muted); }
+.kpi-grid { display: grid; grid-template-columns: 1.35fr repeat(4,minmax(0,1fr)); gap: 10px; margin: 0; }
+.kpi-grid > div { min-width: 0; padding: 16px; background: #f4f7f5; border-radius: 8px; border: 1px solid var(--line); }
+.kpi-grid dt { font-size: 12px; color: var(--muted); }
+.kpi-grid dd { margin: 7px 0 0; font-size: clamp(20px,2.4vw,28px); font-weight: 700; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; line-height: 1.4; }
+.kpi-grid dd span { font-weight: 400; font-size: 12px; white-space: nowrap; }
+.kpi-grid .kpi-main { background: #e7f2ec; border-color: #a6cbbb; color: #11523d; }
+.summary-grid { margin: 16px 0; }
+.summary-grid div { flex-direction: row; align-items: baseline; justify-content: space-between; padding: 10px 12px; gap: 8px; border: none; }
+.summary-grid span { letter-spacing: 0; font-size: 12px; }
+.summary-grid strong { font-size: 20px; }
+.candidate-table table { min-width: 730px; }
+.candidate-rank { display: block; }
+.candidate-table th, .candidate-table td { white-space: nowrap; }
+.candidate-table caption { font-size: 13px; }
+.candidate-table .select-candidate { min-height: 42px; }
+.far-effective { grid-template-columns: repeat(2,minmax(0,1fr)); }
+.far-table table, .height-table table { min-width: 0; }
+.far-table th, .far-table td, .height-table th, .height-table td { overflow-wrap: anywhere; }
+.far-effective dd, .height-effective dd { font-size: 21px; }
+.source-tag { font-family: inherit; }
+.provenance-list { padding-left: 20px; color: var(--muted); font-size: 12px; }
+.sample-conditions { padding: 20px; margin: 22px 0; border: 1px solid var(--line); border-radius: 8px; }
+.sample-conditions > h3 { margin-top: 0; }
+.constraint-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; min-width: 0; }
+.constraint-panels > section { margin: 0; }
+.preparation { margin: 28px 0 36px; scroll-margin-top: 20px; }
+.preparation > summary { font-size: 20px; }
+.preparation-content { padding-top: 14px; }
+.preparation-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 18px; margin: 24px 0; }
+.preparation-grid section { border-top: 2px solid #abc7b9; padding: 16px 0 0; }
+.preparation-grid h3 { margin: 6px 0 12px; font-size: 16px; }
+.preparation-grid p { font-size: 13px; }
+.hybrid-route { padding: 20px; background: #f5f8f5; border-radius: 8px; }
+.hybrid-route h3 { margin-top: 0; }
+.hybrid-route ol { padding-left: 24px; }
+@media (max-width: 760px) {
+  .product-caption, .desktop-break { display: none; }
+  .brand { font-size: 13px; gap: 9px; }
+  .intro { padding-top: 28px; }
+  .entry-actions { grid-template-columns: 1fr; gap: 10px; margin: 20px 0; }
+  .entry-actions button { padding: 15px 18px; }
+  .entry-actions span { margin-top: 3px; }
+  .search-panel { padding: 0; }
+  .search-intro { gap: 14px; }
+  .search-controls { grid-template-columns: 1fr; }
+  .search-intro h2 { font-size: 23px; }
+  .viewer-content { padding: 0 16px; }
+  .comparison-explanation { padding: 16px; }
+  .comparison-facts { grid-template-columns: 1fr; gap: 12px; }
+  .selected-heading { flex-direction: column; gap: 4px; }
+  .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .kpi-grid .kpi-main { grid-column: 1 / -1; }
+  .kpi-grid .kpi-main dd { font-size: 34px; }
+  .summary-grid div { flex-direction: column; gap: 4px; }
+  .constraint-panels, .preparation-grid { grid-template-columns: 1fr; }
+  .far-table th, .far-table td, .height-table th, .height-table td, .project-table th, .project-table td { min-width: 0; padding: 10px 6px; }
+  .far-effective { grid-template-columns: 1fr; }
+  .candidate-detail { padding: 16px; gap: 16px; }
+  .sample-conditions, .area-basis, .constraint-usage, .far-stack, .height-stack, .buildable-area { padding: 16px; }
+  .package-check { padding: 14px; }
+}

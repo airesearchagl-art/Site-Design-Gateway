@@ -34,8 +34,8 @@ test("P12-WEB-01/12 Search0.5 authoritative domain display", () => {
   const value = document(bytes, "search-result.json");
   assert.equal(validateSearchJson(JSON.stringify(value)).state, "DISPLAYABLE");
   const before = JSON.stringify(value); const html = render(value);
-  for (const text of ["Supplied buildable area", "98 m²", "drawing_derived", "explicit_buildable_area", "No spatial review flag",
-    "Candidate footprint is constrained to the supplied domain by Python BVE."]) assert.ok(html.includes(text), text);
+  for (const text of ["指定された配置検討範囲", "98 m²", "drawing_derived", "explicit_buildable_area", "No spatial review flag",
+    "この範囲内で案を作成した計算結果を表示しています。"]) assert.ok(html.includes(text), text);
   assert.equal(JSON.stringify(value), before);
 });
 
